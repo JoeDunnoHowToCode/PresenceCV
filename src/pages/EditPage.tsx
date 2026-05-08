@@ -250,7 +250,7 @@ export default function EditPage() {
   useEffect(() => {
     const handleRequest = (event: MessageEvent) => {
       if (event.data?.type === 'RESUME_DATA_REQUEST' && event.source) {
-        event.source.postMessage({ type: 'RESUME_DATA_SYNC', data }, '*');
+        (event.source as Window).postMessage({ type: 'RESUME_DATA_SYNC', data }, '*');
       }
     };
     window.addEventListener('message', handleRequest);
