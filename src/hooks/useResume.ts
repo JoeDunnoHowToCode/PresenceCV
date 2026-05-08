@@ -1,3 +1,34 @@
+/**
+ * useResume.ts — Central Resume State Management Hook
+ *
+ * This is the MOST IMPORTANT file in the project. It manages the entire
+ * resume editing state, including multi-profile support, persistence
+ * (localStorage + Firestore), and all CRUD operations.
+ *
+ * Architecture:
+ * - AppState: { activeProfileId, profiles: Record<string, ProfileMeta> }
+ * - Each ProfileMeta contains a ResumeData with profile info, blocks, and settings.
+ * - State is initialized from localStorage for instant display, then overridden
+ *   by Firestore data once auth resolves (prevents flash of stale content).
+ *
+ * Sync Strategy:
+ * - On auth state change: reads from Firestore users/{uid}/userState/state
+ * - On state change: immediate localStorage write + debounced (1.5s) Firestore write
+ * - Race condition guard: `isRemoteReady` ref prevents writing local data to
+ *   Firestore before the initial auth check completes
+ *
+ * Sanitization:
+ * - All string inputs are sanitized (HTML script/iframe tags stripped, length capped)
+ * - Base64 data URLs for photos are allowed through unmodified
+ *
+ * Key Exports:
+ * - useResume(): Returns data + 25+ mutation functions + loading state
+ * - ProfileMeta, AppState: Type interfaces for the state shape
+ *
+ * Consumed by: EditPage.tsx (primary), ViewPage.tsx (read-only)
+ * Depends on: firebase.ts, defaultResume.ts, personalBackup.ts, types.ts
+ * Firestore: users/{uid}/userState/state (read + write)
+ */
 import { useState, useEffect, useRef } from 'react';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
@@ -212,6 +243,9 @@ export function useResume() {
         blocks: {},
         blockOrder: []
     };
+    // Ensure the imported profile gets its own unique live link if shared
+    delete newData.liveId;
+    delete newData.updateToken;
 
     if (parsedData.experience && parsedData.experience.length > 0) {
         const bId = `exp-${Date.now()}`;
@@ -260,6 +294,10 @@ export function useResume() {
     const activeProfileData = appState.profiles[appState.activeProfileId]?.data || Object.values(appState.profiles)[0]?.data || DEFAULT_RESUME;
     const newId = `profile-${Date.now()}`;
     const newData = JSON.parse(JSON.stringify(activeProfileData));
+    
+    // IMPORTANT: Delete live share data so the new profile is independent
+    delete newData.liveId;
+    delete newData.updateToken;
     
     setAppState(prev => ({
       activeProfileId: newId,

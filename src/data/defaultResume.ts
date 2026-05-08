@@ -1,3 +1,17 @@
+/**
+ * defaultResume.ts — Default Resume Template
+ *
+ * Provides the initial resume data shown to new users. Contains a fictional
+ * "Alex Rivera" profile with sample experience, education, skills, and languages.
+ *
+ * This template is used when:
+ * - A user visits for the first time (no localStorage or Firestore data)
+ * - A user resets their data via resetToDefault() in useResume
+ * - A new user is detected (isNewUser flag in AuthContext)
+ *
+ * Exports: DEFAULT_RESUME (ResumeData)
+ * Consumed by: useResume.ts
+ */
 import { ResumeData } from '../types';
 
 export const DEFAULT_RESUME: ResumeData = {

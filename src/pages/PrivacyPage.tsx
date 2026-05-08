@@ -1,3 +1,13 @@
+/**
+ * PrivacyPage.tsx — Privacy Policy Page
+ *
+ * A static content page accessible at "/privacy". Displays the PresenceCV
+ * privacy policy covering data collection, usage, and security practices.
+ * Uses the same cream-tone visual style as LandingPage.
+ *
+ * Content sections: Introduction, Information Collected, Usage, Security, Contact
+ * Depends on: react-router-dom (Link), lucide-react (Box icon)
+ */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';

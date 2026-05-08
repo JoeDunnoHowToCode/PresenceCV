@@ -1,3 +1,18 @@
+/**
+ * FirebaseSetupGuide.tsx — Missing Configuration Error Screen
+ *
+ * A full-screen error UI displayed when required Firebase environment variables
+ * are not configured. This component is rendered by App.tsx as a fallback
+ * instead of the normal app when `isConfigValid` is false.
+ *
+ * Displays:
+ * - Which environment variables are missing
+ * - Step-by-step instructions for adding them (tailored for AI Studio)
+ * - A "Check Again" button that reloads the page
+ *
+ * Props: None (stateless component)
+ * Depends on: lucide-react (ShieldAlert, RefreshCw icons)
+ */
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
 

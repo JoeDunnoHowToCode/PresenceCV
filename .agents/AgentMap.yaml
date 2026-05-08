@@ -1,0 +1,249 @@
+# PresenceCV — Agent Project Map
+# Last updated: 2026-05-05
+# Purpose: Machine-oriented source of truth for all agent tasks in this workspace.
+
+project:
+  name: PresenceCV
+  tagline: "AI-powered online resume builder"
+  owner: Joe Chou (mujoecs@gmail.com)
+
+stack:
+  frontend: React 19, TypeScript 5.8, TailwindCSS 4 (via @tailwindcss/vite)
+  ui_libs: [lucide-react, motion (framer-motion), @hello-pangea/dnd, react-easy-crop, react-fast-marquee]
+  routing: react-router-dom v7
+  build: Vite 6
+  backend: Express 4 (server.ts — dev server + API proxy)
+  ai: "@google/genai (Gemini) — resume parsing from PDF/images"
+  firebase:
+    auth: Google OAuth (signInWithPopup)
+    firestore:
+      collections:
+        - users/{uid}: user profile doc (displayName, email, photoURL, createdAt)
+        - users/{uid}/userState/state: full app state (profiles, activeProfileId, updatedAt)
+        - user_limits/{uid}: daily AI import rate limiting (date, count)
+        - sharedResumes/{id}: snapshot share links (read-only, anyone with link)
+        - liveResumes/{id}: live share links (auto-synced, ownerUid-gated updates)
+    hosting: configured but not primary (Vercel is primary)
+  deployment: Vercel (vercel.json SPA rewrite; api/ folder for serverless functions)
+
+entry_points:
+  html: index.html
+  react_root: src/main.tsx
+  app_component: src/App.tsx
+  dev_server: server.ts (Express + Vite middleware)
+  vercel_api: api/parse-resume.ts
+
+routing:
+  "/": LandingPage (public)
+  "/privacy": PrivacyPage (public)
+  "/terms": TermsPage (public)
+  "/view": ViewPage (public — accepts ?id=, ?live=, ?print=true)
+  "/share/:id": ViewPage alias
+  "/print/:id": ViewPage alias
+  "/app": EditPage (protected — requires auth)
+  "/edit": redirects to /app
+
+modules:
+  src/App.tsx:
+    role: Root component — routing, AuthProvider, Firebase config guard
+    depends_on: [AuthContext, ProtectedRoute, LandingPage, EditPage, ViewPage, PrivacyPage, TermsPage, firebase.ts]
+
+  src/main.tsx:
+    role: React DOM entry — mounts App with StrictMode
+    depends_on: [App.tsx, index.css]
+
+  src/types.ts:
+    role: Core TypeScript interfaces
+    exports: [ContactItem, Profile, ListItem, TagItem, Block, ResumeData]
+
+  src/index.css:
+    role: Global styles — Tailwind theme (fonts, colors), glass components, depth-bg animation, print layout (A4)
+    notes: Uses @theme for custom design tokens; print-page-container for exact A4 sizing
+
+  # --- Contexts ---
+  src/contexts/AuthContext.tsx:
+    role: Auth state management — Google sign-in/out, new user detection, Firestore user doc creation
+    exports: [AuthProvider, useAuth]
+    depends_on: [firebase.ts]
+    firestore_writes: ["users/{uid}"]
+
+  # --- Hooks ---
+  src/hooks/useResume.ts:
+    role: Central resume state management — multi-profile CRUD, Firestore sync, localStorage fallback, sanitization
+    exports: [useResume, ProfileMeta, AppState]
+    depends_on: [firebase.ts, defaultResume.ts, personalBackup.ts, types.ts]
+    firestore_reads: ["users/{uid}/userState/state"]
+    firestore_writes: ["users/{uid}/userState/state"]
+    key_functions:
+      - switchProfile / createProfile (strips liveId/updateToken) / deleteProfile / renameProfile
+      - importResumeProfile (merges AI-parsed data into new profile, strips liveId/updateToken)
+      - updateProfile / updateThemeColor / toggleAnimation
+      - reorderBlocks / reorderListItems / reorderTagItems
+      - addBlock / removeBlock / addListItem / removeListItem / addTagItem / removeTagItem
+      - updateContactItem (auto-detects email/phone URL prefixes)
+      - resetToDefault / loadPersonalBackup
+    sync_behavior: |
+      - On auth: loads from Firestore → overwrites local.
+      - On state change: saves to localStorage immediately + debounced (1.5s) Firestore write.
+      - Race-condition guard: isRemoteReady ref prevents premature overwrites.
+
+  # --- Components ---
+  src/components/ProtectedRoute.tsx:
+    role: Route guard — redirects to "/" if not authenticated
+    depends_on: [AuthContext]
+
+  src/components/FirebaseSetupGuide.tsx:
+    role: Fullscreen error UI shown when Firebase env vars are missing
+    depends_on: [lucide-react]
+
+  src/components/ImportResumeModal.tsx:
+    role: Modal for AI-powered resume import (PDF/JPG/PNG → Gemini → structured data)
+    depends_on: [AuthContext, firebase.ts, @google/genai]
+    flow: |
+      1. File validation (type, size ≤ 3MB)
+      2. Rate limit check (5/day via user_limits collection)
+      3. Try server-side parse (/api/parse-resume) → fallback to frontend Gemini API
+      4. Parse JSON response → call onImport callback
+    firestore_reads: ["user_limits/{uid}"]
+    firestore_writes: ["user_limits/{uid}"]
+
+  # --- Pages ---
+  src/pages/LandingPage.tsx:
+    role: Marketing homepage — hero, features grid, pricing cards, footer
+    depends_on: [AuthContext]
+    key_interactions: signInWithGoogle → navigate("/app")
+
+  src/pages/EditPage.tsx:
+    role: Main resume editor (1273 lines) — the core UI of the app
+    depends_on: [useResume, AuthContext, ImportResumeModal, ViewPage, react-easy-crop, @hello-pangea/dnd]
+    features:
+      - Profile switcher (clone, rename, delete)
+      - Theme color picker (6 presets + custom)
+      - Animation toggle
+      - Drag-and-drop block tabs (reorder sections)
+      - Inline content editing (contentEditable for name/title/summary)
+      - Contact items CRUD with icon picker
+      - Photo upload/crop (react-easy-crop → base64 JPEG)
+      - List items editor (experience/education entries)
+      - Tags editor (skills with category:items format)
+      - Share modal (snapshot vs live link)
+      - PDF export (opens ViewPage in print mode via postMessage + localStorage)
+      - Live resume auto-sync (debounced Firestore write when liveId exists)
+    firestore_writes: ["sharedResumes/{id}", "liveResumes/{id}"]
+
+  src/pages/ViewPage.tsx:
+    role: Public resume viewer + print layout
+    depends_on: [useResume, firebase.ts, types.ts]
+    modes:
+      - Normal view: dark glassmorphic showcase with tab navigation
+      - Shared view: loads from sharedResumes or liveResumes via ?id= or ?live=
+      - Print mode (?print=true): white A4 layout with auto-scaling binary search, triggers window.print()
+    cross_window_sync: postMessage for RESUME_DATA_SYNC/ACK between editor and print window
+
+  src/pages/PrivacyPage.tsx:
+    role: Static privacy policy page
+    depends_on: [react-router-dom, lucide-react]
+
+  src/pages/TermsPage.tsx:
+    role: Static terms of service page
+    depends_on: [react-router-dom, lucide-react]
+
+  # --- Data ---
+  src/data/defaultResume.ts:
+    role: Default template for new users (Alex Rivera - Product Designer)
+    exports: [DEFAULT_RESUME]
+
+  src/data/personalBackup.ts:
+    role: Owner's personal resume backup (Joe Chou)
+    exports: [PERSONAL_TEMPLATE_BACKUP]
+    notes: Only loadable by mujoecs@gmail.com
+
+  # --- Lib ---
+  src/lib/firebase.ts:
+    role: Firebase initialization — app, auth, Firestore (with long polling)
+    exports: [db, auth, isConfigValid]
+    env_vars: [VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, VITE_FIREBASE_APP_ID, VITE_FIREBASE_DATABASE_ID]
+    notes: Uses experimentalForceLongPolling to bypass WebSocket issues
+
+  src/lib/errorHandling.ts:
+    role: Structured Firestore error logging and re-throwing
+    exports: [handleFirestoreError, FirestoreErrorInfo]
+
+  # --- API ---
+  api/parse-resume.ts:
+    role: Vercel serverless function — secure server-side Gemini resume parsing
+    env_vars: [GEMINI_API_KEY]
+    notes: Returns 412 if no valid API key (signals frontend to use client-side fallback)
+
+  # --- Server ---
+  server.ts:
+    role: Express dev server — API route (/api/parse-resume) + Vite middleware
+    env_vars: [GEMINI_API_KEY]
+    notes: Also serves dist/ in production mode
+
+data_models:
+  ResumeData:
+    themeColor: string (hex)
+    enableAnimation: boolean
+    profile: Profile
+    blockOrder: string[] (ordered block IDs)
+    blocks: Record<string, Block>
+    liveId?: string
+    updateToken?: string
+
+  Profile:
+    name, title, location, email, summary: string
+    contactItems?: ContactItem[]
+    summaryAlign?: 'left' | 'center' | 'right' | 'justify'
+    summaryWidth?: number (40-100)
+    photo?: string (base64 data URL)
+    photoPosition?: 'left' | 'right'
+
+  Block:
+    id, title: string
+    icon?: string (Lucide icon name)
+    type: 'list' | 'tags'
+    items: ListItem[] | TagItem[]
+
+  ListItem: {id, title, subtitle, period, description}
+  TagItem: {id, text}  # text format: "Category: Skill1, Skill2"
+  ContactItem: {id, icon, text, url}
+
+  AppState:
+    activeProfileId: string
+    profiles: Record<string, ProfileMeta>
+
+  ProfileMeta: {id, name, data: ResumeData}
+
+key_flows:
+  auth:
+    - LandingPage → signInWithGoogle() → Google popup → onAuthStateChanged fires
+    - AuthContext checks users/{uid} doc → creates if new → sets isNewUser
+    - EditPage detects isNewUser → resetToDefault()
+    - On sign-out: clear localStorage keys, firebaseSignOut()
+
+  resume_editing:
+    - useResume initializes from localStorage → Firestore overrides on auth
+    - All mutations go through updateProfileData → setAppState → triggers sync effect
+    - Sync: immediate localStorage.setItem + debounced (1.5s) Firestore setDoc
+
+  ai_import:
+    - ImportResumeModal: file → base64 → POST /api/parse-resume (server) or Gemini client-side
+    - Parsed JSON → importResumeProfile → creates new profile with structured data
+
+  sharing:
+    - Snapshot: addDoc to sharedResumes → copy URL
+    - Live: addDoc to liveResumes (with updateToken + ownerUid) → store liveId in profile
+    - Auto-sync: EditPage useEffect watches data + liveId → debounced setDoc to liveResumes
+
+  pdf_export:
+    - EditPage: store data in localStorage → open /view?print=true
+    - ViewPage (print mode): read from localStorage + postMessage → binary search scale → window.print()
+
+config_files:
+  - vite.config.ts: React plugin, Tailwind plugin, @ alias, GEMINI_API_KEY define
+  - tsconfig.json: ES2022, bundler resolution, @/* path alias
+  - firebase.json: hosting (public/) + firestore rules
+  - firestore.rules: per-user isolation, public shared/live reads, write restrictions
+  - vercel.json: SPA rewrite (/* → /index.html)
+  - .env.example: 7 Firebase vars + GEMINI_API_KEY

@@ -1,3 +1,31 @@
+/**
+ * ViewPage.tsx — Public Resume Viewer & Print Layout
+ *
+ * A multi-mode component that displays resumes in three distinct ways:
+ *
+ * 1. Normal View (no query params): Shows the current user's resume from
+ *    useResume hook with a dark glassmorphic design. Features tab navigation
+ *    with animated transitions between Info, Experience, Skills, etc.
+ *
+ * 2. Shared View (?id=xxx or ?live=xxx): Fetches resume data from Firestore
+ *    (sharedResumes or liveResumes collection) and displays it read-only.
+ *    No authentication required — anyone with the link can view.
+ *
+ * 3. Print View (?print=true): Renders a white, A4-sized layout (794×1122px)
+ *    optimized for PDF export via window.print(). Uses a binary search algorithm
+ *    (15 iterations) to find the optimal scale factor that fits all content
+ *    within one page. Receives data from the editor window via:
+ *    - localStorage (RESUME_PRINT_DATA key) — primary
+ *    - postMessage (RESUME_DATA_SYNC) — fallback
+ *
+ * Tag Display Logic:
+ *   Tag items use "Category: Skill1, Skill2" format. The component parses
+ *   the text at the colon delimiter to display category headers and individual
+ *   skill chips. Supports Chinese colons (：) and various separators (,，、).
+ *
+ * Depends on: useResume, firebase.ts, types.ts, lucide-react, motion
+ * Routes: /view, /share/:id, /print/:id
+ */
 import { CSSProperties, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';

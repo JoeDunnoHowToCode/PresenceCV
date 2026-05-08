@@ -1,3 +1,16 @@
+/**
+ * personalBackup.ts — Owner's Personal Resume Backup
+ *
+ * Contains the project owner's (Joe Chou) actual resume data as a hardcoded
+ * backup template. This is only accessible via the "Restore Backup" button
+ * in EditPage, which is gated behind an email check (mujoecs@gmail.com).
+ *
+ * Purpose: Quick recovery mechanism if the owner's Firestore data is
+ * accidentally deleted or corrupted.
+ *
+ * Exports: PERSONAL_TEMPLATE_BACKUP (ResumeData)
+ * Consumed by: useResume.ts (loadPersonalBackup function)
+ */
 import { ResumeData } from '../types';
 
 export const PERSONAL_TEMPLATE_BACKUP: ResumeData = {

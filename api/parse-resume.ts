@@ -1,3 +1,26 @@
+/**
+ * api/parse-resume.ts — Vercel Serverless Function for Resume Parsing
+ *
+ * This is the production-deployment equivalent of the /api/parse-resume route
+ * defined in server.ts. Deployed as a Vercel Serverless Function at /api/parse-resume.
+ *
+ * Request: POST { fileType: string, base64Data: string }
+ * Response: Structured resume JSON (profile, contactItems, experience, education, skills)
+ *
+ * Key Behaviors:
+ * - Returns 412 if GEMINI_API_KEY env var is missing/placeholder, telling the
+ *   frontend to fall back to client-side Gemini proxy mode
+ * - Returns 405 for non-POST methods
+ * - Body size limit: 4MB (Vercel's hard limit is 4.5MB)
+ *
+ * AI Prompt:
+ * - Comprehensive ATS-style extraction prompt covering contact items, experience,
+ *   education, and categorized skills
+ * - Uses Gemini structured output (responseSchema) for reliable JSON parsing
+ *
+ * Environment Variables: GEMINI_API_KEY
+ * Consumed by: ImportResumeModal.tsx (via fetch POST)
+ */
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Vercel serverless function configuration

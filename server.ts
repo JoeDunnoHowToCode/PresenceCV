@@ -1,3 +1,29 @@
+/**
+ * server.ts — Express Development Server
+ *
+ * The primary entry point for local development (npm run dev / npm start).
+ * Combines Express API routes with Vite's dev middleware for a unified
+ * development experience on a single port (3000).
+ *
+ * API Routes:
+ * - POST /api/parse-resume: Server-side Gemini AI resume parsing.
+ *   Accepts { fileType, base64Data } and returns structured resume JSON.
+ *   Returns 412 if GEMINI_API_KEY is missing/placeholder (signals frontend
+ *   to fall back to client-side Gemini proxy).
+ *
+ * Development Mode:
+ * - Vite middleware handles HMR, module resolution, and SPA routing
+ *
+ * Production Mode:
+ * - Serves static files from dist/ and handles SPA fallback routing
+ *
+ * Environment Variables:
+ * - GEMINI_API_KEY: Google Gemini API key for resume parsing
+ * - NODE_ENV: Controls dev vs production mode
+ *
+ * Note: This file runs via `tsx` (TypeScript execution) — not compiled by Vite.
+ * The Vercel deployment uses api/parse-resume.ts instead (serverless function).
+ */
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";

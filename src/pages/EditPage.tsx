@@ -1,3 +1,39 @@
+/**
+ * EditPage.tsx — Main Resume Editor (Protected Route, "/app")
+ *
+ * This is the largest and most feature-rich component in the project (~1270 lines).
+ * It provides the full resume editing experience with a dark glassmorphic UI.
+ *
+ * Feature Inventory:
+ * - Profile Switcher: Create, clone, rename, delete resume profiles (top bar)
+ * - Theme Color Picker: 6 preset colors + custom hex via color input
+ * - Background Animation Toggle: Enables/disables the smokeFlow CSS animation
+ * - Block Tab Bar: Drag-and-drop reorderable section tabs (Info, Experience, etc.)
+ *   - Desktop: Horizontal draggable tabs via @hello-pangea/dnd
+ *   - Mobile: Dropdown menu with section list
+ * - Info Tab: Inline-editable name/title (contentEditable), contact items CRUD,
+ *   summary text with alignment + width controls, photo upload with crop
+ * - List Blocks (Experience/Education): Draggable items with title/subtitle/period/description
+ * - Tag Blocks (Skills/Languages): Draggable items with "Category: Skill1, Skill2" format
+ * - Photo Upload: File select or drag-and-drop → react-easy-crop → base64 JPEG (max 600px)
+ * - Share Modal: Snapshot link (one-time) vs Live link (auto-syncing)
+ * - PDF Export: Opens /view?print=true via window.open with postMessage data sync
+ * - Import Resume: Opens ImportResumeModal for AI-powered parsing
+ * - Live Resume Auto-Sync: Debounced (2s) Firestore write when liveId is set
+ * - New User Reset: Detects isNewUser flag and resets to default template
+ *
+ * Image Crop Pipeline:
+ *   File → FileReader → data URL → react-easy-crop → canvas → scaled JPEG data URL
+ *   (max 600x600px, 85% quality to keep Firestore doc size manageable)
+ *
+ * Cross-Window Communication (for PDF export):
+ *   EditPage posts RESUME_DATA_SYNC via setInterval → ViewPage (print mode) receives
+ *   and responds with RESUME_DATA_ACK → EditPage clears interval
+ *
+ * Depends on: useResume, AuthContext, ImportResumeModal, ViewPage,
+ *             @hello-pangea/dnd, react-easy-crop, lucide-react, motion
+ * Firestore writes: sharedResumes/{id}, liveResumes/{id}
+ */
 import { useState, KeyboardEvent, CSSProperties, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -76,6 +112,32 @@ const THEME_COLORS = [
 
 const AVAILABLE_ICONS = ['MapPin', 'Mail', 'Phone', 'Link', 'Github', 'Linkedin', 'Twitter', 'Globe', 'Briefcase', 'GraduationCap', 'Code', 'User', 'Award', 'Layout', 'Star', 'Folder', 'File'];
 const AVAILABLE_BLOCK_ICONS = ['Briefcase', 'GraduationCap', 'Code', 'Globe', 'User', 'Award', 'Layout', 'Star', 'Folder', 'File', 'Book', 'Heart', 'Coffee', 'Cpu'];
+
+const copyTextToClipboard = async (text: string) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (err) {
+      console.warn('Clipboard API failed, trying fallback...', err);
+    }
+  }
+  
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+  document.body.removeChild(textArea);
+};
 
 export default function EditPage() {
   const navigate = useNavigate();
@@ -270,7 +332,7 @@ export default function EditPage() {
 
         if (docRef) {
           const url = `${window.location.origin}/view?id=${docRef.id}`;
-          navigator.clipboard.writeText(url);
+          await copyTextToClipboard(url);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         }
@@ -278,7 +340,7 @@ export default function EditPage() {
         if (profileData.liveId) {
           // Already have a live link, just copy it and trigger a sync to make sure it's up to date
           const url = `${window.location.origin}/view?live=${profileData.liveId}`;
-          navigator.clipboard.writeText(url);
+          await copyTextToClipboard(url);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } else {
@@ -301,7 +363,7 @@ export default function EditPage() {
             }));
             
             const url = `${window.location.origin}/view?live=${docRef.id}`;
-            navigator.clipboard.writeText(url);
+            await copyTextToClipboard(url);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           } catch (err: any) {

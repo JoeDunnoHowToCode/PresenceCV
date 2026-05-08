@@ -1,3 +1,21 @@
+/**
+ * types.ts — Core TypeScript Type Definitions
+ *
+ * Defines all shared data model interfaces for PresenceCV. These types are
+ * consumed by nearly every file in the project (hooks, pages, components).
+ *
+ * Data Hierarchy:
+ *   ResumeData (top-level)
+ *     ├── Profile (personal info, photo, contact items)
+ *     ├── blockOrder: string[] (ordered IDs referencing blocks)
+ *     └── blocks: Record<string, Block>
+ *           ├── Block (type: 'list') → items: ListItem[]
+ *           └── Block (type: 'tags') → items: TagItem[]
+ *
+ * Persistence: ResumeData is serialized to localStorage and Firestore
+ * via the useResume hook. The AppState wrapper (in useResume.ts) holds
+ * multiple named profiles, each containing a ResumeData.
+ */
 export interface ContactItem {
   id: string;
   icon: string;

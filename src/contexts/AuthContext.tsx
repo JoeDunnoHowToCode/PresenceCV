@@ -1,3 +1,26 @@
+/**
+ * AuthContext.tsx — Authentication State Management
+ *
+ * Provides a React context for authentication state across the entire app.
+ * Uses Firebase Authentication with Google as the sole OAuth provider.
+ *
+ * Exports:
+ * - AuthProvider: Context provider component (wraps the app in App.tsx)
+ * - useAuth(): Hook returning { user, loading, isNewUser, signInWithGoogle, signOut }
+ *
+ * Key Behaviors:
+ * - On auth state change: checks if a Firestore user document exists at users/{uid}.
+ *   If not, creates one (marks isNewUser=true so EditPage can reset to defaults).
+ * - signInWithGoogle: Uses popup with `select_account` prompt to let users
+ *   choose which Google account to use. Handles edge cases like popup-blocked,
+ *   iframe storage partition issues, and rate limiting.
+ * - signOut: Calls Firebase signOut AND clears localStorage resume data
+ *   to prevent data leakage between sessions.
+ *
+ * Consumed by: ProtectedRoute, LandingPage, EditPage, ImportResumeModal
+ * Depends on: lib/firebase.ts (db, auth instances)
+ * Firestore writes: users/{uid} (on first login)
+ */
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { auth, db } from '../lib/firebase';
 import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, browserPopupRedirectResolver } from 'firebase/auth';

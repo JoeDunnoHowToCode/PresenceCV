@@ -1,3 +1,14 @@
+/**
+ * TermsPage.tsx — Terms of Service Page
+ *
+ * A static content page accessible at "/terms". Displays the PresenceCV
+ * terms of service covering agreement, service description, accounts,
+ * content ownership, and disclaimers.
+ * Uses the same cream-tone visual style as LandingPage.
+ *
+ * Content sections: Agreement, Service Description, User Accounts, Ownership, Disclaimer
+ * Depends on: react-router-dom (Link), lucide-react (Box icon)
+ */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';

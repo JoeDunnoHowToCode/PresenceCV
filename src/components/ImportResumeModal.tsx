@@ -1,3 +1,30 @@
+/**
+ * ImportResumeModal.tsx — AI-Powered Resume Import Modal
+ *
+ * A modal dialog that allows authenticated users to upload an existing resume
+ * (PDF, JPG, or PNG) and have it automatically parsed by Google Gemini AI
+ * into structured data that populates a new resume profile.
+ *
+ * Dual-Path Parsing Strategy:
+ * 1. Server-side (preferred): POST /api/parse-resume → uses server's GEMINI_API_KEY
+ *    - Returns 412 if no valid key is configured on the server
+ * 2. Client-side fallback: Direct Gemini API call via frontend proxy
+ *    - Used in AI Studio Free Tier where the key is injected at build time
+ *
+ * Rate Limiting:
+ * - 5 imports per day per user, tracked in Firestore user_limits/{uid}
+ * - Owner email (mujoecs@gmail.com) is exempted from limits
+ *
+ * File Constraints: Max 3MB, PDF/JPG/PNG only
+ *
+ * Props:
+ * - isOpen: boolean — controls modal visibility
+ * - onClose: () => void — called when modal should close
+ * - onImport: (data) => void — called with parsed resume data on success
+ *
+ * Depends on: AuthContext, firebase.ts, @google/genai
+ * Firestore reads/writes: user_limits/{uid}
+ */
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';

@@ -1,3 +1,17 @@
+/**
+ * errorHandling.ts — Structured Firestore Error Handling
+ *
+ * Provides a standardized error logging and re-throwing mechanism for Firestore operations.
+ *
+ * Exports:
+ * - FirestoreErrorInfo: Interface describing the structured error payload
+ * - handleFirestoreError(error, operationType, path?): Logs a JSON-formatted error
+ *   to console.error and re-throws it as a serialized Error. This makes Firestore
+ *   permission errors easier to debug by including operation type, document path,
+ *   and auth state information.
+ *
+ * Consumed by: EditPage.tsx (share link creation)
+ */
 export interface FirestoreErrorInfo {
   error: string;
   operationType: 'create' | 'update' | 'delete' | 'list' | 'get' | 'write';

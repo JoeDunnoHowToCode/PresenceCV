@@ -1,3 +1,23 @@
+/**
+ * LandingPage.tsx — Marketing Homepage
+ *
+ * The public-facing landing page for PresenceCV, accessible at "/".
+ * Designed with a warm cream-tone aesthetic (bg-[#f7f4ed]) contrasting
+ * the dark glassmorphic editor.
+ *
+ * Sections:
+ * 1. Navigation Bar: Logo, Features/Pricing links, Login/Logout buttons (responsive)
+ * 2. Hero: Headline, subtitle, CTA button ("Start Building Now")
+ * 3. Features Grid: 4 feature cards (AI, Live Share, PDF, Multi-Profile)
+ * 4. Pricing: Free tier (current) and Pro tier (coming soon)
+ * 5. Footer: Brand, links to Features/Privacy/Terms
+ *
+ * Auth Integration:
+ * - "Start Building Now" and "Log In" trigger signInWithGoogle → navigate("/app")
+ * - If already logged in, buttons redirect directly to /app
+ *
+ * Depends on: AuthContext (useAuth), react-router-dom, lucide-react, motion
+ */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';

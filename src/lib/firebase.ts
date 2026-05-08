@@ -1,3 +1,27 @@
+/**
+ * firebase.ts — Firebase SDK Initialization
+ *
+ * Initializes and exports the core Firebase services used throughout the app:
+ * - `app`: The Firebase App instance
+ * - `auth`: Firebase Authentication (Google OAuth)
+ * - `db`: Firestore database instance
+ * - `isConfigValid`: Boolean flag indicating whether required env vars are present
+ *
+ * Configuration:
+ * - All Firebase config values come from VITE_FIREBASE_* environment variables.
+ * - A custom `VITE_FIREBASE_DATABASE_ID` is supported for non-default Firestore DBs.
+ * - Uses `experimentalForceLongPolling` to bypass WebSocket issues on restrictive
+ *   networks (corporate firewalls, ad blockers blocking firestore.googleapis.com).
+ *
+ * Boot-time Connection Test:
+ * - On module load, attempts to read a test doc from Firestore.
+ * - If offline, logs a detailed diagnostic error to help users troubleshoot.
+ *
+ * Consumed by: AuthContext.tsx, useResume.ts, ImportResumeModal.tsx, EditPage.tsx, ViewPage.tsx
+ * Env vars: VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID,
+ *           VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID,
+ *           VITE_FIREBASE_APP_ID, VITE_FIREBASE_DATABASE_ID (optional)
+ */
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
