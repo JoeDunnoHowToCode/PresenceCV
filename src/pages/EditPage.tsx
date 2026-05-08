@@ -191,6 +191,7 @@ export default function EditPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const lastSnapshotDataStr = useRef<string | null>(null);
 
   const allTabs = ['info', ...data.blockOrder];
 
@@ -317,22 +318,26 @@ export default function EditPage() {
     }
   }, [data, user?.uid]);
 
-  // Opens the share modal and pre-generates a fresh snapshot link eagerly.
-  // Pre-generation is important because navigator.clipboard.writeText() requires
-  // a user-gesture context. If we wait until the user clicks "Copy", the async
-  // Firestore write finishes too late and the browser blocks the clipboard access.
+  // Opens the share modal. Only generates a new snapshot if the content has changed
+  // since the last time a snapshot was generated in this session.
   const openShareModal = async () => {
-    setSnapshotUrl(null);
     setCopiedSection(null);
     setIsShareModalOpen(true);
-    setIsSharing(true); // lock UI while the snapshot is being generated
-    try {
-      const profileData = appState.profiles[appState.activeProfileId]?.data || data;
-      const safeData = JSON.parse(JSON.stringify(profileData));
-      // Strip live-link fields from snapshot payloads — snapshots are read-only
-      delete safeData.liveId;
-      delete safeData.updateToken;
+    
+    const profileData = appState.profiles[appState.activeProfileId]?.data || data;
+    const safeData = JSON.parse(JSON.stringify(profileData));
+    delete safeData.liveId;
+    delete safeData.updateToken;
+    const currentDataStr = JSON.stringify(safeData);
 
+    if (snapshotUrl && lastSnapshotDataStr.current === currentDataStr) {
+      // Content hasn't changed, reuse the existing snapshot
+      return;
+    }
+
+    setSnapshotUrl(null);
+    setIsSharing(true);
+    try {
       const { collection, addDoc } = await import('firebase/firestore');
       const { db } = await import('../lib/firebase');
       const docRef = await addDoc(collection(db, 'sharedResumes'), {
@@ -340,36 +345,11 @@ export default function EditPage() {
         createdAt: Date.now()
       });
       setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
+      lastSnapshotDataStr.current = currentDataStr;
     } catch (err) {
       console.error('Failed to pre-generate snapshot:', err);
-      // Don't close the modal; user can retry via the refresh button
     } finally {
       setIsSharing(false);
-    }
-  };
-
-  // Refreshes the snapshot by creating a brand-new Firestore document.
-  const refreshSnapshot = async () => {
-    setIsRefreshingSnapshot(true);
-    setSnapshotUrl(null);
-    setCopiedSection(prev => prev === 'snapshot' ? null : prev);
-    try {
-      const profileData = appState.profiles[appState.activeProfileId]?.data || data;
-      const safeData = JSON.parse(JSON.stringify(profileData));
-      delete safeData.liveId;
-      delete safeData.updateToken;
-
-      const { collection, addDoc } = await import('firebase/firestore');
-      const { db } = await import('../lib/firebase');
-      const docRef = await addDoc(collection(db, 'sharedResumes'), {
-        ...safeData,
-        createdAt: Date.now()
-      });
-      setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
-    } catch (err) {
-      console.error('Failed to refresh snapshot:', err);
-    } finally {
-      setIsRefreshingSnapshot(false);
     }
   };
 
@@ -508,23 +488,14 @@ export default function EditPage() {
                       <LucideIcons.Camera className="w-4 h-4 text-accent" />
                       Snapshot Link
                     </div>
-                    {/* Refresh: creates a brand-new snapshot */}
-                    <button
-                      onClick={refreshSnapshot}
-                      disabled={isRefreshingSnapshot || isSharing}
-                      title="Generate a new snapshot of your current resume"
-                      className="p-1.5 rounded-lg text-text-secondary hover:text-accent hover:bg-white/10 transition-colors disabled:opacity-40"
-                    >
-                      <LucideIcons.RefreshCw className={`w-4 h-4 ${isRefreshingSnapshot ? 'animate-spin' : ''}`} />
-                    </button>
                   </div>
                   <p className="text-xs text-text-secondary">
-                    Captures your resume exactly as it is right now. Good for submitting to a specific job.
+                    Captures your resume exactly as it is right now. Automatically updates only when you make changes.
                   </p>
 
                   {/* URL display + copy */}
                   <div className="flex items-center gap-2 mt-1">
-                    {isSharing || isRefreshingSnapshot ? (
+                    {isSharing ? (
                       <div className="flex-1 flex items-center gap-2 text-xs text-text-secondary bg-white/5 border border-white/10 rounded-lg px-3 py-2">
                         <LucideIcons.Loader2 className="w-3 h-3 animate-spin shrink-0" />
                         Generating…
@@ -538,12 +509,12 @@ export default function EditPage() {
                       />
                     ) : (
                       <div className="flex-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-                        Failed to generate. Click ↻ to retry.
+                        Failed to generate. Close and reopen to retry.
                       </div>
                     )}
                     <button
                       onClick={() => snapshotUrl && handleCopyLink(snapshotUrl, 'snapshot')}
-                      disabled={!snapshotUrl || isSharing || isRefreshingSnapshot}
+                      disabled={!snapshotUrl || isSharing}
                       className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 disabled:opacity-40 transition-colors"
                     >
                       {copiedSection === 'snapshot'
@@ -778,21 +749,23 @@ export default function EditPage() {
                   </div>
                   
                   {appState.activeProfileId === profile.id && (
-                    <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">
+                    <div className={`absolute -top-2 -right-2 flex gap-1 transition-opacity drop-shadow-md ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingProfileId(profile.id); }}
-                        className="p-1 rounded-full bg-blue-500 hover:bg-blue-400 text-white"
+                        className="p-1.5 rounded-full bg-blue-500 hover:bg-blue-400 text-white shadow-lg"
                         title="Rename Resume"
                       >
-                        <LucideIcons.Edit2 className="w-3 h-3" />
+                        <LucideIcons.Edit2 className="w-3.5 h-3.5" />
                       </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setProfileToDelete(profile.id); }}
-                        className="p-1 rounded-full bg-red-500 hover:bg-red-400 text-white"
-                        title="Delete Resume"
-                      >
-                        <LucideIcons.X className="w-3 h-3" />
-                      </button>
+                      {Object.keys(appState.profiles).length > 1 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setProfileToDelete(profile.id); }}
+                          className="p-1.5 rounded-full bg-red-500 hover:bg-red-400 text-white shadow-lg"
+                          title="Delete Resume"
+                        >
+                          <LucideIcons.X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -876,22 +849,54 @@ export default function EditPage() {
           >
             {isMobile ? (
               <div className="relative flex-[2]">
-                 <button 
+                 <div 
+                   className="flex items-center justify-between w-full px-5 py-2.5 rounded-full whitespace-nowrap hover-glow bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)] cursor-pointer"
                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                   className="flex items-center justify-between w-full px-5 py-2.5 rounded-full whitespace-nowrap hover-glow bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)]"
                  >
-                   <div className="flex items-center gap-2">
-                     {activeTab === 'info' ? <LucideIcons.User className="w-4 h-4" /> : (() => {
+                   <div className="flex items-center gap-2 flex-1 min-w-0">
+                     {activeTab === 'info' ? <LucideIcons.User className="w-4 h-4 shrink-0" /> : (() => {
                        const block = data.blocks[activeTab];
                        const FinalIcon = block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase;
-                       return <FinalIcon className="w-4 h-4" />;
+                       return (
+                         <div className="relative shrink-0 flex items-center justify-center" onClick={e => e.stopPropagation()}>
+                           <select 
+                             value={block?.icon || 'Briefcase'} 
+                             onChange={e => updateBlockIcon(activeTab, e.target.value)}
+                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                           >
+                             <option disabled value="">Icon</option>
+                             {AVAILABLE_BLOCK_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
+                           </select>
+                           <FinalIcon className="w-4 h-4" />
+                         </div>
+                       );
                      })()}
-                     <span className="text-sm tracking-widest uppercase truncate max-w-[100px]">
-                       {activeTab === 'info' ? 'Info' : data.blocks[activeTab]?.title}
-                     </span>
+                     {activeTab === 'info' ? (
+                       <span className="text-sm tracking-widest uppercase truncate flex-1 text-left">Info</span>
+                     ) : (
+                       <input 
+                         value={data.blocks[activeTab]?.title || ''}
+                         onClick={e => e.stopPropagation()}
+                         onChange={e => updateBlockTitle(activeTab, e.target.value)}
+                         className="text-sm tracking-widest uppercase truncate bg-transparent outline-none border-b border-bg/20 focus:border-bg w-full text-bg font-medium pb-0.5 min-w-0"
+                         placeholder="Section Name"
+                       />
+                     )}
                    </div>
-                   <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
-                 </button>
+                   
+                   <div className="flex items-center gap-2 pl-2 shrink-0">
+                     {activeTab !== 'info' && (
+                       <button
+                         onClick={(e) => { e.stopPropagation(); setBlockToDelete(activeTab); setIsMobileMenuOpen(false); }}
+                         className="p-1 rounded-full bg-red-500/20 text-red-600 hover:bg-red-500/30 transition-colors"
+                         title="Delete Section"
+                       >
+                         <LucideIcons.X className="w-3 h-3" />
+                       </button>
+                     )}
+                     <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
+                   </div>
+                 </div>
 
                  <AnimatePresence>
                    {isMobileMenuOpen && (
