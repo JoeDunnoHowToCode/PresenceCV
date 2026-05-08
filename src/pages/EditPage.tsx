@@ -245,6 +245,14 @@ export default function EditPage() {
 
   const [isSharing, setIsSharing] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // Tracks the latest snapshot URL generated in the current modal session
+  const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null);
+  // Tracks per-section copy feedback: 'snapshot' | 'live' | null
+  const [copiedSection, setCopiedSection] = useState<'snapshot' | 'live' | null>(null);
+  // Whether the live link is currently being initialized for the first time
+  const [isInitializingLive, setIsInitializingLive] = useState(false);
+  // Whether a new snapshot is being generated (e.g. via the refresh button)
+  const [isRefreshingSnapshot, setIsRefreshingSnapshot] = useState(false);
 
   // Respond to data requests from spawned print windows (e.g. if they are refreshed)
   useEffect(() => {
@@ -309,76 +317,107 @@ export default function EditPage() {
     }
   }, [data, user?.uid]);
 
-  const generateShareLink = async (mode: 'snapshot' | 'live') => {
-    setIsSharing(true);
+  // Opens the share modal and pre-generates a fresh snapshot link eagerly.
+  // Pre-generation is important because navigator.clipboard.writeText() requires
+  // a user-gesture context. If we wait until the user clicks "Copy", the async
+  // Firestore write finishes too late and the browser blocks the clipboard access.
+  const openShareModal = async () => {
+    setSnapshotUrl(null);
+    setCopiedSection(null);
+    setIsShareModalOpen(true);
+    setIsSharing(true); // lock UI while the snapshot is being generated
     try {
       const profileData = appState.profiles[appState.activeProfileId]?.data || data;
       const safeData = JSON.parse(JSON.stringify(profileData));
-      
-      const { collection, addDoc, doc, setDoc } = await import('firebase/firestore');
+      // Strip live-link fields from snapshot payloads — snapshots are read-only
+      delete safeData.liveId;
+      delete safeData.updateToken;
+
+      const { collection, addDoc } = await import('firebase/firestore');
       const { db } = await import('../lib/firebase');
-      const { handleFirestoreError } = await import('../lib/errorHandling');
-
-      if (mode === 'snapshot') {
-        let docRef;
-        try {
-          docRef = await addDoc(collection(db, 'sharedResumes'), {
-            ...safeData,
-            createdAt: Date.now()
-          });
-        } catch (err: any) {
-          handleFirestoreError(err, 'create', 'sharedResumes');
-        }
-
-        if (docRef) {
-          const url = `${window.location.origin}/view?id=${docRef.id}`;
-          await copyTextToClipboard(url);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      } else if (mode === 'live') {
-        if (profileData.liveId) {
-          // Already have a live link, just copy it and trigger a sync to make sure it's up to date
-          const url = `${window.location.origin}/view?live=${profileData.liveId}`;
-          await copyTextToClipboard(url);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } else {
-          // Create new live link
-          const updateToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36);
-          let docRef;
-          try {
-            docRef = await addDoc(collection(db, 'liveResumes'), {
-              ...safeData,
-              updateToken,
-              ownerUid: user?.uid,
-              createdAt: Date.now(),
-              updatedAt: Date.now()
-            });
-            // Update local state with the liveId and token
-            updateProfileData(prev => ({
-              ...prev,
-              liveId: docRef.id,
-              updateToken
-            }));
-            
-            const url = `${window.location.origin}/view?live=${docRef.id}`;
-            await copyTextToClipboard(url);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          } catch (err: any) {
-            handleFirestoreError(err, 'create', 'liveResumes');
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Failed to share resume:', error);
-      alert('Failed to generate share link.');
+      const docRef = await addDoc(collection(db, 'sharedResumes'), {
+        ...safeData,
+        createdAt: Date.now()
+      });
+      setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
+    } catch (err) {
+      console.error('Failed to pre-generate snapshot:', err);
+      // Don't close the modal; user can retry via the refresh button
     } finally {
       setIsSharing(false);
-      setIsShareModalOpen(false);
     }
   };
+
+  // Refreshes the snapshot by creating a brand-new Firestore document.
+  const refreshSnapshot = async () => {
+    setIsRefreshingSnapshot(true);
+    setSnapshotUrl(null);
+    setCopiedSection(prev => prev === 'snapshot' ? null : prev);
+    try {
+      const profileData = appState.profiles[appState.activeProfileId]?.data || data;
+      const safeData = JSON.parse(JSON.stringify(profileData));
+      delete safeData.liveId;
+      delete safeData.updateToken;
+
+      const { collection, addDoc } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      const docRef = await addDoc(collection(db, 'sharedResumes'), {
+        ...safeData,
+        createdAt: Date.now()
+      });
+      setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
+    } catch (err) {
+      console.error('Failed to refresh snapshot:', err);
+    } finally {
+      setIsRefreshingSnapshot(false);
+    }
+  };
+
+  // Ensures a live link exists for the current profile.
+  // If one already exists, this is a no-op. Otherwise creates a new Firestore doc.
+  const ensureLiveLink = async () => {
+    const profileData = appState.profiles[appState.activeProfileId]?.data || data;
+    if (profileData.liveId) return; // already exists, nothing to do
+
+    setIsInitializingLive(true);
+    try {
+      const safeData = JSON.parse(JSON.stringify(profileData));
+      const updateToken = crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now().toString(36) + Math.random().toString(36);
+
+      const { collection, addDoc } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      const docRef = await addDoc(collection(db, 'liveResumes'), {
+        ...safeData,
+        updateToken,
+        ownerUid: user?.uid,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      // Persist liveId and updateToken into the profile's data in Firestore
+      updateProfileData(prev => ({
+        ...prev,
+        liveId: docRef.id,
+        updateToken
+      }));
+    } catch (err) {
+      console.error('Failed to create live link:', err);
+    } finally {
+      setIsInitializingLive(false);
+    }
+  };
+
+  // Copies a given URL to clipboard and sets per-section feedback.
+  const handleCopyLink = async (url: string, section: 'snapshot' | 'live') => {
+    await copyTextToClipboard(url);
+    setCopiedSection(section);
+    setTimeout(() => setCopiedSection(null), 2000);
+  };
+
+  // Legacy alias — kept so nothing else in this file breaks
+  const generateShareLink = async (_mode: 'snapshot' | 'live') => {};
+
 
   const variants = {
     enter: (direction: number) => ({
@@ -446,49 +485,125 @@ export default function EditPage() {
         {isShareModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="glass p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-white/10 shadow-2xl relative">
-              <button 
-                onClick={() => setIsShareModalOpen(false)}
+              {/* Close Button */}
+              <button
+                onClick={() => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); }}
                 className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors p-2"
               >
                 <LucideIcons.X className="w-5 h-5" />
               </button>
+
               <LucideIcons.Share2 className="w-10 h-10 text-accent mb-4" />
               <h3 className="text-2xl font-serif text-white mb-2">Share Your Resume</h3>
               <p className="text-sm text-text-secondary mb-8">
                 Choose how you want to share your profile with the world.
               </p>
-              
-              <div className="flex flex-col gap-4 w-full">
-                {/* Snapshot Link */}
-                <button
-                  onClick={() => generateShareLink('snapshot')}
-                  disabled={isSharing}
-                  className="flex flex-col text-left w-full p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-2 text-white font-medium mb-1">
-                    <LucideIcons.Camera className="w-4 h-4 text-accent" />
-                    Snapshot Link
+
+              <div className="flex flex-col gap-5 w-full">
+
+                {/* ── Snapshot Link Section ── */}
+                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-white/10 bg-white/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white font-medium">
+                      <LucideIcons.Camera className="w-4 h-4 text-accent" />
+                      Snapshot Link
+                    </div>
+                    {/* Refresh: creates a brand-new snapshot */}
+                    <button
+                      onClick={refreshSnapshot}
+                      disabled={isRefreshingSnapshot || isSharing}
+                      title="Generate a new snapshot of your current resume"
+                      className="p-1.5 rounded-lg text-text-secondary hover:text-accent hover:bg-white/10 transition-colors disabled:opacity-40"
+                    >
+                      <LucideIcons.RefreshCw className={`w-4 h-4 ${isRefreshingSnapshot ? 'animate-spin' : ''}`} />
+                    </button>
                   </div>
                   <p className="text-xs text-text-secondary">
                     Captures your resume exactly as it is right now. Good for submitting to a specific job.
                   </p>
-                </button>
 
-                {/* Live Link */}
-                <button
-                  onClick={() => generateShareLink('live')}
-                  disabled={isSharing}
-                  className="flex flex-col text-left w-full p-4 rounded-xl border border-accent/20 bg-accent/5 hover:bg-accent/10 transition-colors disabled:opacity-50 relative overflow-hidden"
-                >
-                  <div className="flex items-center gap-2 text-white font-medium mb-1">
+                  {/* URL display + copy */}
+                  <div className="flex items-center gap-2 mt-1">
+                    {isSharing || isRefreshingSnapshot ? (
+                      <div className="flex-1 flex items-center gap-2 text-xs text-text-secondary bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <LucideIcons.Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                        Generating…
+                      </div>
+                    ) : snapshotUrl ? (
+                      <input
+                        readOnly
+                        value={snapshotUrl}
+                        onClick={e => (e.target as HTMLInputElement).select()}
+                        className="flex-1 text-xs bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-text-secondary outline-none cursor-text select-all"
+                      />
+                    ) : (
+                      <div className="flex-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                        Failed to generate. Click ↻ to retry.
+                      </div>
+                    )}
+                    <button
+                      onClick={() => snapshotUrl && handleCopyLink(snapshotUrl, 'snapshot')}
+                      disabled={!snapshotUrl || isSharing || isRefreshingSnapshot}
+                      className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 disabled:opacity-40 transition-colors"
+                    >
+                      {copiedSection === 'snapshot'
+                        ? <><LucideIcons.Check className="w-3 h-3 text-green-400" /> Copied!</>
+                        : <><LucideIcons.Copy className="w-3 h-3" /> Copy</>}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Live Link Section ── */}
+                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-accent/20 bg-accent/5">
+                  <div className="flex items-center gap-2 text-white font-medium">
                     <LucideIcons.Radio className="w-4 h-4 text-accent" />
                     Live Link
+                    {data.liveId && (
+                      <span className="ml-auto text-[10px] uppercase tracking-widest text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-text-secondary">
-                    Generates a permanent link. Any edits you make here will automatically reflect on the live link.
+                    A permanent link that always reflects your latest edits. Tied to this profile — deleting the profile removes the link.
                   </p>
-                  {isSharing && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><LucideIcons.Loader2 className="w-6 h-6 text-accent animate-spin" /></div>}
-                </button>
+
+                  {/* URL display + copy — initializes on first render if no liveId yet */}
+                  <div className="flex items-center gap-2 mt-1">
+                    {isInitializingLive ? (
+                      <div className="flex-1 flex items-center gap-2 text-xs text-text-secondary bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <LucideIcons.Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                        Creating live link…
+                      </div>
+                    ) : data.liveId ? (
+                      <input
+                        readOnly
+                        value={`${window.location.origin}/view?live=${data.liveId}`}
+                        onClick={e => (e.target as HTMLInputElement).select()}
+                        className="flex-1 text-xs bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-text-secondary outline-none cursor-text select-all"
+                      />
+                    ) : (
+                      <button
+                        onClick={ensureLiveLink}
+                        className="flex-1 flex items-center justify-center gap-2 text-xs text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2 hover:bg-accent/20 transition-colors"
+                      >
+                        <LucideIcons.Plus className="w-3 h-3" />
+                        Create Live Link for this profile
+                      </button>
+                    )}
+                    {data.liveId && (
+                      <button
+                        onClick={() => handleCopyLink(`${window.location.origin}/view?live=${data.liveId}`, 'live')}
+                        className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        {copiedSection === 'live'
+                          ? <><LucideIcons.Check className="w-3 h-3 text-green-400" /> Copied!</>
+                          : <><LucideIcons.Copy className="w-3 h-3" /> Copy</>}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -960,12 +1075,12 @@ export default function EditPage() {
             className="flex flex-wrap justify-center gap-4"
           >
             <button
-              onClick={() => setIsShareModalOpen(true)}
+              onClick={openShareModal}
               disabled={isSharing}
               className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-text-secondary hover:text-accent hover-glow whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {copied ? <LucideIcons.Check className="w-4 h-4 text-green-400" /> : <LucideIcons.Share2 className="w-4 h-4" />}
-              {copied ? 'Copied!' : 'Share'}
+              <LucideIcons.Share2 className="w-4 h-4" />
+              Share
             </button>
             <button
               onClick={handleExportPDF}
