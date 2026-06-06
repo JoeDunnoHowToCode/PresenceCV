@@ -65,7 +65,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-[#f7f4ed]/80 backdrop-blur-md border-b border-[#eceae4]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <LucideIcons.Box className="w-6 h-6" />
+            <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
             <span className="text-xl font-semibold tracking-tight">PresenceCV</span>
           </div>
 
@@ -265,7 +265,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
-              <LucideIcons.Box className="w-5 h-5 text-[#1c1c1c]" />
+              <img src="/favicon.png" className="w-5 h-5 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
               <span className="font-semibold text-[#1c1c1c]">PresenceCV</span>
               <span className="text-[#5f5f5d] ml-2">© 2026 PresenceCV</span>
             </div>

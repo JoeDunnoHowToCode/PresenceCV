@@ -19,7 +19,7 @@ export default function TermsPage() {
       <nav className="sticky top-0 z-50 bg-[#f7f4ed]/80 backdrop-blur-md border-b border-[#eceae4]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <LucideIcons.Box className="w-6 h-6" />
+            <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
             <span className="text-xl font-semibold tracking-tight">PresenceCV</span>
           </Link>
           <Link to="/" className="text-sm font-medium hover:underline">Back to Home</Link>
