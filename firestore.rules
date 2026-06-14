@@ -27,7 +27,7 @@ service cloud.firestore {
 
     match /sharedResumes/{resumeId} {
       // Anyone can generate a share link (create a document)
-      allow create: if true 
+      allow create: if request.auth != null 
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt']);
       // Anyone with the link (id) can read it
       allow get: if true;
@@ -46,8 +46,11 @@ service cloud.firestore {
       allow list: if false;
       // Updates require the creator's anonymous token to match or the ownerUid to match (to patch the legacy vulnerability)
       allow update: if request.auth != null && (
-        (resource.data.ownerUid == request.auth.uid) ||
-        (!("ownerUid" in resource.data) && request.resource.data.updateToken == resource.data.updateToken)
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerUid'])) &&
+        (
+          (resource.data.ownerUid == request.auth.uid) ||
+          (!("ownerUid" in resource.data) && request.resource.data.updateToken == resource.data.updateToken)
+        )
       );
       allow delete: if false;
     }

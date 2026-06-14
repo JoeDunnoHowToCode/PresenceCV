@@ -83,7 +83,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         }
       }
 
-      const isUnlimited = user.email === 'mujoecs@gmail.com';
+      const isUnlimited = user.uid === import.meta.env.VITE_ADMIN_UID;
 
       if (currentCount >= 5 && !isUnlimited) {
         throw new Error("You have reached your daily limit of 5 resume imports.");

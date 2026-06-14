@@ -33,6 +33,20 @@ export const config = {
   },
 };
 
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limitData = rateLimitMap.get(ip);
+  if (!limitData || now > limitData.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 3600000 });
+    return false;
+  }
+  if (limitData.count >= 5) return true;
+  limitData.count++;
+  return false;
+}
+
 export default async function handler(req: any, res: any) {
   // Prevent any non-POST methods immediately
   if (req.method !== 'POST') {
@@ -40,6 +54,11 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+    if (isRateLimited(ip as string)) {
+      return res.status(429).json({ error: "Too many requests from this IP. Please try again later." });
+    }
+
     const { fileType, base64Data } = req.body;
 
     if (!base64Data || !fileType) {
@@ -273,6 +292,6 @@ OUTPUT RULES
     res.status(200).json(parsedResult);
   } catch (error: any) {
     console.error("Vercel Secure API Parse Error:", error);
-    res.status(500).json({ error: "Failed to parse resume on Vercel backend", details: error.message });
+    res.status(500).json({ error: "Failed to parse resume on Vercel backend" });
   }
 }

@@ -777,7 +777,7 @@ export default function EditPage() {
                 <LucideIcons.Plus className="w-4 h-4" />
                 <span className="text-sm font-medium">Clone Active</span>
               </button>
-              {user?.email === 'mujoecs@gmail.com' && (
+              {user?.uid === import.meta.env.VITE_ADMIN_UID && (
                 <button
                   onClick={loadPersonalBackup}
                   className="flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 bg-accent/5 text-accent hover:bg-accent/10 transition-all shrink-0 ml-2"
