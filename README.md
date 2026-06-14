@@ -84,7 +84,7 @@ npm start
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 19, TypeScript 5.8, TailwindCSS 4 |
-| UI Libraries | lucide-react, Motion (Framer Motion), @hello-pangea/dnd, react-easy-crop |
+| UI Libraries | lucide-react, Motion (Framer Motion), @hello-pangea/dnd, react-easy-crop, react-fast-marquee |
 | Routing | react-router-dom v7 |
 | Build | Vite 6 |
 | Dev Server | Express 4 + Vite middleware |
@@ -98,23 +98,34 @@ npm start
 
 ```
 PresenceCV/
-├── index.html          # SPA entry point
-├── server.ts           # Express dev server + API proxy
-├── api/                # Vercel serverless functions
-├── src/
-│   ├── main.tsx        # React DOM entry
-│   ├── App.tsx         # Root component (routing + auth)
-│   ├── types.ts        # Shared TypeScript interfaces
-│   ├── index.css       # Global styles + print layout
-│   ├── contexts/       # React context providers
-│   ├── hooks/          # Custom hooks (useResume — core state mgmt)
-│   ├── components/     # Reusable UI components
-│   ├── pages/          # Route-level page components
-│   ├── data/           # Static resume templates
-│   └── lib/            # Firebase init, error handling
-├── firebase.json       # Firebase config
-├── firestore.rules     # Firestore security rules
-└── vercel.json         # Vercel deployment config
+├── index.html              # SPA entry point
+├── server.ts               # Express dev server + API proxy
+├── vite.config.ts           # Vite configuration
+├── tsconfig.json            # TypeScript configuration
+├── firebase.json            # Firebase config
+├── firestore.rules          # Firestore security rules
+├── vercel.json              # Vercel deployment config
+├── .env.example             # Environment variables template
+├── package.json             # Dependencies and scripts
+│
+├── api/
+│   └── parse-resume.ts      # Vercel serverless functions (AI parser)
+│
+├── public/
+│   └── favicon.png          # Monogram CV logo & favicon
+│
+└── src/
+    ├── main.tsx             # React DOM entry
+    ├── App.tsx              # Root component (routing + auth)
+    ├── types.ts             # Shared TypeScript interfaces
+    ├── index.css            # Global styles + print layout
+    │
+    ├── contexts/            # React context providers
+    ├── hooks/               # Custom hooks (useResume — core state mgmt)
+    ├── components/          # Reusable UI components
+    ├── pages/               # Route-level page components
+    ├── data/                # Static resume templates
+    └── lib/                 # Firebase init, error handling
 ```
 
 For a comprehensive architecture overview, see [**進階專案架構說明**](.agents/HumanMap.md).

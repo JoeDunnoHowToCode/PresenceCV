@@ -75,6 +75,9 @@ PresenceCV/
 ├── api/
 │   └── parse-resume.ts      # Vercel Serverless 函式：AI 履歷解析端點
 │
+├── public/
+│   └── favicon.png          # 品牌 Logo 兼瀏覽器 Favicon（簡約幾何「CV」字母圖）
+│
 ├── src/
 │   ├── main.tsx             # React DOM 渲染入口
 │   ├── App.tsx              # 根元件：路由、AuthProvider、Firebase 設定檢查
@@ -93,7 +96,7 @@ PresenceCV/
 │   │   └── ImportResumeModal.tsx   # AI 履歷匯入對話框
 │   │
 │   ├── pages/
-│   │   ├── LandingPage.tsx  # 行銷首頁（Hero、功能、定價）
+│   │   ├── LandingPage.tsx  # 行銷首頁（Hero、功能、定價），使用 favicon.png 作為品牌 Logo
 │   │   ├── EditPage.tsx     # 主編輯器（1273 行，拖放、內嵌編輯、主題、分享、匯出）
 │   │   ├── ViewPage.tsx     # 公開履歷展示 + 列印排版
 │   │   ├── PrivacyPage.tsx  # 隱私政策
@@ -257,7 +260,42 @@ npm run dev             # 啟動 Express + Vite（http://localhost:3000）
 
 ## 更新紀錄
 
-| 日期 | 說明 |
-|------|------|
-| 2026-05-05 | 初始建立：完整掃描專案並撰寫架構文件 |
-| 2026-05-08 | 修復複製連結功能：(1) 在建立/複製履歷 Profile 時清除 `liveId` 與 `updateToken`，確保每個 Profile 有獨立的分享連結。(2) 新增 `copyTextToClipboard` 包含 `execCommand` 備用方案，解決手機版 Safari 無法複製連結的問題。 |
+### 專案本體更新紀錄 (Project Updates)
+
+#### 2026-05-05
+- **初始建立**：完整掃描專案並撰寫架構文件。
+
+#### 2026-05-08
+- **功能修復**：
+  1. 在建立/複製履歷 Profile 時清除 `liveId` 與 `updateToken`，確保每個 Profile 有獨立的分享連結。
+  2. 新增 `copyTextToClipboard` 包含 `execCommand` 備用方案，解決手機版 Safari 無法複製連結的問題。
+
+#### 2026-06-06
+- **11:35** - **品牌識別更新**：
+  1. 生成簡約幾何「CV」Logo 圖並放置於 `public/favicon.png`。
+  2. `index.html` 新增 `<link rel="icon">` 標籤。
+  3. `LandingPage.tsx`（導覽列 + 頁尾）、`PrivacyPage.tsx`、`TermsPage.tsx` 全部將原本的 `LucideIcons.Box` 圖示替換為 `<img src="/favicon.png">` 並加上 `mixBlendMode: 'multiply'` 使白底融入乳白色背景。
+
+#### 2026-06-14
+- **15:20** - **文件對齊更新**：
+  1. 修正 `README.md` 的技術堆疊表格，補上遺漏的 `react-fast-marquee`。
+  2. 更新 `README.md` 中的專案目錄結構，補齊 `public/favicon.png` 與根目錄設定檔以如實呈現網站本體結構。
+
+---
+
+### 作業與規範更新紀錄 (Workflow & Rule Updates)
+
+#### 2026-06-14
+- **15:05** - **Agent 規範重構**：
+  1. 重寫 `.agents/skills/project-map.md`：修正任務前僅需讀取 AgentMap（不讀 HumanMap）、任務後才讀取並更新 HumanMap、新增嚴格的 Git 規則、更新紀錄時間戳記改為精確到分鐘。
+  2. `AgentMap.yaml` 新增 `dependency_groups` 區段（跨檔案依賴分析）與 `static_assets` 區段（品牌資源）。
+  3. `HumanMap.md` 目錄結構新增 `public/` 資料夾與 `favicon.png` 描述。
+
+- **15:25** - **排版規範調整**：更新 `.agents/skills/project-map.md`，明訂 HumanMap.md 更新紀錄表格中，每筆紀錄行之間必須相隔一個空白行，以提升人類可讀性。
+
+- **15:32** - **工作模式與重構更新**：
+  1. 更新 `.agents/skills/project-map.md` 的 Git 規則：每次執行完後自動執行 `git add <Modified Files>`（不需使用者同意），再提出 `git commit -m` 請求供使用者確認。
+  2. 更新 `.agents/skills/project-map.md` 的紀錄格式：將更新紀錄切分為「專案本體」與「作業規範」，並改用日期區塊包覆、僅標示「時:分」的格式。
+  3. 重構 `HumanMap.md` 歷史更新紀錄至此新格式。
+
+- **15:40** - **Git 工作規範調整**：更新 `.agents/skills/project-map.md` 的 Git 規則，允許並要求 Agent 在 `git add` 後自動執行 `git commit`（發起 run_command 以提供確認通知給使用者）。

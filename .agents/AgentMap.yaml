@@ -1,5 +1,5 @@
 # PresenceCV — Agent Project Map
-# Last updated: 2026-05-05
+# Last updated: 2026-06-14 15:05
 # Purpose: Machine-oriented source of truth for all agent tasks in this workspace.
 
 project:
@@ -112,6 +112,7 @@ modules:
     role: Marketing homepage — hero, features grid, pricing cards, footer
     depends_on: [AuthContext]
     key_interactions: signInWithGoogle → navigate("/app")
+    branding: Uses /favicon.png as logo image (mixBlendMode multiply on cream bg)
 
   src/pages/EditPage.tsx:
     role: Main resume editor (1273 lines) — the core UI of the app
@@ -142,11 +143,13 @@ modules:
 
   src/pages/PrivacyPage.tsx:
     role: Static privacy policy page
-    depends_on: [react-router-dom, lucide-react]
+    depends_on: [react-router-dom]
+    branding: Uses /favicon.png as logo image
 
   src/pages/TermsPage.tsx:
     role: Static terms of service page
-    depends_on: [react-router-dom, lucide-react]
+    depends_on: [react-router-dom]
+    branding: Uses /favicon.png as logo image
 
   # --- Data ---
   src/data/defaultResume.ts:
@@ -239,6 +242,38 @@ key_flows:
   pdf_export:
     - EditPage: store data in localStorage → open /view?print=true
     - ViewPage (print mode): read from localStorage + postMessage → binary search scale → window.print()
+
+static_assets:
+  public/favicon.png:
+    role: Brand logo and browser favicon — minimalist geometric "CV" monogram, white background
+    used_by: [index.html (favicon link), LandingPage.tsx (nav + footer), PrivacyPage.tsx (nav), TermsPage.tsx (nav)]
+
+dependency_groups:
+  # When modifying files in "trigger", always check files in "check"
+  types.ts:
+    check: [src/hooks/useResume.ts, src/pages/EditPage.tsx, src/pages/ViewPage.tsx]
+    reason: Core data interfaces consumed by all state management and UI modules
+  useResume.ts:
+    check: [src/pages/EditPage.tsx, firestore.rules]
+    reason: State management consumed by editor; Firestore rules must match data access patterns
+  EditPage_sharing:
+    trigger: src/pages/EditPage.tsx (sharing logic)
+    check: [src/pages/ViewPage.tsx, firestore.rules]
+    reason: Share logic writes data that ViewPage reads; rules must permit the access
+  firebase.ts:
+    check: [.env.example, server.ts, vite.config.ts]
+    reason: Firebase config depends on env vars defined in these files
+  index.css_print:
+    trigger: src/index.css (print styles)
+    check: [src/pages/ViewPage.tsx]
+    reason: Print CSS classes must match the elements ViewPage renders in print mode
+  branding:
+    trigger: public/favicon.png or any logo change
+    check: [index.html, src/pages/LandingPage.tsx, src/pages/PrivacyPage.tsx, src/pages/TermsPage.tsx]
+    reason: Brand assets (logo, favicon) must be consistent across all public pages
+  ImportResumeModal:
+    check: [server.ts, api/parse-resume.ts]
+    reason: AI parsing prompt and schema must stay in sync across server/client/serverless
 
 config_files:
   - vite.config.ts: React plugin, Tailwind plugin, @ alias, GEMINI_API_KEY define
