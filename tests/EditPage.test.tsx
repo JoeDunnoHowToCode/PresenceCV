@@ -29,7 +29,7 @@ describe('EditPage - Security Fixes', () => {
     
     (useResume as any).mockReturnValue({
       appState: { profiles: { 'main': { id: 'main', name: 'Main Resume', data: {} } }, activeProfileId: 'main' },
-      data: { blocks: {}, blockOrder: [] },
+      data: { profile: {}, blocks: {}, blockOrder: [] },
       switchProfile: vi.fn()
     });
   });
