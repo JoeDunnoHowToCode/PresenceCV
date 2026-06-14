@@ -10,3 +10,6 @@ coverage/
 !.env.example
 firebase-applet-config.json
 firebase-blueprint.json
+
+# Agent development files (local only)
+.agents/
