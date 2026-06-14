@@ -28,7 +28,8 @@ service cloud.firestore {
     match /sharedResumes/{resumeId} {
       // Anyone can generate a share link (create a document)
       allow create: if request.auth != null 
-        && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt']);
+        && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation']);
       // Anyone with the link (id) can read it
       allow get: if true;
       // Listing all resumes is forbidden (no scraping)
@@ -40,7 +41,8 @@ service cloud.firestore {
     match /liveResumes/{resumeId} {
       // Anyone can generate a live resume link
       allow create: if request.auth != null
-        && request.resource.data.keys().hasAny(['profile', 'blocks', 'blockOrder']);
+        && request.resource.data.keys().hasAny(['profile', 'blocks', 'blockOrder'])
+        && request.resource.data.ownerUid == request.auth.uid;
       // Anyone with the live link can view it
       allow get: if true;
       allow list: if false;

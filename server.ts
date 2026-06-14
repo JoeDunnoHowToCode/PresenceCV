@@ -36,19 +36,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const limitData = rateLimitMap.get(ip);
-  if (!limitData || now > limitData.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 3600000 });
-    return false;
-  }
-  if (limitData.count >= 5) return true;
-  limitData.count++;
-  return false;
-}
+import { globalRateLimiter } from "./src/utils/rateLimiter.js";
 
 async function startServer() {
   const app = express();
@@ -61,7 +49,7 @@ async function startServer() {
   app.post("/api/parse-resume", async (req, res) => {
     try {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip as string)) {
+      if (globalRateLimiter.isRateLimited(ip as string)) {
         return res.status(429).json({ error: "Too many requests from this IP. Please try again later." });
       }
 
