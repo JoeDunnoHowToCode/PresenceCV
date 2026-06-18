@@ -12,81 +12,61 @@ interface InfoEditorProps {
   AVAILABLE_ICONS: string[];
 }
 
-// Custom hook for debounced local state
+// Uncontrolled debounced input to prevent Mac Zhuyin IME composition interruptions
 export function useDebouncedInput(
   initialValue: string,
   onSave: (value: string) => void,
   delay: number = 1000
 ) {
-  const [value, setValue] = useState(initialValue);
+  const [localValue, setLocalValue] = useState(initialValue);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isDirty = useRef(false);
-  const isComposing = useRef(false);
 
+  // Sync external changes ONLY if the input is not actively focused
   useEffect(() => {
-    if (initialValue === value) {
-      isDirty.current = false;
+    if (inputRef.current && document.activeElement !== inputRef.current) {
+      if (inputRef.current.value !== initialValue) {
+        inputRef.current.value = initialValue;
+        setLocalValue(initialValue);
+      }
     }
-    if (!isDirty.current && !isComposing.current) {
-      setValue(initialValue);
-    }
-  }, [initialValue, value]);
+  }, [initialValue]);
 
+  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      // Force save on unmount if dirty
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
-      }
-      if (isDirty.current) {
-        onSave(value);
+        onSave(inputRef.current?.value || localValue);
       }
     };
-  }, [value, onSave]);
+  }, [localValue, onSave]);
 
-  const handleChange = (newValue: string) => {
-    setValue(newValue);
-    isDirty.current = true;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
     
-    // Only schedule save if not actively composing
-    if (!isComposing.current) {
-      timeoutRef.current = setTimeout(() => {
-        onSave(newValue);
-        isDirty.current = false;
-      }, delay);
-    }
-  };
-
-  const handleBlur = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (isDirty.current) {
-      onSave(value);
-      isDirty.current = false;
-    }
+    timeoutRef.current = setTimeout(() => {
+      onSave(newValue);
+      timeoutRef.current = null;
+    }, delay);
   };
 
-  const handleCompositionStart = () => {
-    isComposing.current = true;
-  };
-
-  const handleCompositionEnd = () => {
-    isComposing.current = false;
-    if (isDirty.current) {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        onSave(value);
-        isDirty.current = false;
-      }, delay);
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+      onSave(e.target.value);
     }
   };
 
   return { 
-    value, 
-    handleChange, 
-    handleBlur, 
-    handleCompositionStart, 
-    handleCompositionEnd 
+    ref: inputRef,
+    defaultValue: initialValue, 
+    onChange: handleChange, 
+    onBlur: handleBlur,
+    localValue 
   };
 }
 
@@ -111,7 +91,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   }, [data.profile.title, targetRole]);
 
   // 中文字一個算一字元，標點符號不算 (移除所有標點與空白)
-  const charCount = (summaryInput.value || '').replace(/[\p{P}\p{S}\s]/gu, '').length;
+  const charCount = (summaryInput.localValue || '').replace(/[\p{P}\p{S}\s]/gu, '').length;
   let countColor = 'text-text-secondary';
   let countStatus = 'Type your summary';
   if (charCount > 0) {
@@ -129,7 +109,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 
   const handleAtsCheck = () => {
     if (!targetRole.trim()) return;
-    const text = summaryInput.value.toLowerCase();
+    const text = summaryInput.localValue.toLowerCase();
     const roleKeywords = targetRole.toLowerCase().split(/\s+/).filter(w => w.trim().length > 0);
     // Add some generic strong keywords to check
     const keywords = [...(roleKeywords.length ? roleKeywords : [targetRole.trim().toLowerCase()]), 'experience', 'strategy', 'impact'];
@@ -148,20 +128,18 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
     <div className="flex flex-col items-center text-center space-y-12 py-12 w-full">
       <div className="w-full flex flex-col items-center">
         <input
-          value={nameInput.value}
-          onChange={(e) => nameInput.handleChange(e.target.value)}
-          onBlur={nameInput.handleBlur}
-          onCompositionStart={nameInput.handleCompositionStart}
-          onCompositionEnd={nameInput.handleCompositionEnd}
+          ref={nameInput.ref as any}
+          defaultValue={nameInput.defaultValue}
+          onChange={nameInput.onChange}
+          onBlur={nameInput.onBlur}
           className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] hover-glow text-center bg-transparent w-full"
           placeholder="Your Name"
         />
         <input
-          value={titleInput.value}
-          onChange={(e) => titleInput.handleChange(e.target.value)}
-          onBlur={titleInput.handleBlur}
-          onCompositionStart={titleInput.handleCompositionStart}
-          onCompositionEnd={titleInput.handleCompositionEnd}
+          ref={titleInput.ref as any}
+          defaultValue={titleInput.defaultValue}
+          onChange={titleInput.onChange}
+          onBlur={titleInput.onBlur}
           className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] hover-glow-text text-center font-['Georgia'] bg-transparent w-full"
           placeholder="Professional Title"
         />
@@ -292,16 +270,17 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
             className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] font-['Georgia'] w-full break-words"
             style={{ textAlign: summaryAlign as any }}
           >
-            {summaryInput.value + ' '}
+            {summaryInput.localValue + ' '}
           </div>
 
           <textarea
-            ref={textareaRef}
-            value={summaryInput.value}
-            onChange={(e) => summaryInput.handleChange(e.target.value)}
-            onBlur={summaryInput.handleBlur}
-            onCompositionStart={summaryInput.handleCompositionStart}
-            onCompositionEnd={summaryInput.handleCompositionEnd}
+            ref={(el) => {
+              (textareaRef as any).current = el;
+              (summaryInput.ref as any).current = el;
+            }}
+            defaultValue={summaryInput.defaultValue}
+            onChange={summaryInput.onChange}
+            onBlur={summaryInput.onBlur}
             className="absolute inset-0 italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none overflow-hidden"
             style={{ textAlign: summaryAlign as any }}
             placeholder="A short summary about yourself..."
@@ -334,20 +313,18 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         <Icon className="w-5 h-5 text-accent hover:text-white transition-colors cursor-pointer" />
       </div>
       <input
-        value={textInput.value}
-        onChange={(e) => textInput.handleChange(e.target.value)}
-        onBlur={textInput.handleBlur}
-        onCompositionStart={textInput.handleCompositionStart}
-        onCompositionEnd={textInput.handleCompositionEnd}
+        ref={textInput.ref as any}
+        defaultValue={textInput.defaultValue}
+        onChange={textInput.onChange}
+        onBlur={textInput.onBlur}
         placeholder="Display Text"
         className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-lg transition-colors hover-glow-text font-['Georgia']"
       />
       <input
-        value={urlInput.value}
-        onChange={(e) => urlInput.handleChange(e.target.value)}
-        onBlur={urlInput.handleBlur}
-        onCompositionStart={urlInput.handleCompositionStart}
-        onCompositionEnd={urlInput.handleCompositionEnd}
+        ref={urlInput.ref as any}
+        defaultValue={urlInput.defaultValue}
+        onChange={urlInput.onChange}
+        onBlur={urlInput.onBlur}
         placeholder="URL (optional)"
         className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-sm text-text-secondary transition-colors"
       />
