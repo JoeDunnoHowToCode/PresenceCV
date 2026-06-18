@@ -21,12 +21,13 @@ export function useDebouncedInput(
   const [value, setValue] = useState(initialValue);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isDirty = useRef(false);
+  const isComposing = useRef(false);
 
   useEffect(() => {
     if (initialValue === value) {
       isDirty.current = false;
     }
-    if (!isDirty.current) {
+    if (!isDirty.current && !isComposing.current) {
       setValue(initialValue);
     }
   }, [initialValue, value]);
@@ -47,10 +48,14 @@ export function useDebouncedInput(
     setValue(newValue);
     isDirty.current = true;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      onSave(newValue);
-      isDirty.current = false;
-    }, delay);
+    
+    // Only schedule save if not actively composing
+    if (!isComposing.current) {
+      timeoutRef.current = setTimeout(() => {
+        onSave(newValue);
+        isDirty.current = false;
+      }, delay);
+    }
   };
 
   const handleBlur = () => {
@@ -61,7 +66,28 @@ export function useDebouncedInput(
     }
   };
 
-  return { value, handleChange, handleBlur };
+  const handleCompositionStart = () => {
+    isComposing.current = true;
+  };
+
+  const handleCompositionEnd = () => {
+    isComposing.current = false;
+    if (isDirty.current) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        onSave(value);
+        isDirty.current = false;
+      }, delay);
+    }
+  };
+
+  return { 
+    value, 
+    handleChange, 
+    handleBlur, 
+    handleCompositionStart, 
+    handleCompositionEnd 
+  };
 }
 
 const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeContactItem, addContactItem, AVAILABLE_ICONS }: InfoEditorProps) => {
@@ -125,6 +151,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           value={nameInput.value}
           onChange={(e) => nameInput.handleChange(e.target.value)}
           onBlur={nameInput.handleBlur}
+          onCompositionStart={nameInput.handleCompositionStart}
+          onCompositionEnd={nameInput.handleCompositionEnd}
           className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] hover-glow text-center bg-transparent w-full"
           placeholder="Your Name"
         />
@@ -132,6 +160,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           value={titleInput.value}
           onChange={(e) => titleInput.handleChange(e.target.value)}
           onBlur={titleInput.handleBlur}
+          onCompositionStart={titleInput.handleCompositionStart}
+          onCompositionEnd={titleInput.handleCompositionEnd}
           className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] hover-glow-text text-center font-['Georgia'] bg-transparent w-full"
           placeholder="Professional Title"
         />
@@ -270,6 +300,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
             value={summaryInput.value}
             onChange={(e) => summaryInput.handleChange(e.target.value)}
             onBlur={summaryInput.handleBlur}
+            onCompositionStart={summaryInput.handleCompositionStart}
+            onCompositionEnd={summaryInput.handleCompositionEnd}
             className="absolute inset-0 italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none overflow-hidden"
             style={{ textAlign: summaryAlign as any }}
             placeholder="A short summary about yourself..."
@@ -305,6 +337,8 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         value={textInput.value}
         onChange={(e) => textInput.handleChange(e.target.value)}
         onBlur={textInput.handleBlur}
+        onCompositionStart={textInput.handleCompositionStart}
+        onCompositionEnd={textInput.handleCompositionEnd}
         placeholder="Display Text"
         className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-lg transition-colors hover-glow-text font-['Georgia']"
       />
@@ -312,6 +346,8 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         value={urlInput.value}
         onChange={(e) => urlInput.handleChange(e.target.value)}
         onBlur={urlInput.handleBlur}
+        onCompositionStart={urlInput.handleCompositionStart}
+        onCompositionEnd={urlInput.handleCompositionEnd}
         placeholder="URL (optional)"
         className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-sm text-text-secondary transition-colors"
       />
