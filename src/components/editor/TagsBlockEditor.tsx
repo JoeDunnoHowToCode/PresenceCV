@@ -1,0 +1,126 @@
+import React, { KeyboardEvent, useState } from 'react';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
+import * as LucideIcons from 'lucide-react';
+import { TagItem } from '../../types';
+import { useDebouncedInput } from './InfoEditor';
+
+interface TagsBlockEditorProps {
+  block: any;
+  updateBlockTitle: (blockId: string, title: string) => void;
+  updateTagItem: (blockId: string, itemId: string, text: string) => void;
+  removeTagItem: (blockId: string, itemId: string) => void;
+  addTagItem: (blockId: string, text: string) => void;
+}
+
+const TagsBlockEditor = React.memo(({
+  block,
+  updateBlockTitle,
+  updateTagItem,
+  removeTagItem,
+  addTagItem
+}: TagsBlockEditorProps) => {
+
+  const titleInput = useDebouncedInput(block.title, (val) => updateBlockTitle(block.id, val));
+  const [newTagText, setNewTagText] = useState('');
+
+  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newTagText.trim()) {
+      addTagItem(block.id, newTagText.trim());
+      setNewTagText('');
+    }
+  };
+
+  return (
+    <div className="py-8">
+      <div className="flex items-center justify-between mb-12">
+        <input
+          value={titleInput.value}
+          onChange={e => titleInput.handleChange(e.target.value)}
+          onBlur={titleInput.handleBlur}
+          className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
+          placeholder="Section Title"
+        />
+      </div>
+
+      <Droppable droppableId={block.id} type="tag-items">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+            {block.items.map((item: TagItem, index: number) => (
+              <Draggable key={item.id} draggableId={item.id} index={index}>
+                {(provided, snapshot) => (
+                  <TagItemEditor
+                    provided={provided}
+                    snapshot={snapshot}
+                    blockId={block.id}
+                    item={item}
+                    updateTagItem={updateTagItem}
+                    removeTagItem={removeTagItem}
+                  />
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+            <div className="glass p-4 rounded-xl flex items-center gap-4">
+              <LucideIcons.Plus className="w-5 h-5 text-text-secondary opacity-50" />
+              <input
+                value={newTagText}
+                onChange={e => setNewTagText(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Add new category/skills (e.g., Python: ML, NLP) (Press Enter)"
+                className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-sm tracking-wide px-1 pb-1 transition-colors text-text-secondary"
+              />
+            </div>
+          </div>
+        )}
+      </Droppable>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  return JSON.stringify(prevProps.block) === JSON.stringify(nextProps.block);
+});
+
+interface TagItemEditorProps {
+  provided: any;
+  snapshot: any;
+  blockId: string;
+  item: TagItem;
+  updateTagItem: (blockId: string, itemId: string, text: string) => void;
+  removeTagItem: (blockId: string, itemId: string) => void;
+}
+
+const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTagItem, removeTagItem }: TagItemEditorProps) => {
+  const textInput = useDebouncedInput(item.text, (val) => updateTagItem(blockId, item.id, val));
+
+  return (
+    <div 
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      className={`glass p-4 rounded-xl flex items-center gap-4 border-accent/20 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} hover-glow group`}
+    >
+      <div 
+        {...provided.dragHandleProps}
+        className="cursor-grab active:cursor-grabbing text-white/20 hover:text-accent transition-colors"
+      >
+        <LucideIcons.GripVertical className="w-5 h-5" />
+      </div>
+      <input
+        value={textInput.value}
+        onChange={e => textInput.handleChange(e.target.value)}
+        onBlur={textInput.handleBlur}
+        placeholder="Category/skills"
+        className="flex-1 bg-transparent border-b border-white/10 hover:border-white/30 focus:border-accent outline-none text-base tracking-wide text-white transition-colors pb-1 font-['Georgia']"
+      />
+      <button 
+        onClick={() => removeTagItem(blockId, item.id)} 
+        className="text-text-secondary hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+      >
+        <LucideIcons.X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  return JSON.stringify(prevProps.item) === JSON.stringify(nextProps.item) &&
+         prevProps.snapshot.isDragging === nextProps.snapshot.isDragging;
+});
+
+export default TagsBlockEditor;
