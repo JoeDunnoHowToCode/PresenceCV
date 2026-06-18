@@ -70,11 +70,18 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // ATS and Word Count states
-  const [targetRole, setTargetRole] = useState('');
+  const [targetRole, setTargetRole] = useState(data.profile.title || '');
   const [showAts, setShowAts] = useState(false);
   const [mockAtsResult, setMockAtsResult] = useState<{ score: number, matched: string[], missing: string[] } | null>(null);
 
-  const charCount = summaryInput.value.trim().length;
+  useEffect(() => {
+    if (!targetRole && data.profile.title) {
+      setTargetRole(data.profile.title);
+    }
+  }, [data.profile.title, targetRole]);
+
+  // 中文字一個算一字元，標點符號不算 (移除所有標點與空白)
+  const charCount = (summaryInput.value || '').replace(/[\p{P}\p{S}\s]/gu, '').length;
   let countColor = 'text-text-secondary';
   let countStatus = 'Type your summary';
   if (charCount > 0) {
@@ -93,9 +100,9 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   const handleAtsCheck = () => {
     if (!targetRole.trim()) return;
     const text = summaryInput.value.toLowerCase();
-    const roleKeywords = targetRole.toLowerCase().split(' ').filter(w => w.length > 2);
+    const roleKeywords = targetRole.toLowerCase().split(/\s+/).filter(w => w.trim().length > 0);
     // Add some generic strong keywords to check
-    const keywords = [...roleKeywords, 'experience', 'strategy', 'impact'];
+    const keywords = [...(roleKeywords.length ? roleKeywords : [targetRole.trim().toLowerCase()]), 'experience', 'strategy', 'impact'];
     const matched = keywords.filter(k => text.includes(k));
     const missing = keywords.filter(k => !text.includes(k));
     setMockAtsResult({ 
@@ -105,17 +112,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
     });
   };
 
-  const adjustHeight = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = '0px'; // Reset height to get true scrollHeight
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, []);
 
-  useEffect(() => {
-    adjustHeight();
-  }, [summaryInput.value, adjustHeight]);
 
   return (
     <div className="flex flex-col items-center text-center space-y-12 py-12 w-full">
@@ -158,7 +155,10 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         </button>
       </div>
 
-      <div className="max-w-4xl w-full px-4 flex flex-col items-center group relative">
+      <div 
+        className="max-w-4xl w-full px-4 flex flex-col items-center group relative cursor-text"
+        onClick={() => textareaRef.current?.focus()}
+      >
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-4 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
           <div className="flex items-center gap-1">
             {['left', 'center', 'right', 'justify'].map(align => (
@@ -241,21 +241,26 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           </div>
         </div>
 
-        <div className="relative transition-all duration-300 w-full">
-          <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary">"</span>
+        <div className="relative transition-all duration-300 w-full flex flex-col mt-4">
+          <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary pointer-events-none z-10">"</span>
+          
+          <div 
+            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] font-['Georgia'] w-full break-words"
+            style={{ textAlign: summaryAlign as any }}
+          >
+            {summaryInput.value + ' '}
+          </div>
+
           <textarea
             ref={textareaRef}
             value={summaryInput.value}
-            onChange={(e) => {
-              summaryInput.handleChange(e.target.value);
-              adjustHeight();
-            }}
+            onChange={(e) => summaryInput.handleChange(e.target.value)}
             onBlur={summaryInput.handleBlur}
-            className="italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none"
+            className="absolute inset-0 italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none overflow-hidden"
             style={{ textAlign: summaryAlign as any }}
             placeholder="A short summary about yourself..."
           />
-          <span className="absolute -right-8 bottom-0 text-3xl font-serif italic text-text-secondary">"</span>
+          <span className="absolute -right-8 bottom-0 text-3xl font-serif italic text-text-secondary pointer-events-none z-10">"</span>
         </div>
       </div>
     </div>
