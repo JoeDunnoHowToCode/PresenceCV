@@ -61,12 +61,61 @@ export function useDebouncedInput(
 }
 
 const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeContactItem, addContactItem, AVAILABLE_ICONS }: InfoEditorProps) => {
-  const summaryWidth = data.profile.summaryWidth || 100;
   const summaryAlign = data.profile.summaryAlign || 'center';
 
   const nameInput = useDebouncedInput(data.profile.name, (val) => updateProfile('name', val));
   const titleInput = useDebouncedInput(data.profile.title, (val) => updateProfile('title', val));
   const summaryInput = useDebouncedInput(data.profile.summary, (val) => updateProfile('summary', val));
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // ATS and Word Count states
+  const [targetRole, setTargetRole] = useState('');
+  const [showAts, setShowAts] = useState(false);
+  const [mockAtsResult, setMockAtsResult] = useState<{ score: number, matched: string[], missing: string[] } | null>(null);
+
+  const charCount = summaryInput.value.trim().length;
+  let countColor = 'text-text-secondary';
+  let countStatus = 'Type your summary';
+  if (charCount > 0) {
+    if (charCount < 150) {
+      countColor = 'text-yellow-400';
+      countStatus = 'Too short (optimal: 150-250)';
+    } else if (charCount >= 150 && charCount <= 250) {
+      countColor = 'text-green-400';
+      countStatus = 'Optimal length!';
+    } else {
+      countColor = 'text-yellow-400';
+      countStatus = 'A bit long (ATS prefers concise)';
+    }
+  }
+
+  const handleAtsCheck = () => {
+    if (!targetRole.trim()) return;
+    const text = summaryInput.value.toLowerCase();
+    const roleKeywords = targetRole.toLowerCase().split(' ').filter(w => w.length > 2);
+    // Add some generic strong keywords to check
+    const keywords = [...roleKeywords, 'experience', 'strategy', 'impact'];
+    const matched = keywords.filter(k => text.includes(k));
+    const missing = keywords.filter(k => !text.includes(k));
+    setMockAtsResult({ 
+      score: Math.round((matched.length / keywords.length) * 100) || 0, 
+      matched, 
+      missing 
+    });
+  };
+
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = '0px'; // Reset height to get true scrollHeight
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [summaryInput.value, adjustHeight]);
 
   return (
     <div className="flex flex-col items-center text-center space-y-12 py-12 w-full">
@@ -110,8 +159,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
       </div>
 
       <div className="max-w-4xl w-full px-4 flex flex-col items-center group relative">
-        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-4 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl">
-          <div className="flex items-center gap-1 border-r border-white/10 pr-4">
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-4 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
+          <div className="flex items-center gap-1">
             {['left', 'center', 'right', 'justify'].map(align => (
               <button
                 key={align}
@@ -126,25 +175,81 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3 pl-2">
-            <LucideIcons.Maximize2 className="w-4 h-4 text-text-secondary" />
-            <input
-              type="range"
-              min="40"
-              max="100"
-              value={summaryWidth}
-              onChange={(e) => updateProfile('summaryWidth', parseInt(e.target.value))}
-              className="w-24"
-            />
-            <span className="text-xs text-text-secondary w-8">{summaryWidth}%</span>
+
+          <div className="w-px h-6 bg-white/20 mx-1"></div>
+          
+          <div className={`flex items-center gap-1.5 text-xs font-medium tracking-wider ${countColor}`} title={countStatus}>
+             <LucideIcons.BarChart2 className="w-3.5 h-3.5" />
+             <span>{charCount} / 250</span>
+          </div>
+
+          <div className="w-px h-6 bg-white/20 mx-1"></div>
+
+          <div className="flex items-center gap-2 relative">
+            {!showAts ? (
+              <button onClick={() => setShowAts(true)} className="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/5">
+                <LucideIcons.Target className="w-3.5 h-3.5" />
+                <span>ATS Check</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 relative">
+                <input 
+                  type="text" 
+                  value={targetRole} 
+                  onChange={e => setTargetRole(e.target.value)} 
+                  onKeyDown={e => e.key === 'Enter' && handleAtsCheck()}
+                  placeholder="Target Role (e.g. Designer)" 
+                  className="bg-transparent text-xs text-white outline-none w-36 placeholder-white/40"
+                />
+                <button onClick={handleAtsCheck} className="text-accent hover:text-white transition-colors" title="Run ATS Analysis">
+                  <LucideIcons.Sparkles className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => { setShowAts(false); setMockAtsResult(null); }} className="text-white/40 hover:text-white/80 transition-colors border-l border-white/20 pl-2 ml-1" title="Close">
+                  <LucideIcons.X className="w-3 h-3" />
+                </button>
+
+                {mockAtsResult && (
+                  <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl p-4 shadow-2xl z-50 text-left">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <LucideIcons.Search className="w-3.5 h-3.5 text-accent" />
+                        ATS Match
+                      </span>
+                      <span className={`text-sm font-bold ${mockAtsResult.score > 70 ? 'text-green-400' : 'text-yellow-400'}`}>{mockAtsResult.score}%</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Found Keywords</div>
+                        <div className="text-xs font-medium text-green-400 flex flex-wrap gap-1">
+                          {mockAtsResult.matched.length ? mockAtsResult.matched.map(k => <span key={k} className="bg-green-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Missing / Suggested</div>
+                        <div className="text-xs font-medium text-red-400/80 flex flex-wrap gap-1">
+                          {mockAtsResult.missing.length ? mockAtsResult.missing.map(k => <span key={k} className="bg-red-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-white/10 text-[10px] text-white/40 italic">
+                      Note: This is a static mock. AI integration will be added in the next phase.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div style={{ width: `${summaryWidth}%` }} className="relative transition-all duration-300">
+        <div className="relative transition-all duration-300 w-full">
           <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary">"</span>
           <textarea
+            ref={textareaRef}
             value={summaryInput.value}
-            onChange={(e) => summaryInput.handleChange(e.target.value)}
+            onChange={(e) => {
+              summaryInput.handleChange(e.target.value);
+              adjustHeight();
+            }}
             onBlur={summaryInput.handleBlur}
             className="italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none"
             style={{ textAlign: summaryAlign as any }}
