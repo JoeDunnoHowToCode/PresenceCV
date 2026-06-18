@@ -1,6 +1,7 @@
 import React from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import * as LucideIcons from 'lucide-react';
+import isEqual from 'fast-deep-equal';
 import { ListItem } from '../../types';
 import { useDebouncedInput } from './InfoEditor';
 
@@ -65,7 +66,7 @@ const ListBlockEditor = React.memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.block) === JSON.stringify(nextProps.block);
+  return isEqual(prevProps.block, nextProps.block);
 });
 
 interface ListItemEditorProps {
@@ -137,7 +138,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
     </div>
   );
 }, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.item) === JSON.stringify(nextProps.item) &&
+  return isEqual(prevProps.item, nextProps.item) &&
          prevProps.snapshot.isDragging === nextProps.snapshot.isDragging;
 });
 

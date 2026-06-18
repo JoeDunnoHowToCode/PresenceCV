@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as LucideIcons from 'lucide-react';
+import isEqual from 'fast-deep-equal';
 import { ContactItem, ResumeData } from '../../types';
 
 interface InfoEditorProps {
@@ -155,7 +156,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
     </div>
   );
 }, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.data.profile) === JSON.stringify(nextProps.data.profile);
+  return isEqual(prevProps.data.profile, nextProps.data.profile);
 });
 
 const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeContactItem, AVAILABLE_ICONS }: any) => {
@@ -199,7 +200,7 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
     </div>
   );
 }, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.item) === JSON.stringify(nextProps.item);
+  return isEqual(prevProps.item, nextProps.item);
 });
 
 export default InfoEditor;
