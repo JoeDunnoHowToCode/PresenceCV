@@ -23,9 +23,13 @@ export function useDebouncedInput(
   const isDirty = useRef(false);
 
   useEffect(() => {
-    setValue(initialValue);
-    isDirty.current = false;
-  }, [initialValue]);
+    if (initialValue === value) {
+      isDirty.current = false;
+    }
+    if (!isDirty.current) {
+      setValue(initialValue);
+    }
+  }, [initialValue, value]);
 
   useEffect(() => {
     return () => {
@@ -157,7 +161,17 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 
       <div 
         className="max-w-4xl w-full px-4 flex flex-col items-center group relative cursor-text"
-        onClick={() => textareaRef.current?.focus()}
+        onClick={(e) => {
+          const textarea = textareaRef.current;
+          const target = e.target as HTMLElement;
+          if (textarea && target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+            textarea.focus();
+            if (target !== textarea) {
+              const len = textarea.value.length;
+              textarea.setSelectionRange(len, len);
+            }
+          }
+        }}
       >
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-4 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
           <div className="flex items-center gap-1">
