@@ -29,13 +29,14 @@
  * Depends on: firebase.ts, defaultResume.ts, personalBackup.ts, types.ts
  * Firestore: users/{uid}/userState/state (read + write)
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
 import { PERSONAL_TEMPLATE_BACKUP } from '../data/personalBackup';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { ParsedResumeSchema } from '../types';
 
 const APP_STORAGE_KEY = 'elegant_resume_app_data';
 const OLD_STORAGE_KEY = 'elegant_resume_data';
@@ -59,15 +60,15 @@ export function useResume() {
     return sanitized.substring(0, maxLength);
   };
 
-  const sanitizeObject = (obj: any): any => {
-    if (typeof obj === 'string') return sanitizeHtml(obj);
-    if (Array.isArray(obj)) return obj.map(sanitizeObject);
+  const sanitizeObject = <T>(obj: T): T => {
+    if (typeof obj === 'string') return sanitizeHtml(obj) as any;
+    if (Array.isArray(obj)) return (obj as any[]).map(sanitizeObject) as any;
     if (typeof obj === 'object' && obj !== null) {
       const newObj: any = {};
       for (const [key, value] of Object.entries(obj)) {
         newObj[key] = sanitizeObject(value);
       }
-      return newObj;
+      return newObj as T;
     }
     return obj;
   };
@@ -158,7 +159,7 @@ export function useResume() {
 
   const data = appState.profiles[appState.activeProfileId]?.data || DEFAULT_RESUME;
 
-  const updateProfileData = (updater: (prev: ResumeData) => ResumeData) => {
+  const updateProfileData = useCallback( (updater: (prev: ResumeData) => ResumeData) => {
     setAppState(prev => {
       const activeData = prev.profiles[prev.activeProfileId].data;
       const updatedData = sanitizeObject(updater(activeData));
@@ -173,23 +174,32 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
+
 
   const setData = updateProfileData;
 
-  const switchProfile = (id: string) => {
-    if (appState.profiles[id]) {
-      setAppState(prev => ({ ...prev, activeProfileId: id }));
-    }
-  };
+  const switchProfile = useCallback( (id: string) => {
+    setAppState(prev => {
+      if (prev.profiles[id]) {
+        return { ...prev, activeProfileId: id };
+      }
+      return prev;
+    });
+  }, []);
 
-  const importResumeProfile = (name: string, parsedData: any) => {
+
+
+  const importResumeProfile = useCallback( (name: string, rawData: unknown) => {
     const newId = `profile-${Date.now()}`;
     const mainData = appState.profiles['main']?.data || DEFAULT_RESUME;
     
+    // Apply Zod Validation
+    const parsedData = ParsedResumeSchema.parse(rawData);
+
     // Extract and format contact items
     const rawContactItems = parsedData.contactItems || [];
-    let formattedContactItems = rawContactItems.map((item: any) => {
+    let formattedContactItems = rawContactItems.map((item) => {
       let textVal = (item.text || '').trim();
       let finalUrl = (item.url || '').trim();
       
@@ -253,7 +263,7 @@ export function useResume() {
             id: bId,
             type: 'list',
             title: 'Experience',
-            items: parsedData.experience.map((i: any) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
+            items: parsedData.experience.map((i) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
         };
         newData.blockOrder.push(bId);
     }
@@ -264,7 +274,7 @@ export function useResume() {
             id: bId,
             type: 'list',
             title: 'Education',
-            items: parsedData.education.map((i: any) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
+            items: parsedData.education.map((i) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
         };
         newData.blockOrder.push(bId);
     }
@@ -275,7 +285,7 @@ export function useResume() {
             id: bId,
             type: 'tags',
             title: 'Skills',
-            items: parsedData.skills.map((t: string) => ({ id: Math.random().toString(36).substr(2, 9), text: t }))
+            items: parsedData.skills.map((t) => ({ id: Math.random().toString(36).substr(2, 9), text: t }))
         };
         newData.blockOrder.push(bId);
     }
@@ -287,9 +297,10 @@ export function useResume() {
             [newId]: { id: newId, name, data: sanitizeObject(newData) }
         }
     }));
-  };
+  }, [appState]);
 
-  const createProfile = (name: string) => {
+
+  const createProfile = useCallback( (name: string) => {
     // Clone the active profile, not strictly 'main', to prevent crashes if main was deleted
     const activeProfileData = appState.profiles[appState.activeProfileId]?.data || (Object.values(appState.profiles) as ProfileMeta[])[0]?.data || DEFAULT_RESUME;
     const newId = `profile-${Date.now()}`;
@@ -306,9 +317,10 @@ export function useResume() {
         [newId]: { id: newId, name, data: newData }
       }
     }));
-  };
+  }, [appState]);
 
-  const renameProfile = (id: string, newName: string) => {
+
+  const renameProfile = useCallback( (id: string, newName: string) => {
     setAppState(prev => ({
       ...prev,
       profiles: {
@@ -316,9 +328,10 @@ export function useResume() {
         [id]: { ...prev.profiles[id], name: newName }
       }
     }));
-  };
+  }, []);
 
-  const deleteProfile = (id: string) => {
+
+  const deleteProfile = useCallback( (id: string) => {
     setAppState(prev => {
       if (Object.keys(prev.profiles).length <= 1) return prev;
       const newProfiles = { ...prev.profiles };
@@ -329,20 +342,23 @@ export function useResume() {
         profiles: newProfiles
       };
     });
-  };
+  }, []);
 
-  const toggleAnimation = () => {
+
+  const toggleAnimation = useCallback( () => {
     setData(prev => ({ ...prev, enableAnimation: !prev.enableAnimation }));
-  };
+  }, []);
 
-  const updateProfile = (field: keyof ResumeData['profile'], value: any) => {
+
+  const updateProfile = useCallback( <K extends keyof ResumeData['profile']>(field: K, value: ResumeData['profile'][K]) => {
     setData(prev => ({
       ...prev,
       profile: { ...prev.profile, [field]: value }
     }));
-  };
+  }, []);
 
-  const addContactItem = () => {
+
+  const addContactItem = useCallback( () => {
     setData(prev => ({
       ...prev,
       profile: {
@@ -353,9 +369,10 @@ export function useResume() {
         ]
       }
     }));
-  };
+  }, []);
 
-  const updateContactItem = (id: string, field: string, value: string) => {
+
+  const updateContactItem = useCallback( (id: string, field: string, value: string) => {
     setData(prev => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/;
@@ -400,9 +417,10 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
 
-  const removeContactItem = (id: string) => {
+
+  const removeContactItem = useCallback( (id: string) => {
     setData(prev => ({
       ...prev,
       profile: {
@@ -410,22 +428,25 @@ export function useResume() {
         contactItems: prev.profile.contactItems?.filter(item => item.id !== id)
       }
     }));
-  };
+  }, []);
 
-  const updateThemeColor = (color: string) => {
+
+  const updateThemeColor = useCallback( (color: string) => {
     setData(prev => ({ ...prev, themeColor: color }));
-  };
+  }, []);
 
-  const reorderBlocks = (startIndex: number, endIndex: number) => {
+
+  const reorderBlocks = useCallback( (startIndex: number, endIndex: number) => {
     setData(prev => {
       const newOrder = Array.from(prev.blockOrder);
       const [removed] = newOrder.splice(startIndex, 1);
       newOrder.splice(endIndex, 0, removed);
       return { ...prev, blockOrder: newOrder };
     });
-  };
+  }, []);
 
-  const reorderListItems = (blockId: string, startIndex: number, endIndex: number) => {
+
+  const reorderListItems = useCallback( (blockId: string, startIndex: number, endIndex: number) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       if (!block || block.type !== 'list') return prev;
@@ -440,9 +461,10 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
 
-  const reorderTagItems = (blockId: string, startIndex: number, endIndex: number) => {
+
+  const reorderTagItems = useCallback( (blockId: string, startIndex: number, endIndex: number) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       if (!block || block.type !== 'tags') return prev;
@@ -457,9 +479,10 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
 
-  const updateBlockTitle = (blockId: string, title: string) => {
+
+  const updateBlockTitle = useCallback( (blockId: string, title: string) => {
     setData(prev => ({
       ...prev,
       blocks: {
@@ -467,9 +490,10 @@ export function useResume() {
         [blockId]: { ...prev.blocks[blockId], title }
       }
     }));
-  };
+  }, []);
 
-  const updateBlockIcon = (blockId: string, icon: string) => {
+
+  const updateBlockIcon = useCallback( (blockId: string, icon: string) => {
     setData(prev => ({
       ...prev,
       blocks: {
@@ -477,9 +501,10 @@ export function useResume() {
         [blockId]: { ...prev.blocks[blockId], icon }
       }
     }));
-  };
+  }, []);
 
-  const addListItem = (blockId: string) => {
+
+  const addListItem = useCallback( (blockId: string) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       const newItem = { id: Math.random().toString(36).substr(2, 9), title: '', subtitle: '', period: '', description: '' };
@@ -491,9 +516,10 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
 
-  const updateListItem = (blockId: string, itemId: string, field: string, value: string) => {
+
+  const updateListItem = useCallback( (blockId: string, itemId: string, field: string, value: string) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       return {
@@ -502,14 +528,15 @@ export function useResume() {
           ...prev.blocks,
           [blockId]: {
             ...block,
-            items: block.items.map((item: any) => item.id === itemId ? { ...item, [field]: value } : item)
+            items: (block.items as import('../types').ListItem[]).map(item => item.id === itemId ? { ...item, [field]: value } : item)
           }
         }
       };
     });
-  };
+  }, []);
 
-  const removeListItem = (blockId: string, itemId: string) => {
+
+  const removeListItem = useCallback( (blockId: string, itemId: string) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       return {
@@ -518,14 +545,15 @@ export function useResume() {
           ...prev.blocks,
           [blockId]: {
             ...block,
-            items: block.items.filter((item: any) => item.id !== itemId)
+            items: (block.items as import('../types').ListItem[]).filter(item => item.id !== itemId)
           }
         }
       };
     });
-  };
+  }, []);
 
-  const addTagItem = (blockId: string, text: string) => {
+
+  const addTagItem = useCallback( (blockId: string, text: string) => {
     if (!text.trim()) return;
     setData(prev => {
       const block = prev.blocks[blockId];
@@ -538,9 +566,10 @@ export function useResume() {
         }
       };
     });
-  };
+  }, []);
 
-  const removeTagItem = (blockId: string, itemId: string) => {
+
+  const removeTagItem = useCallback( (blockId: string, itemId: string) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       return {
@@ -549,14 +578,15 @@ export function useResume() {
           ...prev.blocks,
           [blockId]: {
             ...block,
-            items: block.items.filter((item: any) => item.id !== itemId)
+            items: (block.items as import('../types').TagItem[]).filter(item => item.id !== itemId)
           }
         }
       };
     });
-  };
+  }, []);
 
-  const updateTagItem = (blockId: string, itemId: string, text: string) => {
+
+  const updateTagItem = useCallback( (blockId: string, itemId: string, text: string) => {
     setData(prev => {
       const block = prev.blocks[blockId];
       return {
@@ -565,14 +595,15 @@ export function useResume() {
           ...prev.blocks,
           [blockId]: {
             ...block,
-            items: block.items.map((item: any) => item.id === itemId ? { ...item, text } : item)
+            items: (block.items as import('../types').TagItem[]).map(item => item.id === itemId ? { ...item, text } : item)
           }
         }
       };
     });
-  };
+  }, []);
 
-  const addBlock = (type: 'list' | 'tags') => {
+
+  const addBlock = useCallback( (type: 'list' | 'tags') => {
     const id = `block-${Date.now()}`;
     setData(prev => ({
       ...prev,
@@ -588,9 +619,10 @@ export function useResume() {
       blockOrder: [...prev.blockOrder, id]
     }));
     return id;
-  };
+  }, []);
 
-  const removeBlock = (blockId: string) => {
+
+  const removeBlock = useCallback( (blockId: string) => {
     setData(prev => {
       const newBlocks = { ...prev.blocks };
       delete newBlocks[blockId];
@@ -600,9 +632,10 @@ export function useResume() {
         blockOrder: prev.blockOrder.filter(id => id !== blockId)
       };
     });
-  };
+  }, []);
 
-  const resetToDefault = () => {
+
+  const resetToDefault = useCallback( () => {
     localStorage.removeItem(APP_STORAGE_KEY);
     localStorage.removeItem(OLD_STORAGE_KEY);
     setAppState({
@@ -611,9 +644,10 @@ export function useResume() {
         'main': { id: 'main', name: 'Main profile', data: DEFAULT_RESUME }
       }
     });
-  };
+  }, []);
 
-  const loadPersonalBackup = () => {
+
+  const loadPersonalBackup = useCallback( () => {
     const backupId = `backup-${Date.now()}`;
     setAppState(prev => ({
       ...prev,
@@ -623,7 +657,8 @@ export function useResume() {
         [backupId]: { id: backupId, name: 'Personal Backup', data: PERSONAL_TEMPLATE_BACKUP }
       }
     }));
-  };
+  }, []);
+
 
   return {
     loading,
