@@ -58,6 +58,9 @@ VITE_FIREBASE_DATABASE_ID=                    # Optional, for non-default Firest
 
 # AI Features (optional — enables AI resume import)
 GEMINI_API_KEY=your_gemini_api_key
+
+# Security & Admin Configuration (optional)
+VITE_ADMIN_UID=your_firebase_user_uid         # UID of the user who gains admin privileges (bypassing upload limits)
 ```
 
 > **Note:** Frontend-accessible variables must be prefixed with `VITE_` (Vite requirement). The `GEMINI_API_KEY` is used server-side only and does NOT need the prefix.
@@ -77,6 +80,18 @@ npm run build
 npm start
 ```
 
+### 5. Running Tests
+
+To run the unit and security rules tests:
+
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once
+npx vitest run
+```
+
 ---
 
 ## 🏗️ Tech Stack
@@ -90,6 +105,7 @@ npm start
 | Dev Server | Express 4 + Vite middleware |
 | AI | Google Gemini (@google/genai) |
 | Backend | Firebase Authentication (Google OAuth) + Firestore |
+| Testing | Vitest, React Testing Library, jsdom, @firebase/rules-unit-testing |
 | Deployment | Vercel (SPA + Serverless Functions) |
 
 ---
@@ -101,6 +117,7 @@ PresenceCV/
 ├── index.html              # SPA entry point
 ├── server.ts               # Express dev server + API proxy
 ├── vite.config.ts           # Vite configuration
+├── vitest.config.ts         # Vitest configuration
 ├── tsconfig.json            # TypeScript configuration
 ├── firebase.json            # Firebase config
 ├── firestore.rules          # Firestore security rules
@@ -114,9 +131,18 @@ PresenceCV/
 ├── public/
 │   └── favicon.png          # Monogram CV logo & favicon
 │
+├── tests/                   # Vitest unit & security rules tests
+│   ├── EditPage.test.tsx
+│   ├── ImportResumeModal.test.tsx
+│   ├── firestore.rules.test.ts
+│   ├── performance.test.tsx
+│   ├── rateLimiter.test.ts
+│   └── useResume.test.ts
+│
 └── src/
     ├── main.tsx             # React DOM entry
     ├── App.tsx              # Root component (routing + auth)
+    ├── setupTests.ts        # Vitest setup (jest-dom, whatwg-fetch)
     ├── types.ts             # Shared TypeScript interfaces
     ├── index.css            # Global styles + print layout
     │
