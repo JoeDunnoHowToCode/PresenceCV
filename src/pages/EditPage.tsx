@@ -26,6 +26,7 @@ export default function EditPage() {
   const {
     data,
     appState,
+    loading,
     switchProfile,
     importResumeProfile,
     createProfile,
@@ -277,6 +278,21 @@ export default function EditPage() {
       opacity: 0
     })
   };
+
+  if (loading) {
+    return (
+      <div 
+        className="min-h-screen relative flex items-center justify-center bg-bg" 
+        style={{ '--theme-accent': THEME_COLORS[0] } as CSSProperties}
+      >
+        <div className="depth-bg animated" />
+        <div className="glass p-8 rounded-2xl flex flex-col items-center gap-4 border border-white/10 shadow-2xl">
+          <LucideIcons.Loader2 className="w-8 h-8 animate-spin text-accent" />
+          <p className="text-text-secondary text-xs uppercase tracking-widest font-medium">Loading your profiles...</p>
+        </div>
+      </div>
+    );
+  }
 
   const activeBlock = data.blocks[activeTab];
 
@@ -779,6 +795,7 @@ export default function EditPage() {
                 />
                 
                 <InfoEditor 
+                  key={appState.activeProfileId}
                   data={data}
                   updateProfile={updateProfile}
                   updateContactItem={updateContactItem}

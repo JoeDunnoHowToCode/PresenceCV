@@ -38,6 +38,38 @@
   .depth-bg.animated {
     animation: smokeFlow 15s ease-in-out infinite alternate;
   }
+
+  /* Glassmorphism Range Sliders */
+  input[type="range"] {
+    -webkit-appearance: none;
+    @apply h-1.5 rounded-full cursor-pointer outline-none transition-all;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  input[type="range"]:focus {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply w-4 h-4 rounded-full border border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform;
+    background: var(--theme-accent, #e5e5e5);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    @apply scale-125 border-white shadow-[0_0_15px_var(--theme-accent)];
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    @apply w-4 h-4 rounded-full border border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform appearance-none;
+    background: var(--theme-accent, #e5e5e5);
+  }
+
+  input[type="range"]::-moz-range-thumb:hover {
+    @apply scale-125 border-white shadow-[0_0_15px_var(--theme-accent)];
+  }
 }
 
 @keyframes smokeFlow {

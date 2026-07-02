@@ -82,7 +82,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   // ATS and Word Count states
   const [targetRole, setTargetRole] = useState(data.profile.title || '');
   const [showAts, setShowAts] = useState(false);
-  const [mockAtsResult, setMockAtsResult] = useState<{ score: number, matched: string[], missing: string[] } | null>(null);
+  const [isAtsLoading, setIsAtsLoading] = useState(false);
+  const [atsResult, setAtsResult] = useState<{ score: number, matchedKeywords: string[], missingKeywords: string[], aiSuggestion: string } | null>(null);
 
   useEffect(() => {
     if (!targetRole && data.profile.title) {
@@ -107,19 +108,77 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
     }
   }
 
-  const handleAtsCheck = () => {
+  const handleAtsCheck = async () => {
     if (!targetRole.trim()) return;
-    const text = summaryInput.localValue.toLowerCase();
-    const roleKeywords = targetRole.toLowerCase().split(/\s+/).filter(w => w.trim().length > 0);
-    // Add some generic strong keywords to check
-    const keywords = [...(roleKeywords.length ? roleKeywords : [targetRole.trim().toLowerCase()]), 'experience', 'strategy', 'impact'];
-    const matched = keywords.filter(k => text.includes(k));
-    const missing = keywords.filter(k => !text.includes(k));
-    setMockAtsResult({ 
-      score: Math.round((matched.length / keywords.length) * 100) || 0, 
-      matched, 
-      missing 
-    });
+    
+    setIsAtsLoading(true);
+    try {
+      let parsedData = null;
+      try {
+        const response = await fetch('/api/ats-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            resumeData: data,
+            jobDescription: targetRole
+          })
+        });
+
+        if (response.status === 412 || response.status >= 500) {
+          throw new Error("SERVER_UNAVAILABLE_OR_NO_KEY");
+        } 
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        parsedData = await response.json();
+      } catch (backendError: any) {
+        if (backendError.message !== "SERVER_UNAVAILABLE_OR_NO_KEY") {
+          throw backendError;
+        }
+
+        console.log("Backend unable to process, routing securely via AI Studio frontend proxy...");
+        
+        const { GoogleGenAI, Type } = await import("@google/genai");
+        const { ATS_EVALUATION_SYSTEM_PROMPT } = await import("../../lib/aiPrompt");
+
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
+        const result = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite-preview",
+          contents: [
+            { text: ATS_EVALUATION_SYSTEM_PROMPT },
+            { text: `Resume Data: ${JSON.stringify(data)}\n\nJob Description: ${targetRole}` }
+          ],
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                score: { type: Type.INTEGER },
+                matchedKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                aiSuggestion: { type: Type.STRING },
+              },
+            },
+          },
+        });
+
+        const jsonStr = result.text?.trim();
+        if (!jsonStr) throw new Error("Empty response from AI");
+
+        parsedData = JSON.parse(jsonStr);
+      }
+      
+      setAtsResult(parsedData);
+    } catch (err: any) {
+      console.error("ATS Check Error:", err);
+      alert(err.message || "Failed to perform ATS check");
+    } finally {
+      setIsAtsLoading(false);
+    }
   };
 
 
@@ -172,7 +231,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         onClick={(e) => {
           const textarea = textareaRef.current;
           const target = e.target as HTMLElement;
-          if (textarea && target.tagName !== 'BUTTON' && target.tagName !== 'INPUT') {
+          if (textarea && target.tagName !== 'BUTTON' && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
             textarea.focus();
             if (target !== textarea) {
               const len = textarea.value.length;
@@ -214,47 +273,69 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                 <span>ATS Check</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 relative">
-                <input 
-                  type="text" 
+              <div className="flex items-center gap-2 bg-[#1a1a1a] border border-white/10 rounded-xl p-3 relative flex-col w-[350px] shadow-2xl z-50">
+                <div className="flex w-full justify-between items-center mb-1">
+                  <span className="text-xs font-semibold text-white/80 flex items-center gap-1.5"><LucideIcons.FileText className="w-3.5 h-3.5 text-accent" /> Job Description</span>
+                  <button onClick={() => { setShowAts(false); setAtsResult(null); }} className="text-white/40 hover:text-white/80 transition-colors p-1" title="Close">
+                    <LucideIcons.X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <textarea 
                   value={targetRole} 
                   onChange={e => setTargetRole(e.target.value)} 
-                  onKeyDown={e => e.key === 'Enter' && handleAtsCheck()}
-                  placeholder="Target Role (e.g. Designer)" 
-                  className="bg-transparent text-xs text-white outline-none w-36 placeholder-white/40"
+                  placeholder="Paste the full job description here (max 5000 chars)..." 
+                  maxLength={5000}
+                  className="bg-black/20 text-xs text-white outline-none w-full h-24 p-2 rounded-lg placeholder-white/30 resize-none custom-scrollbar"
                 />
-                <button onClick={handleAtsCheck} className="text-accent hover:text-white transition-colors" title="Run ATS Analysis">
-                  <LucideIcons.Sparkles className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => { setShowAts(false); setMockAtsResult(null); }} className="text-white/40 hover:text-white/80 transition-colors border-l border-white/20 pl-2 ml-1" title="Close">
-                  <LucideIcons.X className="w-3 h-3" />
+                <button 
+                  onClick={handleAtsCheck} 
+                  disabled={isAtsLoading || !targetRole.trim()}
+                  className="mt-1 w-full flex items-center justify-center gap-2 bg-accent/20 hover:bg-accent/40 text-accent hover:text-white transition-colors py-1.5 rounded-lg text-xs font-medium disabled:opacity-50"
+                >
+                  {isAtsLoading ? <LucideIcons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LucideIcons.Sparkles className="w-3.5 h-3.5" />}
+                  {isAtsLoading ? "Analyzing..." : "Analyze ATS Match"}
                 </button>
 
-                {mockAtsResult && (
-                  <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl p-4 shadow-2xl z-50 text-left">
+                {atsResult && (
+                  <div className="w-full mt-3 pt-3 border-t border-white/10 text-left">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-medium text-white uppercase tracking-wider flex items-center gap-1.5">
                         <LucideIcons.Search className="w-3.5 h-3.5 text-accent" />
                         ATS Match
                       </span>
-                      <span className={`text-sm font-bold ${mockAtsResult.score > 70 ? 'text-green-400' : 'text-yellow-400'}`}>{mockAtsResult.score}%</span>
+                      <span className={`text-sm font-bold ${atsResult.score > 70 ? 'text-green-400' : 'text-yellow-400'}`}>{atsResult.score}%</span>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
                       <div>
                         <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Found Keywords</div>
-                        <div className="text-xs font-medium text-green-400 flex flex-wrap gap-1">
-                          {mockAtsResult.matched.length ? mockAtsResult.matched.map(k => <span key={k} className="bg-green-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
+                        <div className="text-[11px] font-medium text-green-400 flex flex-wrap gap-1">
+                          {atsResult.matchedKeywords?.length ? atsResult.matchedKeywords.map(k => <span key={k} className="bg-green-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Missing / Suggested</div>
-                        <div className="text-xs font-medium text-red-400/80 flex flex-wrap gap-1">
-                          {mockAtsResult.missing.length ? mockAtsResult.missing.map(k => <span key={k} className="bg-red-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
+                        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Missing Keywords</div>
+                        <div className="text-[11px] font-medium text-red-400/80 flex flex-wrap gap-1">
+                          {atsResult.missingKeywords?.length ? atsResult.missingKeywords.map(k => <span key={k} className="bg-red-500/10 px-1.5 py-0.5 rounded">{k}</span>) : 'None'}
                         </div>
                       </div>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-white/10 text-[10px] text-white/40 italic">
-                      Note: This is a static mock. AI integration will be added in the next phase.
+                      {atsResult.aiSuggestion && (
+                        <div className="bg-accent/5 p-2.5 rounded-lg border border-accent/10">
+                          <div className="text-[10px] text-accent uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1">
+                            <LucideIcons.Wand2 className="w-3 h-3" />
+                            AI Suggested Summary
+                          </div>
+                          <p className="text-xs text-white/90 leading-relaxed italic mb-2">"{atsResult.aiSuggestion}"</p>
+                          <button 
+                            onClick={() => {
+                              updateProfile('summary', atsResult.aiSuggestion);
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 bg-accent text-white py-1.5 rounded-md text-[11px] font-medium hover:bg-accent/90 transition-colors"
+                          >
+                            <LucideIcons.Check className="w-3 h-3" />
+                            Apply Suggestion
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

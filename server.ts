@@ -29,6 +29,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { RESUME_PARSER_SYSTEM_PROMPT, ATS_EVALUATION_SYSTEM_PROMPT } from './src/lib/aiPrompt';
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -75,23 +76,9 @@ async function startServer() {
 
       const ai = new GoogleGenAI({ apiKey });
 
-      const prompt = `You are an expert HR system.
-Extract the person's resume details from the provided document perfectly.
-Structure the text correctly and return ONLY the JSON matching the required schema.
-Ensure all names, titles, locations, emails, and summaries are accurate.
-If a section isn't found, leave the array empty or the string null. 
-Do not hallucinate data.
-
-IMPORTANT FOR SKILLS: 
-Group related skills together intelligently into categories based on ecosystems or domains.
-Look for programming languages, frameworks, AI tools, etc., and group them logically.
-Format each skill entry STRICTLY as "Category: Skill1, Skill2, Skill3".
-For example: "Python: Django, Flask, OpenCV" or "Frontend: React, TypeScript, Tailwind".
-Do not just output single disconnected skills if they can be categorized.`;
-
       const result = await ai.models.generateContent({
         model: "gemini-3.1-flash-lite-preview",
-        contents: [{ text: prompt }, { inlineData: { data: base64Data, mimeType: fileType } }],
+        contents: [{ text: RESUME_PARSER_SYSTEM_PROMPT }, { inlineData: { data: base64Data, mimeType: fileType } }],
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -149,6 +136,60 @@ Do not just output single disconnected skills if they can be categorized.`;
     } catch (error: any) {
       console.error("Secure API Parse Error:", error);
       res.status(500).json({ error: "Failed to parse resume" });
+    }
+  });
+
+  // ATS check API route
+  app.post("/api/ats-check", async (req, res) => {
+    try {
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      if (globalRateLimiter.isRateLimited(ip as string)) {
+        return res.status(429).json({ error: "Too many requests from this IP. Please try again later." });
+      }
+
+      const { resumeData, jobDescription } = req.body;
+
+      if (!resumeData || !jobDescription) {
+        return res.status(400).json({ error: "Missing resumeData or jobDescription" });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      const isPlaceholderKey = !apiKey || apiKey.includes(' ') || apiKey.length < 20;
+
+      if (isPlaceholderKey) {
+        return res.status(412).json({ error: "NO_SERVER_KEY" });
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite-preview",
+        contents: [
+          { text: ATS_EVALUATION_SYSTEM_PROMPT },
+          { text: `Resume Data: ${JSON.stringify(resumeData)}\n\nJob Description: ${jobDescription}` }
+        ],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              score: { type: Type.INTEGER },
+              matchedKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+              missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+              aiSuggestion: { type: Type.STRING },
+            },
+          },
+        },
+      });
+
+      const jsonStr = result.text?.trim();
+      if (!jsonStr) throw new Error("Empty response from AI");
+
+      const parsedResult = JSON.parse(jsonStr);
+      res.json(parsedResult);
+    } catch (error: any) {
+      console.error("Secure API ATS Check Error:", error);
+      res.status(500).json({ error: "Failed to perform ATS check" });
     }
   });
 

@@ -16,6 +16,8 @@
  * via the useResume hook. The AppState wrapper (in useResume.ts) holds
  * multiple named profiles, each containing a ResumeData.
  */
+import { z } from 'zod';
+
 export interface ContactItem {
   id: string;
   icon: string;
@@ -54,7 +56,7 @@ export interface Block {
   title: string;
   icon?: string;
   type: 'list' | 'tags';
-  items: any[]; // ListItem[] | TagItem[]
+  items: (ListItem | TagItem)[];
 }
 
 export interface ResumeData {
@@ -66,3 +68,33 @@ export interface ResumeData {
   liveId?: string;
   updateToken?: string;
 }
+
+export const ParsedResumeSchema = z.object({
+  profile: z.object({
+    name: z.string(),
+    title: z.string().catch(''),
+    location: z.string().catch(''),
+    email: z.string().catch(''),
+    summary: z.string().catch(''),
+  }).catch({ name: "Unknown" }),
+  contactItems: z.array(z.object({
+    icon: z.string().catch('Link'),
+    text: z.string().catch(''),
+    url: z.string().catch('#')
+  })).catch([]),
+  experience: z.array(z.object({
+    title: z.string().catch(''),
+    subtitle: z.string().catch(''),
+    period: z.string().catch(''),
+    description: z.string().catch('')
+  })).catch([]),
+  education: z.array(z.object({
+    title: z.string().catch(''),
+    subtitle: z.string().catch(''),
+    period: z.string().catch(''),
+    description: z.string().catch('')
+  })).catch([]),
+  skills: z.array(z.string()).catch([]),
+});
+
+export type ParsedResumeData = z.infer<typeof ParsedResumeSchema>;
