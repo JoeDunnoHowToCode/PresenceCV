@@ -85,11 +85,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   const [isAtsLoading, setIsAtsLoading] = useState(false);
   const [atsResult, setAtsResult] = useState<{ score: number, matchedKeywords: string[], missingKeywords: string[], aiSuggestion: string } | null>(null);
 
-  useEffect(() => {
-    if (!targetRole && data.profile.title) {
-      setTargetRole(data.profile.title);
-    }
-  }, [data.profile.title, targetRole]);
+
 
   // 中文字一個算一字元，標點符號不算 (移除所有標點與空白)
   const charCount = (summaryInput.localValue || '').replace(/[\p{P}\p{S}\s]/gu, '').length;
