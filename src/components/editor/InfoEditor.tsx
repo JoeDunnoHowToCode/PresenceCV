@@ -353,12 +353,12 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                       <span className="text-[10px] text-white/30 font-medium">({targetRole.length}/5000)</span>
                     </div>
                     <p className="text-[11px] text-white/40 leading-relaxed bg-white/5 p-2.5 rounded-lg border border-white/5">
-                      💡 <strong>提示：</strong>請貼上目標職稱與完整的**工作要求 (Job Description / Qualifications)**，越完整 AI 提取關鍵字與改寫的精準度越高！若只輸入單個字詞（例如 "sales"），AI 可能會因缺乏上下文而無法萃取關鍵字。
+                      💡 <strong>Tip:</strong> Please paste the target job title and full **Job Description / Qualifications**. The more complete it is, the more accurate the AI's keyword matching and rewrite suggestions will be. Single words (e.g., "sales") lack context and may not yield accurate results.
                     </p>
                     <textarea 
                       value={targetRole} 
                       onChange={e => setTargetRole(e.target.value)} 
-                      placeholder="貼上完整的職缺說明、必要技能與工作條件（上限 5000 字）..." 
+                      placeholder="Paste the full job description, requirements, and qualifications (max 5000 chars)..." 
                       maxLength={5000}
                       className="w-full h-40 bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-accent transition-colors placeholder-white/20 resize-none custom-scrollbar"
                     />
@@ -368,7 +368,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                       className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white font-medium py-3 rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(var(--theme-accent-rgb),0.2)] hover:shadow-[0_0_25px_rgba(var(--theme-accent-rgb),0.3)] disabled:opacity-30 disabled:pointer-events-none"
                     >
                       {isAtsLoading ? <LucideIcons.Loader2 className="w-4 h-4 animate-spin" /> : <LucideIcons.Sparkles className="w-4 h-4" />}
-                      {isAtsLoading ? "AI 分析中..." : "開始 ATS 契合度分析"}
+                      {isAtsLoading ? "Analyzing..." : "Analyze ATS Match"}
                     </button>
                   </div>
 
@@ -396,7 +396,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                           <div className="text-[11px] font-medium text-green-400 flex flex-wrap gap-1.5">
                             {atsResult.matchedKeywords?.length ? atsResult.matchedKeywords.map(k => (
                               <span key={k} className="bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-lg">{k}</span>
-                            )) : <span className="text-white/30 italic text-xs">無匹配的關鍵字</span>}
+                            )) : <span className="text-white/30 italic text-xs">No matched keywords.</span>}
                           </div>
                         </div>
 
@@ -408,7 +408,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                           <div className="text-[11px] font-medium text-red-400/80 flex flex-wrap gap-1.5">
                             {atsResult.missingKeywords?.length ? atsResult.missingKeywords.map(k => (
                               <span key={k} className="bg-red-500/10 border border-red-500/20 px-2 py-1 rounded-lg">{k}</span>
-                            )) : <span className="text-white/30 italic text-xs">無漏失的關鍵字</span>}
+                            )) : <span className="text-white/30 italic text-xs">No missing keywords.</span>}
                           </div>
                         </div>
 
@@ -428,7 +428,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
                               className="w-full flex items-center justify-center gap-1.5 bg-accent hover:bg-accent/90 text-bg py-3 rounded-xl text-xs font-bold transition-all shadow-[0_4px_12px_rgba(var(--theme-accent-rgb),0.2)]"
                             >
                               <LucideIcons.Check className="w-4 h-4" />
-                              Apply Suggestion (一鍵套用自我介紹)
+                              Apply Suggestion
                             </button>
                           </div>
                         )}
