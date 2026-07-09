@@ -144,7 +144,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 
         const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
         const result = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-3.1-flash-lite-preview",
           contents: [
             { text: ATS_EVALUATION_SYSTEM_PROMPT },
             { text: `Resume Data: ${JSON.stringify(data)}\n\nJob Description: ${targetRole}` }
