@@ -65,7 +65,7 @@ export default async function handler(req: any, res: any) {
     const ai = new GoogleGenAI({ apiKey });
 
     const result = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.5-flash",
       contents: [{ text: RESUME_PARSER_SYSTEM_PROMPT }, { inlineData: { data: base64Data, mimeType: fileType } }],
       config: {
         responseMimeType: "application/json",
@@ -81,7 +81,7 @@ export default async function handler(req: any, res: any) {
                 email: { type: Type.STRING },
                 summary: { type: Type.STRING },
               },
-              required: ["name"],
+              required: ["name", "title", "location", "email", "summary"],
             },
             contactItems: {
               type: Type.ARRAY,
@@ -91,7 +91,8 @@ export default async function handler(req: any, res: any) {
                   icon: { type: Type.STRING, description: "One of: Mail, Phone, Globe, Linkedin, Github, Twitter" },
                   text: { type: Type.STRING, description: "Display text, e.g., email address, phone number, or handle" },
                   url: { type: Type.STRING, description: "The actual URL or mailto:/tel: link. If it's an email, prefix with mailto:. If it's a phone, prefix with tel:" }
-                }
+                },
+                required: ["icon", "text", "url"]
               }
             },
             experience: {
@@ -104,6 +105,7 @@ export default async function handler(req: any, res: any) {
                   period: { type: Type.STRING },
                   description: { type: Type.STRING },
                 },
+                required: ["title", "subtitle", "period", "description"]
               },
             },
             education: {
@@ -116,6 +118,7 @@ export default async function handler(req: any, res: any) {
                   period: { type: Type.STRING },
                   description: { type: Type.STRING },
                 },
+                required: ["title", "subtitle", "period", "description"]
               },
             },
             skills: {
@@ -123,6 +126,7 @@ export default async function handler(req: any, res: any) {
               items: { type: Type.STRING },
             },
           },
+          required: ["profile", "contactItems", "experience", "education", "skills"]
         },
       },
     });

@@ -139,7 +139,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         
         const result = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite-preview",
+          model: "gemini-2.5-flash",
           contents: [
             { text: RESUME_PARSER_SYSTEM_PROMPT },
             {
@@ -163,7 +163,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                     email: { type: Type.STRING },
                     summary: { type: Type.STRING },
                   },
-                  required: ["name"],
+                  required: ["name", "title", "location", "email", "summary"],
                 },
                 contactItems: {
                   type: Type.ARRAY,
@@ -173,7 +173,8 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                       icon: { type: Type.STRING, description: "One of: Mail, Phone, Globe, Linkedin, Github, Twitter" },
                       text: { type: Type.STRING, description: "Display text, e.g., email address, phone number, or handle" },
                       url: { type: Type.STRING, description: "The actual URL or mailto:/tel: link. If it's an email, prefix with mailto:. If it's a phone, prefix with tel:" }
-                    }
+                    },
+                    required: ["icon", "text", "url"]
                   }
                 },
                 experience: {
@@ -186,6 +187,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                       period: { type: Type.STRING },
                       description: { type: Type.STRING },
                     },
+                    required: ["title", "subtitle", "period", "description"]
                   },
                 },
                 education: {
@@ -198,6 +200,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                       period: { type: Type.STRING },
                       description: { type: Type.STRING },
                     },
+                    required: ["title", "subtitle", "period", "description"]
                   },
                 },
                 skills: {
@@ -205,6 +208,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                   items: { type: Type.STRING },
                 },
               },
+              required: ["profile", "contactItems", "experience", "education", "skills"]
             },
           },
         });
