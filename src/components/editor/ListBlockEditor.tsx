@@ -27,9 +27,10 @@ const ListBlockEditor = React.memo(({
     <div className="py-8">
       <div className="flex items-center justify-between mb-12">
         <input
-          value={titleInput.value}
-          onChange={e => titleInput.handleChange(e.target.value)}
-          onBlur={titleInput.handleBlur}
+          ref={titleInput.ref as React.Ref<HTMLInputElement>}
+          defaultValue={titleInput.defaultValue}
+          onChange={titleInput.onChange}
+          onBlur={titleInput.onBlur}
           className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
           placeholder="Section Title"
         />
@@ -104,32 +105,36 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
       </button>
       <div className="pl-8">
         <input
-          value={titleInput.value}
-          onChange={e => titleInput.handleChange(e.target.value)}
-          onBlur={titleInput.handleBlur}
+          ref={titleInput.ref as React.Ref<HTMLInputElement>}
+          defaultValue={titleInput.defaultValue}
+          onChange={titleInput.onChange}
+          onBlur={titleInput.onBlur}
           className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none font-serif text-2xl pb-1 transition-colors hover-glow"
           placeholder="Role / Degree"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <input
-            value={subtitleInput.value}
-            onChange={e => subtitleInput.handleChange(e.target.value)}
-            onBlur={subtitleInput.handleBlur}
+            ref={subtitleInput.ref as React.Ref<HTMLInputElement>}
+            defaultValue={subtitleInput.defaultValue}
+            onChange={subtitleInput.onChange}
+            onBlur={subtitleInput.onBlur}
             className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 transition-colors hover-glow-text"
             placeholder="Company / Institution"
           />
           <input
-            value={periodInput.value}
-            onChange={e => periodInput.handleChange(e.target.value)}
-            onBlur={periodInput.handleBlur}
+            ref={periodInput.ref as React.Ref<HTMLInputElement>}
+            defaultValue={periodInput.defaultValue}
+            onChange={periodInput.onChange}
+            onBlur={periodInput.onBlur}
             className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 transition-colors hover-glow-text"
             placeholder="Period (e.g. 2021 - Present)"
           />
         </div>
         <textarea
-          value={descInput.value}
-          onChange={e => descInput.handleChange(e.target.value)}
-          onBlur={descInput.handleBlur}
+          ref={descInput.ref as React.Ref<HTMLTextAreaElement>}
+          defaultValue={descInput.defaultValue}
+          onChange={descInput.onChange}
+          onBlur={descInput.onBlur}
           className="w-full mt-4 bg-white/5 border border-white/10 rounded-xl p-4 text-sm focus:border-accent/50 outline-none resize-none transition-colors hover-glow-text"
           rows={3}
           placeholder="Description..."

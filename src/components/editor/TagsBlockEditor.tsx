@@ -35,9 +35,10 @@ const TagsBlockEditor = React.memo(({
     <div className="py-8">
       <div className="flex items-center justify-between mb-12">
         <input
-          value={titleInput.value}
-          onChange={e => titleInput.handleChange(e.target.value)}
-          onBlur={titleInput.handleBlur}
+          ref={titleInput.ref as React.Ref<HTMLInputElement>}
+          defaultValue={titleInput.defaultValue}
+          onChange={titleInput.onChange}
+          onBlur={titleInput.onBlur}
           className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
           placeholder="Section Title"
         />
@@ -105,9 +106,10 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
         <LucideIcons.GripVertical className="w-5 h-5" />
       </div>
       <input
-        value={textInput.value}
-        onChange={e => textInput.handleChange(e.target.value)}
-        onBlur={textInput.handleBlur}
+        ref={textInput.ref as React.Ref<HTMLInputElement>}
+        defaultValue={textInput.defaultValue}
+        onChange={textInput.onChange}
+        onBlur={textInput.onBlur}
         placeholder="Category/skills"
         className="flex-1 bg-transparent border-b border-white/10 hover:border-white/30 focus:border-accent outline-none text-base tracking-wide text-white transition-colors pb-1 font-['Georgia']"
       />
