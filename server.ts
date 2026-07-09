@@ -95,6 +95,17 @@ async function startServer() {
                 },
                 required: ["name"],
               },
+              contactItems: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    icon: { type: Type.STRING, description: "One of: Mail, Phone, Globe, Linkedin, Github, Twitter" },
+                    text: { type: Type.STRING, description: "Display text, e.g., email address, phone number, or handle" },
+                    url: { type: Type.STRING, description: "The actual URL or mailto:/tel: link. If it's an email, prefix with mailto:. If it's a phone, prefix with tel:" }
+                  }
+                }
+              },
               experience: {
                 type: Type.ARRAY,
                 items: {
