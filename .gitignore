@@ -17,3 +17,6 @@ firebase-blueprint.json
 !.agents/skills/
 .agents/skills/*
 !.agents/skills/project-map.md
+
+# HumanMap archive (local only, may contain sensitive dev notes)
+UpdateLog/

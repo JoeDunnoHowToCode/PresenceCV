@@ -175,13 +175,15 @@ globs:
 `.agents/` 整個資料夾在 `.gitignore` 中被排除，但以下兩個檔案**需要被追蹤**（用於展示 AI 工作流規範設計）：
 
 ```gitignore
-# Agent development files (local only)
-.agents/
-
-# Exception: track workflow rules for portfolio showcase
+# Agent development files (local only, except workflow rules)
+.agents/*
 !.agents/AGENTS.md
 !.agents/skills/
+.agents/skills/*
 !.agents/skills/project-map.md
+
+# HumanMap archive (local only, may contain sensitive dev notes)
+UpdateLog/
 ```
 
 ### 追蹤 vs 不追蹤
@@ -192,6 +194,7 @@ globs:
 | `.agents/skills/project-map.md` | ✅ | 展示 AI 操作 SOP 設計，無敏感資訊 |
 | `.agents/AgentMap.yaml` | ❌ | 更新頻繁、可能含內部架構細節 |
 | `.agents/HumanMap.md` | ❌ | 可能含 API Key、Admin UID 等敏感開發紀錄 |
+| `UpdateLog/` | ❌ | 從 HumanMap 歸檔而來，內容同樣可能含敏感資訊 |
 
 ---
 
@@ -207,24 +210,4 @@ globs:
 - **歸檔時機**：在每次 post-task 更新 HumanMap.md 時檢查筆數，若超標則自動執行歸檔。
 - 詳細規則請參考 `UpdateLog/README.md`。
 
----
 
-## 七、ErrorLog 錯誤紀錄規則
-
-- **目錄**：`ErrorLog/`（專案根目錄）
-- **用途**：記錄使用者在使用 PresenceCV 時回報的錯誤訊息，以便開發者除錯。
-- **檔案命名**：`YYYY-MM-DD.md`（按日期分檔）。
-- **紀錄時機**：當使用者回報錯誤、提供錯誤截圖、或貼上 console error 時，Agent 應將錯誤結構化記錄至對應日期的 ErrorLog 檔案。
-- **紀錄格式**（每筆錯誤）：
-  ```
-  ### HH:MM — [錯誤摘要]
-  - **頁面/模組**：[頁面或元件名稱]
-  - **錯誤類型**：[Exception 類型]
-  - **錯誤訊息**：[完整 error.message]
-  - **Stack Trace**（如有）
-  - **重現步驟**：[操作描述]
-  - **影響範圍**：[影響的功能]
-  - **狀態**：🔴 未修復 / 🟡 調查中 / 🟢 已修復（附 commit hash）
-  ```
-- **需捕捉的例外類別**：Firebase/Firestore 錯誤、Gemini AI API 錯誤、前端 UI 操作異常、網路/環境問題、分享與匯出功能失敗。
-- 詳細的例外分類清單請參考 `ErrorLog/README.md`。
