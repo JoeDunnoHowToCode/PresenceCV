@@ -11,5 +11,9 @@ coverage/
 firebase-applet-config.json
 firebase-blueprint.json
 
-# Agent development files (local only)
-.agents/
+# Agent development files (local only, except workflow rules)
+.agents/*
+!.agents/AGENTS.md
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/project-map.md
