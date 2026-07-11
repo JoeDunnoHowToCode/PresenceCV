@@ -153,4 +153,6 @@ Return a JSON object containing:
 - missingKeywords (string array): Important keywords from the JD that are missing in the resume.
 - aiSuggestion (string): A rewritten, ATS-friendly professional summary for the candidate that seamlessly incorporates the missing keywords and aligns perfectly with the target role. It should be concise (150-250 characters).
 
+*CRITICAL RULE*: If the provided Job Description is extremely short (e.g., just a single job title like "sales" or "software engineer"), proactively expand upon it. Think of the core skills, methodologies, and requirements typically expected for that role in the industry, and use those expanded, implicit requirements to evaluate the resume and generate matched/missing keywords.
+
 Return ONLY valid JSON matching this schema. Do NOT include markdown code fences (\`\`\`), commentary, or any text outside the JSON object.`;

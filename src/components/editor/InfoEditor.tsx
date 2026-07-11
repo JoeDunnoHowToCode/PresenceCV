@@ -142,7 +142,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         const { GoogleGenAI, Type } = await import("@google/genai");
         const { ATS_EVALUATION_SYSTEM_PROMPT } = await import("../../lib/aiPrompt");
 
-        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const result = await ai.models.generateContent({
           model: "gemini-3.1-flash-lite-preview",
           contents: [
