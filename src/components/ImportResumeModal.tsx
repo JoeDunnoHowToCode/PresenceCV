@@ -30,8 +30,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { RESUME_PARSER_SYSTEM_PROMPT } from '../lib/aiPrompt';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../lib/firebase';
-import { doc, runTransaction } from 'firebase/firestore';
+import { auth } from '../lib/firebase';
 
 
 interface ImportResumeModalProps {
@@ -71,25 +70,10 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         throw new Error("You must be logged in to use this feature.");
       }
 
-      // Rate limit check + counter increment (atomic transaction to prevent concurrent bypass)
-      const today = new Date().toISOString().split('T')[0];
-      const limitRef = doc(db, 'user_limits', user.uid);
-      const isUnlimited = user.uid === import.meta.env.VITE_ADMIN_UID;
-
-      await runTransaction(db, async (transaction) => {
-        const limitSnap = await transaction.get(limitRef);
-        let currentCount = 0;
-        if (limitSnap.exists()) {
-          const data = limitSnap.data();
-          if (data.date === today) {
-            currentCount = data.count || 0;
-          }
-        }
-        if (currentCount >= 5 && !isUnlimited) {
-          throw new Error('You have reached your daily limit of 5 resume imports.');
-        }
-        transaction.set(limitRef, { date: today, count: currentCount + 1 }, { merge: true });
-      });
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Failed to get authentication token.");
+      }
 
       // Convert file to Base64
       const reader = new FileReader();
@@ -108,7 +92,10 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         // Step 1: Try secure backend parsing (For Vercel Production)
         const response = await fetch('/api/parse-resume', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
           body: JSON.stringify({
             fileType: file.type,
             base64Data: base64Data
@@ -141,12 +128,8 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
       onClose();
     } catch (err: any) {
       console.error("Import Error:", err);
-      // Clean up error message if it's an API Key error to guide the user
-      if (err.message && err.message.includes('API key not valid')) {
-          setError("Failed to authenticate AI. If you are not using AI Studio, please provide a valid GEMINI_API_KEY.");
-      } else {
-          setError(err.message || "An unexpected error occurred during import.");
-      }
+      // Show friendly error from server or default fallback
+      setError(err.message || "An unexpected error occurred during import.");
     } finally {
       setIsUploading(false);
       // Reset input

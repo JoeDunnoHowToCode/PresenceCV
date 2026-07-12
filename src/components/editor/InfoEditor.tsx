@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
 import { ContactItem, ResumeData } from '../../types';
+import { auth } from '../../lib/firebase';
 
 interface InfoEditorProps {
   data: ResumeData;
@@ -113,9 +114,15 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
     try {
       let parsedData = null;
       try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) throw new Error("Failed to get authentication token.");
+
         const response = await fetch('/api/ats-check', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
           body: JSON.stringify({
             resumeData: data,
             jobDescription: targetRole
@@ -133,12 +140,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 
         parsedData = await response.json();
       } catch (backendError: any) {
-        if (backendError.message !== "SERVER_UNAVAILABLE_OR_NO_KEY") {
-          throw backendError;
-        }
-
-        console.warn('Server-side ATS check unavailable (412). No client-side fallback configured.');
-        throw new Error('AI service unavailable. Please ensure the server is configured with a valid API key.');
+        throw backendError;
       }
       
       setAtsResult(parsedData);

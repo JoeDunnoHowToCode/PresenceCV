@@ -2,7 +2,7 @@ import { initializeTestEnvironment, assertFails, assertSucceeds, RulesTestEnviro
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
@@ -132,6 +132,58 @@ describe.skip('Firestore Security Rules', () => {
         blocks: {},
         blockOrder: [],
         ownerUid: 'user_123'
+      }));
+    });
+  });
+
+  describe('user_limits', () => {
+    it('allows read by owner', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertSucceeds(getDoc(doc(db, 'user_limits/user_123')));
+    });
+
+    it('denies read by other users', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertFails(getDoc(doc(db, 'user_limits/user_456')));
+    });
+
+    it('denies write by anyone (even owner)', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertFails(setDoc(doc(db, 'user_limits/user_123'), { count: 1 }));
+    });
+  });
+
+  describe('userState (profile limits)', () => {
+    it('allows write if profiles count <= 3', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertSucceeds(setDoc(doc(db, 'users/user_123/userState/state'), {
+        profiles: { '1': {}, '2': {}, '3': {} }
+      }));
+    });
+
+    it('denies write if profiles count > 3', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertFails(setDoc(doc(db, 'users/user_123/userState/state'), {
+        profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+      }));
+    });
+
+    it('allows write if profiles count > 3 but size is not increasing', async () => {
+      // First, artificially bypass rules to setup 4 profiles
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'users/user_123/userState/state'), {
+          profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+        });
+      });
+
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      // Update with same size (4)
+      await assertSucceeds(setDoc(doc(db, 'users/user_123/userState/state'), {
+        profiles: { '1': { updated: true }, '2': {}, '3': {}, '4': {} }
+      }));
+      // Update with reduced size (3)
+      await assertSucceeds(setDoc(doc(db, 'users/user_123/userState/state'), {
+        profiles: { '1': {}, '2': {}, '3': {} }
       }));
     });
   });

@@ -8,10 +8,10 @@ service cloud.firestore {
     }
 
     // AI 掃描次數限制記錄 (新功能開通)
+    // 額度由 Server-side Admin SDK 處理，前端嚴禁修改
     match /user_limits/{userId} {
       allow get: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
-      allow delete, list: if false;
+      allow write, delete, list: if false;
     }
 
     // 使用者主體設定存取
@@ -23,40 +23,37 @@ service cloud.firestore {
       allow list: if false;
       
       match /userState/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && request.auth.uid == userId;
+        // 限制每個帳號最多只能擁有 3 份履歷
+        // 若本身已經超過 3 份，允許修改舊資料（長度 <= 原長度），但不允許新增
+        // 管理員 (admins/{userId} 存在) 則不受此限制
+        allow write: if request.auth != null && request.auth.uid == userId
+          && (
+            !("profiles" in request.resource.data) ||
+            request.resource.data.profiles.size() <= 3 ||
+            (resource != null && "profiles" in resource.data && request.resource.data.profiles.size() <= resource.data.profiles.size()) ||
+            exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          );
       }
     }
 
     // 快照分享連結 (需要登入建立，任何人憑 ID 可讀，不可修改)
     match /sharedResumes/{resumeId} {
-      // 限制 1：必須登入才能建立分享連結
-      // 限制 2：傳入欄位必須包含 profile、blocks、blockOrder 與 createdAt (hasAll)
-      // 限制 3：嚴格限制只允許傳入特定安全欄位，防範惡意寫入垃圾資料 (hasOnly)
       allow create: if request.auth != null 
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt'])
         && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation']);
-      // 任何人只要有分享連結 ID 都可以讀取履歷
       allow get: if true;
-      // 嚴禁列出所有分享履歷清單，防範爬蟲爬取所有資料
       allow list: if false;
-      // 分享連結一旦建立，不允許更新或刪除
       allow update, delete: if false;
     }
 
     // Live 即時同步連結 (權限與擁有者綁定)
     match /liveResumes/{resumeId} {
-      // 建立 Live 連結時，必須登入，且資料須包含基本履歷欄位，並強制綁定擁有者為目前登入者
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder'])
         && request.resource.data.ownerUid == request.auth.uid;
-      // 任何人有 Live 連結都可以檢視
       allow get: if true;
-      // 嚴禁列出所有 Live 履歷清單，防範爬蟲
       allow list: if false;
-      // 更新規則：
-      // 1. 必須登入
-      // 2. 禁止竄改 ownerUid 欄位 (保護擁有權不被轉移)
-      // 3. 必須是擁有者本人更新，或是符合 legacy 升級機制 (在無 ownerUid 的舊資料時比對 updateToken)
       allow update: if request.auth != null && (
         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerUid'])) &&
         (
@@ -64,7 +61,6 @@ service cloud.firestore {
           (!("ownerUid" in resource.data) && request.resource.data.updateToken == resource.data.updateToken)
         )
       );
-      // 禁止刪除 Live 連結
       allow delete: if false;
     }
   }
