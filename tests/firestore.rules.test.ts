@@ -6,8 +6,8 @@ import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
-// SKIPPED: Requires Firebase Emulator (Java JRE). Run via GitHub Actions CI.
-describe.skip('Firestore Security Rules', () => {
+// Requires Firebase Emulator (Java JRE). Run via GitHub Actions CI.
+describe('Firestore Security Rules', () => {
   beforeAll(async () => {
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-presencecv',

@@ -36,7 +36,8 @@ export default async function handler(req: any, res: any) {
     const idToken = authHeader.split('Bearer ')[1];
     let decodedToken;
     try {
-      const { adminAuth } = await import('./firebase-admin');
+      const { getFirebaseAdmin } = await import('./firebase-admin');
+      const { adminAuth } = getFirebaseAdmin();
       if (!adminAuth) throw new Error("adminAuth not initialized");
       decodedToken = await adminAuth.verifyIdToken(idToken);
     } catch (err) {
@@ -60,7 +61,8 @@ export default async function handler(req: any, res: any) {
     }
 
     // Check Quota using Admin SDK Transaction
-    const { adminDb } = await import('./firebase-admin');
+    const { getFirebaseAdmin } = await import('./firebase-admin');
+    const { adminDb } = getFirebaseAdmin();
     if (!adminDb) {
        return res.status(500).json({ error: "Firebase DB not initialized" });
     }

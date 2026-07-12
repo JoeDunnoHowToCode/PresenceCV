@@ -300,14 +300,27 @@ export function useResume() {
   }, [appState]);
 
 
-  const createProfile = useCallback( (name: string) => {
-    // Profile limit guard (admin bypass via VITE_ADMIN_UID)
+  const createProfile = useCallback( async (name: string) => {
+    // Profile limit guard (admin bypass via Firestore admins collection)
     const currentUid = auth.currentUser?.uid;
-    const isAdmin = currentUid === import.meta.env.VITE_ADMIN_UID;
     const profileCount = Object.keys(appState.profiles).length;
-    if (!isAdmin && profileCount >= MAX_FREE_PROFILES) {
-      alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-      return;
+    
+    if (profileCount >= MAX_FREE_PROFILES) {
+      if (!currentUid) {
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+        return;
+      }
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', currentUid));
+        if (!adminDoc.exists()) {
+           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+           return;
+        }
+      } catch (err) {
+        console.error("Failed to verify admin status:", err);
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+        return;
+      }
     }
 
     // Clone the active profile, not strictly 'main', to prevent crashes if main was deleted

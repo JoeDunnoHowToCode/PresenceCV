@@ -3,7 +3,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ImportResumeModal } from '../src/components/ImportResumeModal';
 import { useAuth } from '../src/contexts/AuthContext';
-import { runTransaction } from 'firebase/firestore';
 
 // ── Auth context ──────────────────────────────────────────────────────────────
 vi.mock('../src/contexts/AuthContext', () => ({
@@ -12,49 +11,35 @@ vi.mock('../src/contexts/AuthContext', () => ({
 
 // ── Firebase app ──────────────────────────────────────────────────────────────
 vi.mock('../src/lib/firebase', () => ({
+  auth: {
+    currentUser: {
+      getIdToken: vi.fn().mockResolvedValue('mock-token-123')
+    }
+  },
   db: {}
 }));
 
-// ── Firestore SDK — mock runTransaction (post-fix component uses atomic read+write)
-vi.mock('firebase/firestore', () => ({
-  doc: vi.fn(),
-  runTransaction: vi.fn()
-}));
-
 // ── Guard: GoogleGenAI must NOT be imported/called from the component ─────────
-// The post-fix version removes the client-side Gemini fallback entirely.
 vi.mock('@google/genai', () => ({
-  // If the component tries to instantiate GoogleGenAI, this spy will capture it.
-  GoogleGenAI: vi.fn(() => ({
-    models: {
-      generateContent: vi.fn().mockResolvedValue({ text: '{}' })
-    }
-  }))
+  GoogleGenAI: vi.fn(() => {
+    throw new Error("GoogleGenAI should never be called on the client-side!");
+  })
 }));
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe('ImportResumeModal - Security Fixes', () => {
+describe('ImportResumeModal - Security Fixes (Token-Based API)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv('VITE_ADMIN_UID', 'admin_123');
   });
 
-  // ── Test 1: Quota enforcement — normal user blocked at count >= 5 ──────────
-  it('blocks upload when Firestore returns count=5 for today and user is not admin', async () => {
+  // ── Test 1: Quota enforcement — API returns 429 ──────────
+  it('blocks upload when backend API returns 429 (Daily limit reached)', async () => {
     (useAuth as any).mockReturnValue({ user: { uid: 'normal_user' } });
 
-    // runTransaction receives a callback (transaction); simulate it reading count=5.
-    (runTransaction as any).mockImplementation(async (_db: any, updateFn: Function) => {
-      const today = new Date().toISOString().split('T')[0];
-      const mockTransaction = {
-        get: vi.fn().mockResolvedValue({
-          exists: () => true,
-          data: () => ({ date: today, count: 5 })
-        }),
-        set: vi.fn()
-      };
-      return updateFn(mockTransaction);
+    // Mock fetch to simulate 429 Quota Exceeded
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({ error: "Daily limit reached (5/5). Please try again tomorrow." })
     });
 
     render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
@@ -66,74 +51,48 @@ describe('ImportResumeModal - Security Fixes', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/You have reached your daily limit of 5 resume imports\./i)
+        screen.getByText(/Daily limit reached \(5\/5\)\. Please try again tomorrow\./i)
       ).toBeInTheDocument();
     });
   });
 
-  // ── Test 2: Admin bypass — uid matches VITE_ADMIN_UID → not blocked ────────
-  it('does NOT block upload when user is admin even if count >= 5', async () => {
-    (useAuth as any).mockReturnValue({ user: { uid: 'admin_123' } });
-
-    // runTransaction would normally throw for over-quota — but admin skips it
-    (runTransaction as any).mockImplementation(async (_db: any, updateFn: Function) => {
-      const today = new Date().toISOString().split('T')[0];
-      const mockTransaction = {
-        get: vi.fn().mockResolvedValue({
-          exists: () => true,
-          data: () => ({ date: today, count: 5 })
-        }),
-        set: vi.fn()
-      };
-      return updateFn(mockTransaction);
-    });
-
-    // Backend parse succeeds so the modal closes without an error
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ profile: {}, contactItems: [], experience: [], education: [], skills: [] })
-    });
-
-    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
-
-    const file = new File(['dummy content'], 'resume.pdf', { type: 'application/pdf' });
-    const input = document.querySelector('input[type="file"]')!;
-
-    fireEvent.change(input, { target: { files: [file] } });
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText(/You have reached your daily limit of 5 resume imports\./i)
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  // ── Test 3: No client-side GoogleGenAI fallback ────────────────────────────
-  // The post-fix component routes everything through /api/parse-resume.
-  // GoogleGenAI must never be instantiated during a normal (non-error) flow.
-  it('does not call GoogleGenAI directly when the backend responds successfully', async () => {
-    const { GoogleGenAI } = await import('@google/genai');
-
+  // ── Test 2: Successful parsing — API returns 200 ──────────
+  it('successfully imports when backend API returns 200', async () => {
     (useAuth as any).mockReturnValue({ user: { uid: 'normal_user' } });
 
-    // Quota not reached
-    (runTransaction as any).mockImplementation(async (_db: any, updateFn: Function) => {
-      const today = new Date().toISOString().split('T')[0];
-      const mockTransaction = {
-        get: vi.fn().mockResolvedValue({
-          exists: () => true,
-          data: () => ({ date: today, count: 0 })
-        }),
-        set: vi.fn()
-      };
-      return updateFn(mockTransaction);
-    });
+    const onImportMock = vi.fn();
 
-    // Backend responds with success — no fallback needed
+    // Mock fetch to simulate successful response
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ profile: {}, contactItems: [], experience: [], education: [], skills: [] })
+      status: 200,
+      json: async () => ({ profile: { name: 'Test User' }, contactItems: [], experience: [], education: [], skills: [] })
     });
+
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={onImportMock} />);
+
+    const file = new File(['dummy content'], 'resume.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]')!;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(onImportMock).toHaveBeenCalledWith({
+        profile: { name: 'Test User' },
+        contactItems: [],
+        experience: [],
+        education: [],
+        skills: []
+      });
+    });
+
+    // Modal should not show an error
+    expect(screen.queryByText(/Daily limit reached/i)).not.toBeInTheDocument();
+  });
+  
+  // ── Test 3: Missing Token ──────────
+  it('shows error if user auth token is missing', async () => {
+    (useAuth as any).mockReturnValue({ user: null });
 
     render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
 
@@ -143,13 +102,11 @@ describe('ImportResumeModal - Security Fixes', () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     await waitFor(() => {
-      // Modal should not be showing an error
       expect(
-        screen.queryByText(/You have reached your daily limit/i)
-      ).not.toBeInTheDocument();
+        screen.getByText(/You must be logged in to use this feature\./i)
+      ).toBeInTheDocument();
     });
-
-    // GoogleGenAI constructor must never have been called
-    expect(GoogleGenAI).not.toHaveBeenCalled();
+    
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });
