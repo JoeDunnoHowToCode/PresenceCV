@@ -137,36 +137,8 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           throw backendError;
         }
 
-        console.log("Backend unable to process, routing securely via AI Studio frontend proxy...");
-        
-        const { GoogleGenAI, Type } = await import("@google/genai");
-        const { ATS_EVALUATION_SYSTEM_PROMPT } = await import("../../lib/aiPrompt");
-
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const result = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite-preview",
-          contents: [
-            { text: ATS_EVALUATION_SYSTEM_PROMPT },
-            { text: `Resume Data: ${JSON.stringify(data)}\n\nJob Description: ${targetRole}` }
-          ],
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                score: { type: Type.INTEGER },
-                matchedKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-                missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-                aiSuggestion: { type: Type.STRING },
-              },
-            },
-          },
-        });
-
-        const jsonStr = result.text?.trim();
-        if (!jsonStr) throw new Error("Empty response from AI");
-
-        parsedData = JSON.parse(jsonStr);
+        console.warn('Server-side ATS check unavailable (412). No client-side fallback configured.');
+        throw new Error('AI service unavailable. Please ensure the server is configured with a valid API key.');
       }
       
       setAtsResult(parsedData);

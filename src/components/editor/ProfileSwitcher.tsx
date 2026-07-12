@@ -9,9 +9,7 @@ interface ProfileSwitcherProps {
   createProfile: (name: string) => void;
   renameProfile: (id: string, name: string) => void;
   setProfileToDelete: (id: string | null) => void;
-  loadPersonalBackup: () => void;
   user: any;
-  isAdmin: boolean;
   isMobile: boolean;
   navigate: (path: string) => void;
 }
@@ -23,9 +21,7 @@ const ProfileSwitcher = React.memo(({
   createProfile,
   renameProfile,
   setProfileToDelete,
-  loadPersonalBackup,
   user,
-  isAdmin,
   isMobile,
   navigate
 }: ProfileSwitcherProps) => {
@@ -110,16 +106,6 @@ const ProfileSwitcher = React.memo(({
           <LucideIcons.Plus className="w-4 h-4" />
           <span className="text-sm font-medium">Clone Active</span>
         </button>
-        {isAdmin && (
-          <button
-            onClick={loadPersonalBackup}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border border-accent/40 bg-accent/5 text-accent hover:bg-accent/10 transition-all shrink-0 ml-2"
-            title="Restore your personal backup profile"
-          >
-            <LucideIcons.History className="w-4 h-4" />
-            <span className="text-sm font-medium">Restore Backup</span>
-          </button>
-        )}
       </div>
       {user && (
         <div className="flex items-center gap-3 pl-4 border-l border-white/10 shrink-0">

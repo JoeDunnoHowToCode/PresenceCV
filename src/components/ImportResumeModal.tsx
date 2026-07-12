@@ -31,8 +31,8 @@ import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { RESUME_PARSER_SYSTEM_PROMPT } from '../lib/aiPrompt';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { GoogleGenAI, Type } from "@google/genai";
+import { doc, runTransaction } from 'firebase/firestore';
+
 
 interface ImportResumeModalProps {
   isOpen: boolean;
@@ -71,25 +71,25 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         throw new Error("You must be logged in to use this feature.");
       }
 
-      // Rate limit check
+      // Rate limit check + counter increment (atomic transaction to prevent concurrent bypass)
       const today = new Date().toISOString().split('T')[0];
       const limitRef = doc(db, 'user_limits', user.uid);
-      const limitSnap = await getDoc(limitRef);
-      
-      let currentCount = 0;
-      if (limitSnap.exists()) {
-        const data = limitSnap.data();
-        if (data.date === today) {
-          currentCount = data.count || 0;
-        }
-      }
-
       const isUnlimited = user.uid === import.meta.env.VITE_ADMIN_UID;
 
-      // Temporarily suspended for testing
-      // if (currentCount >= 5 && !isUnlimited) {
-      //   throw new Error("You have reached your daily limit of 5 resume imports.");
-      // }
+      await runTransaction(db, async (transaction) => {
+        const limitSnap = await transaction.get(limitRef);
+        let currentCount = 0;
+        if (limitSnap.exists()) {
+          const data = limitSnap.data();
+          if (data.date === today) {
+            currentCount = data.count || 0;
+          }
+        }
+        if (currentCount >= 5 && !isUnlimited) {
+          throw new Error('You have reached your daily limit of 5 resume imports.');
+        }
+        transaction.set(limitRef, { date: today, count: currentCount + 1 }, { merge: true });
+      });
 
       // Convert file to Base64
       const reader = new FileReader();
@@ -133,100 +133,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
           throw backendError; // Stop if it's a real server error (like 400 Bad Request)
         }
 
-        console.log("Backend unable to process, routing securely via AI Studio frontend proxy...");
-
-        // Step 2: Fallback to Frontend Parsing (For AI Studio Free Tier Proxy)
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        
-        const result = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite-preview",
-          contents: [
-            { text: RESUME_PARSER_SYSTEM_PROMPT },
-            {
-              inlineData: {
-                data: base64Data,
-                mimeType: file.type,
-              },
-            },
-          ],
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                profile: {
-                  type: Type.OBJECT,
-                  properties: {
-                    name: { type: Type.STRING },
-                    title: { type: Type.STRING },
-                    location: { type: Type.STRING },
-                    email: { type: Type.STRING },
-                    summary: { type: Type.STRING },
-                  },
-                  required: ["name", "title", "location", "email", "summary"],
-                },
-                contactItems: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      icon: { type: Type.STRING, description: "One of: Mail, Phone, Globe, Linkedin, Github, Twitter" },
-                      text: { type: Type.STRING, description: "Display text, e.g., email address, phone number, or handle" },
-                      url: { type: Type.STRING, description: "The actual URL or mailto:/tel: link. If it's an email, prefix with mailto:. If it's a phone, prefix with tel:" }
-                    },
-                    required: ["icon", "text", "url"]
-                  }
-                },
-                experience: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      title: { type: Type.STRING },
-                      subtitle: { type: Type.STRING },
-                      period: { type: Type.STRING },
-                      description: { type: Type.STRING },
-                    },
-                    required: ["title", "subtitle", "period", "description"]
-                  },
-                },
-                education: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      title: { type: Type.STRING },
-                      subtitle: { type: Type.STRING },
-                      period: { type: Type.STRING },
-                      description: { type: Type.STRING },
-                    },
-                    required: ["title", "subtitle", "period", "description"]
-                  },
-                },
-                skills: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                },
-              },
-              required: ["profile", "contactItems", "experience", "education", "skills"]
-            },
-          },
-        });
-
-        const jsonStr = result.text?.trim();
-
-        if (!jsonStr) {
-          throw new Error("Empty response from AI");
-        }
-
-        parsedData = JSON.parse(jsonStr);
+        console.warn('Server-side parsing unavailable (412). No client-side fallback configured.');
+        throw new Error('AI service unavailable. Please ensure the server is configured with a valid API key.');
       }
-
-      // Update Rate Limit
-      await setDoc(limitRef, {
-        date: today,
-        count: currentCount + 1
-      }, { merge: true });
 
       onImport(parsedData);
       onClose();

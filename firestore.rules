@@ -47,7 +47,7 @@ service cloud.firestore {
     match /liveResumes/{resumeId} {
       // 建立 Live 連結時，必須登入，且資料須包含基本履歷欄位，並強制綁定擁有者為目前登入者
       allow create: if request.auth != null
-        && request.resource.data.keys().hasAny(['profile', 'blocks', 'blockOrder'])
+        && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder'])
         && request.resource.data.ownerUid == request.auth.uid;
       // 任何人有 Live 連結都可以檢視
       allow get: if true;

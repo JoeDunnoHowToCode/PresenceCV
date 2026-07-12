@@ -20,8 +20,6 @@ import TagsBlockEditor from '../components/editor/TagsBlockEditor';
 export default function EditPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const location = useLocation();
-  const isAdmin = user?.uid === import.meta.env.VITE_ADMIN_UID;
   
   const {
     data,
@@ -52,8 +50,9 @@ export default function EditPage() {
     addBlock,
     removeBlock,
     updateProfileData,
-    loadPersonalBackup
   } = useResume();
+
+  const location = useLocation();
 
   const [activeTab, setActiveTab] = useState('info');
   const [direction, setDirection] = useState(0);
@@ -501,9 +500,7 @@ export default function EditPage() {
             createProfile={createProfile}
             renameProfile={renameProfile}
             setProfileToDelete={setProfileToDelete}
-            loadPersonalBackup={loadPersonalBackup}
             user={user}
-            isAdmin={isAdmin}
             isMobile={isMobile}
             navigate={navigate}
           />

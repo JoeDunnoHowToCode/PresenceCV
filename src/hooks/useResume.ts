@@ -26,17 +26,17 @@
  * - ProfileMeta, AppState: Type interfaces for the state shape
  *
  * Consumed by: EditPage.tsx (primary), ViewPage.tsx (read-only)
- * Depends on: firebase.ts, defaultResume.ts, personalBackup.ts, types.ts
+ * Depends on: firebase.ts, defaultResume.ts, types.ts
  * Firestore: users/{uid}/userState/state (read + write)
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
-import { PERSONAL_TEMPLATE_BACKUP } from '../data/personalBackup';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ParsedResumeSchema } from '../types';
+import { MAX_FREE_PROFILES } from '../constants';
 
 const APP_STORAGE_KEY = 'elegant_resume_app_data';
 const OLD_STORAGE_KEY = 'elegant_resume_data';
@@ -301,6 +301,15 @@ export function useResume() {
 
 
   const createProfile = useCallback( (name: string) => {
+    // Profile limit guard (admin bypass via VITE_ADMIN_UID)
+    const currentUid = auth.currentUser?.uid;
+    const isAdmin = currentUid === import.meta.env.VITE_ADMIN_UID;
+    const profileCount = Object.keys(appState.profiles).length;
+    if (!isAdmin && profileCount >= MAX_FREE_PROFILES) {
+      alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+      return;
+    }
+
     // Clone the active profile, not strictly 'main', to prevent crashes if main was deleted
     const activeProfileData = appState.profiles[appState.activeProfileId]?.data || (Object.values(appState.profiles) as ProfileMeta[])[0]?.data || DEFAULT_RESUME;
     const newId = `profile-${Date.now()}`;
@@ -647,18 +656,6 @@ export function useResume() {
   }, []);
 
 
-  const loadPersonalBackup = useCallback( () => {
-    const backupId = `backup-${Date.now()}`;
-    setAppState(prev => ({
-      ...prev,
-      activeProfileId: backupId,
-      profiles: {
-        ...prev.profiles,
-        [backupId]: { id: backupId, name: 'Personal Backup', data: PERSONAL_TEMPLATE_BACKUP }
-      }
-    }));
-  }, []);
-
 
   return {
     loading,
@@ -689,7 +686,6 @@ export function useResume() {
     updateContactItem,
     removeContactItem,
     updateProfileData,
-    resetToDefault,
-    loadPersonalBackup
+    resetToDefault
   };
 }

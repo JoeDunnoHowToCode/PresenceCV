@@ -29,9 +29,6 @@ export class RateLimiter {
   }
 
   isRateLimited(ip: string): boolean {
-    // Temporarily suspended for testing
-    return false;
-    
     const now = Date.now();
     const limitData = this.map.get(ip);
 

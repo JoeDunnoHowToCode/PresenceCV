@@ -1,5 +1,10 @@
 import * as LucideIcons from 'lucide-react';
 
+// --- Plan Limits ---
+// Maximum number of resume profiles for free users.
+// Increase or adjust per-plan as needed.
+export const MAX_FREE_PROFILES = 3;
+
 export const ICONS: Record<string, any> = {
   info: LucideIcons.User,
   experience: LucideIcons.Briefcase,

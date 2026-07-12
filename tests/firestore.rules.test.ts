@@ -6,6 +6,7 @@ import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
+// SKIPPED: Requires Firebase Emulator (Java JRE). Run via GitHub Actions CI.
 describe.skip('Firestore Security Rules', () => {
   beforeAll(async () => {
     testEnv = await initializeTestEnvironment({
@@ -107,6 +108,30 @@ describe.skip('Firestore Security Rules', () => {
       const db = testEnv.authenticatedContext('user_123').firestore();
       await assertFails(updateDoc(doc(db, 'liveResumes/resume_4'), {
         ownerUid: 'user_1234'
+      }));
+    });
+
+    it('denies liveResumes creation when required fields are missing (hasAll guard)', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+
+      // Missing `blocks` and `blockOrder` — hasAll(['profile','blocks','blockOrder']) must reject
+      await assertFails(setDoc(doc(db, 'liveResumes/resume_5'), {
+        profile: {},
+        ownerUid: 'user_123'
+      }));
+
+      // Missing only `blockOrder` — still must reject
+      await assertFails(setDoc(doc(db, 'liveResumes/resume_6'), {
+        profile: {},
+        blocks: {},
+        ownerUid: 'user_123'
+      }));
+
+      // Missing only `profile` — still must reject
+      await assertFails(setDoc(doc(db, 'liveResumes/resume_7'), {
+        blocks: {},
+        blockOrder: [],
+        ownerUid: 'user_123'
       }));
     });
   });
