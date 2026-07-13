@@ -290,7 +290,7 @@ export function useResume() {
             id: bId,
             type: 'list',
             title: 'Experience',
-            items: parsedData.experience.map((i) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
+            items: parsedData.experience.map((i) => ({ title: i.title || '', subtitle: i.subtitle || '', period: i.period || '', description: i.description || '', ...i, id: Math.random().toString(36).substr(2, 9) }))
         };
         newData.blockOrder.push(bId);
     }
@@ -301,7 +301,7 @@ export function useResume() {
             id: bId,
             type: 'list',
             title: 'Education',
-            items: parsedData.education.map((i) => ({ ...i, id: Math.random().toString(36).substr(2, 9) }))
+            items: parsedData.education.map((i) => ({ title: i.title || '', subtitle: i.subtitle || '', period: i.period || '', description: i.description || '', ...i, id: Math.random().toString(36).substr(2, 9) }))
         };
         newData.blockOrder.push(bId);
     }

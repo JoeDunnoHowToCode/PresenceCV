@@ -48,6 +48,7 @@ const TagsBlockEditor = React.memo(({
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {block.items.map((item: TagItem, index: number) => (
+              // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
               <Draggable key={item.id} draggableId={item.id} index={index}>
                 {(provided, snapshot) => (
                   <TagItemEditor

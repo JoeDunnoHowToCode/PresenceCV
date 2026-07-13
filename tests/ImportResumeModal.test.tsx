@@ -158,7 +158,7 @@ describe('ImportResumeModal - Security Fixes (Token-Based API)', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Server Configuration Error/i)
+        screen.getByText(/AI service unavailable/i)
       ).toBeInTheDocument();
     });
   });

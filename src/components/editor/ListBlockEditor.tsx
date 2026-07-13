@@ -40,6 +40,7 @@ const ListBlockEditor = React.memo(({
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-6">
             {block.items.map((item: ListItem, index: number) => (
+              // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
               <Draggable key={item.id} draggableId={item.id} index={index}>
                 {(provided, snapshot) => (
                   <ListItemEditor

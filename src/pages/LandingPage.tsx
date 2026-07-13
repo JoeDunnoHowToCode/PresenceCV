@@ -201,7 +201,7 @@ export default function LandingPage() {
                 <LucideIcons.FileText className="w-7 h-7 text-[#1c1c1c]" />
               </div>
               <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">PDF Export</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Clean, print-optimized formatting ready for ATS tracking.</p>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Clean, print-optimized formatting ready for job applications.</p>
             </div>
 
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">

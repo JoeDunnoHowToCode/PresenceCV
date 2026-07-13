@@ -8,8 +8,7 @@
  * API Routes:
  * - POST /api/parse-resume: Server-side Gemini AI resume parsing.
  *   Accepts { fileType, base64Data } and returns structured resume JSON.
- *   Returns 412 if GEMINI_API_KEY is missing/placeholder (signals frontend
- *   to fall back to client-side Gemini proxy).
+ *   Returns 412 if GEMINI_API_KEY is missing/placeholder.
  *
  * Development Mode:
  * - Vite middleware handles HMR, module resolution, and SPA routing
@@ -36,7 +35,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import parseResumeHandler from './api/parse-resume.ts';
-import atsCheckHandler from './api/ats-check.ts';
 
 async function startServer() {
   const app = express();
@@ -49,11 +47,6 @@ async function startServer() {
   // This guarantees local testing is identical to production.
   app.post("/api/parse-resume", async (req, res) => {
     await parseResumeHandler(req, res);
-  });
-
-  // Use the exact same handler from the Vercel API for local development
-  app.post("/api/ats-check", async (req, res) => {
-    await atsCheckHandler(req, res);
   });
 
   // Vite middleware for development

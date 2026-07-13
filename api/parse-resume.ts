@@ -14,11 +14,11 @@
  * - Body size limit: 4MB (Vercel's hard limit is 4.5MB)
  *
  * AI Prompt:
- * - Comprehensive ATS-style extraction prompt covering contact items, experience,
+ * - Comprehensive resume data extraction prompt covering contact items, experience,
  *   education, and categorized skills
  * - Uses Gemini structured output (responseSchema) for reliable JSON parsing
  *
- * Environment Variables: GEMINI_API_KEY
+ * Environment Variables: GEMINI_API_KEY, FIREBASE_SERVICE_ACCOUNT_KEY
  * Consumed by: ImportResumeModal.tsx (via fetch POST)
  */
 import { GoogleGenAI, Type } from "@google/genai";
@@ -60,6 +60,11 @@ export default async function handler(req: any, res: any) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: "Unauthorized. Missing or invalid Authorization header." });
     }
+    const idToken = authHeader.split('Bearer ')[1];
+    if (!idToken) {
+      return res.status(401).json({ error: "Unauthorized. Missing bearer token." });
+    }
+
     let adminAuth, adminDb;
     try {
       const adminModule = await import('./firebase-admin');

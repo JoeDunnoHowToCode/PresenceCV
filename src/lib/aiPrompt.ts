@@ -1,4 +1,4 @@
-export const RESUME_PARSER_SYSTEM_PROMPT = `You are an expert ATS (Applicant Tracking System) data extractor.
+export const RESUME_PARSER_SYSTEM_PROMPT = `You are an expert resume data extractor.
 Extract ALL resume details from the provided document with 100% completeness.
 Do NOT skip, summarize, or infer any data that is not explicitly present in the document.
 
@@ -144,15 +144,3 @@ OUTPUT RULES
 - Do NOT include markdown code fences (\`\`\`), commentary, or any text outside the JSON object.
 - All string values must be properly escaped (e.g., use \\n for newlines inside strings).
 - If a field has no data in the document, return null for that field — do not omit the key.`;
-
-export const ATS_EVALUATION_SYSTEM_PROMPT = `You are an expert ATS (Applicant Tracking System) and professional resume writer.
-Evaluate the provided resume data against the job description.
-Return a JSON object containing:
-- score (number, 0-100): An ATS match score.
-- matchedKeywords (string array): Important keywords from the JD that are present in the resume.
-- missingKeywords (string array): Important keywords from the JD that are missing in the resume.
-- aiSuggestion (string): A rewritten, ATS-friendly professional summary for the candidate that seamlessly incorporates the missing keywords and aligns perfectly with the target role. It should be concise (150-250 characters).
-
-*CRITICAL RULE*: If the provided Job Description is extremely short (e.g., just a single job title like "sales" or "software engineer"), proactively expand upon it. Think of the core skills, methodologies, and requirements typically expected for that role in the industry, and use those expanded, implicit requirements to evaluate the resume and generate matched/missing keywords.
-
-Return ONLY valid JSON matching this schema. Do NOT include markdown code fences (\`\`\`), commentary, or any text outside the JSON object.`;

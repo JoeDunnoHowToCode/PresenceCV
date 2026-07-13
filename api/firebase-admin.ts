@@ -1,17 +1,19 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert, applicationDefault } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 export function getFirebaseAdmin() {
-  if (admin.apps.length === 0) {
+  if (getApps().length === 0) {
     try {
       if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount)
+        initializeApp({
+          credential: cert(serviceAccount)
         });
         console.log('Firebase Admin initialized securely via FIREBASE_SERVICE_ACCOUNT_KEY');
       } else {
-        admin.initializeApp({
-          credential: admin.credential.applicationDefault()
+        initializeApp({
+          credential: applicationDefault()
         });
         console.log('Firebase Admin initialized via applicationDefault()');
       }
@@ -23,8 +25,8 @@ export function getFirebaseAdmin() {
 
   try {
     return {
-      adminDb: admin.firestore(),
-      adminAuth: admin.auth()
+      adminDb: getFirestore(),
+      adminAuth: getAuth()
     };
   } catch (error) {
     console.error('Failed to get Firebase Admin services:', error);
