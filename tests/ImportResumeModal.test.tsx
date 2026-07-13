@@ -84,6 +84,11 @@ describe('ImportResumeModal - Security Fixes (Token-Based API)', () => {
         education: [],
         skills: []
       });
+      expect(global.fetch).toHaveBeenCalledWith('/api/parse-resume', expect.objectContaining({
+        headers: expect.objectContaining({
+          'Authorization': 'Bearer mock-token-123',
+        })
+      }));
     });
 
     // Modal should not show an error
@@ -108,5 +113,53 @@ describe('ImportResumeModal - Security Fixes (Token-Based API)', () => {
     });
     
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  // ── Test 4: API returns 401 Unauthorized ──────────
+  it('shows error if backend API returns 401', async () => {
+    (useAuth as any).mockReturnValue({ user: { uid: 'normal_user' } });
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: "Unauthorized. Invalid ID token." })
+    });
+
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    const file = new File(['dummy content'], 'resume.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]')!;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Unauthorized\. Invalid ID token\./i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  // ── Test 5: API returns 500 Server Error ──────────
+  it('shows error if backend API returns 500 (e.g. Firebase Admin misconfigured)', async () => {
+    (useAuth as any).mockReturnValue({ user: { uid: 'normal_user' } });
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: "Server Configuration Error" })
+    });
+
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    const file = new File(['dummy content'], 'resume.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]')!;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Server Configuration Error/i)
+      ).toBeInTheDocument();
+    });
   });
 });

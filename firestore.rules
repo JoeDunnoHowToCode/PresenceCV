@@ -14,6 +14,11 @@ service cloud.firestore {
       allow write, delete, list: if false;
     }
 
+    // 開放讀取 admin 列表以同步前端判斷
+    match /admins/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
     // 使用者主體設定存取
     match /users/{userId} {
       allow get: if request.auth != null && request.auth.uid == userId;

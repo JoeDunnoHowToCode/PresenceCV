@@ -37,5 +37,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-firebase-emulators-
 
-      - name: Run Tests with Emulator
-        run: npm run test
+      - name: Run Unit Tests
+        run: npm test -- --run
+
+      - name: Run Emulator Rules Tests
+        run: npm run test:rules
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Build Test
+        run: npm run build

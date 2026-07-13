@@ -190,7 +190,34 @@ export function useResume() {
 
 
 
-  const importResumeProfile = useCallback( (name: string, rawData: unknown) => {
+  const checkCanCreateProfile = async (): Promise<boolean> => {
+    const currentUid = auth.currentUser?.uid;
+    const profileCount = Object.keys(appState.profiles).length;
+    
+    if (profileCount >= MAX_FREE_PROFILES) {
+      if (!currentUid) {
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+        return false;
+      }
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', currentUid));
+        if (!adminDoc.exists()) {
+           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+           return false;
+        }
+      } catch (err) {
+        console.error("Failed to verify admin status:", err);
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const importResumeProfile = useCallback( async (name: string, rawData: unknown) => {
+    const canCreate = await checkCanCreateProfile();
+    if (!canCreate) return;
+
     const newId = `profile-${Date.now()}`;
     const mainData = appState.profiles['main']?.data || DEFAULT_RESUME;
     
@@ -301,27 +328,8 @@ export function useResume() {
 
 
   const createProfile = useCallback( async (name: string) => {
-    // Profile limit guard (admin bypass via Firestore admins collection)
-    const currentUid = auth.currentUser?.uid;
-    const profileCount = Object.keys(appState.profiles).length;
-    
-    if (profileCount >= MAX_FREE_PROFILES) {
-      if (!currentUid) {
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-        return;
-      }
-      try {
-        const adminDoc = await getDoc(doc(db, 'admins', currentUid));
-        if (!adminDoc.exists()) {
-           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-           return;
-        }
-      } catch (err) {
-        console.error("Failed to verify admin status:", err);
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-        return;
-      }
-    }
+    const canCreate = await checkCanCreateProfile();
+    if (!canCreate) return;
 
     // Clone the active profile, not strictly 'main', to prevent crashes if main was deleted
     const activeProfileData = appState.profiles[appState.activeProfileId]?.data || (Object.values(appState.profiles) as ProfileMeta[])[0]?.data || DEFAULT_RESUME;

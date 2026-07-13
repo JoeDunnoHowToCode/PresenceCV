@@ -60,19 +60,28 @@ export default async function handler(req: any, res: any) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: "Unauthorized. Missing or invalid Authorization header." });
     }
-    const idToken = authHeader.split('Bearer ')[1];
+    let adminAuth, adminDb;
+    try {
+      const adminModule = await import('./firebase-admin');
+      adminAuth = adminModule.getFirebaseAdmin().adminAuth;
+      adminDb = adminModule.getFirebaseAdmin().adminDb;
+    } catch (err) {
+      console.error("Firebase Admin SDK import failed:", err);
+      return res.status(500).json({ error: "Server Configuration Error" });
+    }
+
+    if (!adminAuth || !adminDb) {
+      return res.status(500).json({ error: "Server Configuration Error" });
+    }
+
     let decodedToken;
     try {
-      const { getFirebaseAdmin } = await import('./firebase-admin');
-      const { adminAuth } = getFirebaseAdmin();
-      if (!adminAuth) throw new Error("adminAuth not initialized");
       decodedToken = await adminAuth.verifyIdToken(idToken);
     } catch (err) {
       console.error("Firebase ID Token verification failed:", err);
       return res.status(401).json({ error: "Unauthorized. Invalid ID token." });
     }
     const uid = decodedToken.uid;
-    const isAdmin = uid === process.env.ADMIN_UID;
 
     const { fileType, base64Data } = req.body;
 
@@ -87,19 +96,17 @@ export default async function handler(req: any, res: any) {
       return res.status(412).json({ error: "NO_SERVER_KEY" });
     }
 
-    // Check Quota using Admin SDK Transaction
-    const { getFirebaseAdmin } = await import('./firebase-admin');
-    const { adminDb } = getFirebaseAdmin();
-    if (!adminDb) {
-       return res.status(500).json({ error: "Firebase DB not initialized" });
-    }
     const userLimitsRef = adminDb.collection('user_limits').doc(uid);
+    const adminRef = adminDb.collection('admins').doc(uid);
     const todayStr = new Date().toISOString().split('T')[0];
 
     let allowed = false;
     try {
       await adminDb.runTransaction(async (t: any) => {
         const doc = await t.get(userLimitsRef);
+        const adminDoc = await t.get(adminRef);
+        const isAdmin = adminDoc.exists;
+
         let count = 0;
         if (doc.exists) {
           const data = doc.data();
