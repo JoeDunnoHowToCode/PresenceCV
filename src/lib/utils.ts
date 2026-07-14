@@ -24,3 +24,14 @@ export const copyTextToClipboard = async (text: string) => {
   }
   textArea.remove();
 };
+
+export function formatUrl(url: string): string {
+  if (!url) return '';
+  url = url.trim();
+  // Already has protocol or is a mailto/tel link
+  if (/^([a-z]+:)/i.test(url)) return url;
+  // If it's an email address without mailto
+  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(url)) return `mailto:${url}`;
+  // Default to https
+  return `https://${url}`;
+}

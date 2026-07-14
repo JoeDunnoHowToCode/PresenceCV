@@ -27,11 +27,15 @@
  * Routes: /view, /share/:id, /print/:id
  */
 import { CSSProperties, useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
 import { useResume } from '../hooks/useResume';
-import { ListItem, TagItem, ResumeData } from '../types';
-import { Link, useSearchParams } from 'react-router-dom';
+import { ResumeData, ListItem, TagItem } from '../types';
+import { THEME_COLORS } from '../constants';
+import { formatUrl } from '../lib/utils';
+import { useSearchParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -322,13 +326,16 @@ export default function ViewPage() {
                   const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
                   return (
                     <div key={item.id} className="flex items-center gap-2">
-                      <Icon className="w-4 h-4" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
                       {item.url ? (
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-sm font-['Georgia']" style={{ color: 'inherit', textDecoration: 'none' }}>
+                        <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-['Georgia']" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
                           {item.text}
                         </a>
                       ) : (
-                        <span className="text-sm font-['Georgia']">{item.text}</span>
+                        <>
+                          <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
+                          <span className="text-sm font-['Georgia']">{item.text}</span>
+                        </>
                       )}
                     </div>
                   );
@@ -530,16 +537,19 @@ export default function ViewPage() {
                     {data.profile.contactItems?.map(item => {
                       const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
                       return (
-                        <div key={item.id} className={`flex items-center gap-3 hover-glow-text cursor-default ${
+                        <div key={item.id} className={`flex items-center hover-glow-text cursor-pointer ${
                           data.profile.photo && data.profile.photoPosition === 'right' ? 'flex-row-reverse md:flex-row' : ''
                         }`}>
-                          <Icon className="w-5 h-5 text-accent" />
                           {item.url ? (
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-lg hover:text-accent transition-colors font-['Georgia'] font-bold">
+                            <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-lg hover:text-accent transition-colors font-['Georgia'] font-bold">
+                              <Icon className="w-5 h-5 shrink-0 text-accent" />
                               {item.text}
                             </a>
                           ) : (
-                            <span className="text-lg font-['Georgia']">{item.text}</span>
+                            <div className="flex items-center gap-3">
+                              <Icon className="w-5 h-5 shrink-0 text-accent" />
+                              <span className="text-lg font-['Georgia'] cursor-default">{item.text}</span>
+                            </div>
                           )}
                         </div>
                       );

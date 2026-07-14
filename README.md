@@ -59,11 +59,11 @@ VITE_FIREBASE_DATABASE_ID=                    # Optional, for non-default Firest
 # AI Features (optional — enables AI resume import)
 GEMINI_API_KEY=your_gemini_api_key
 
-# Security & Admin Configuration (optional)
-VITE_ADMIN_UID=your_firebase_user_uid         # UID of the user who gains admin privileges (bypassing upload limits)
+# Security & Backend Configuration (required for API limits/parsing)
+FIREBASE_SERVICE_ACCOUNT_KEY= # Stringified JSON of your Firebase Admin Service Account Key
 ```
 
-> **Note:** Frontend-accessible variables must be prefixed with `VITE_` (Vite requirement). The `GEMINI_API_KEY` is used server-side only and does NOT need the prefix.
+> **Note:** Frontend-accessible variables must be prefixed with `VITE_` (Vite requirement). The `GEMINI_API_KEY` and `FIREBASE_SERVICE_ACCOUNT_KEY` are used server-side only and do NOT need the prefix.
 
 ### 3. Run in Development
 
@@ -158,13 +158,14 @@ For a comprehensive architecture overview, see [**進階專案架構說明**](.a
 
 ---
 
-## 🔒 Security
+## 🔒 Security & Admin
 
 - **Authentication**: Google OAuth only — no password storage
 - **Data Isolation**: Firestore security rules enforce strict per-user access (UID matching)
 - **Session Cleanup**: Sign-out clears all localStorage data to prevent cross-session leaks
 - **Shared Links**: Read-only access; cannot be updated or deleted after creation
 - **Live Links**: Updates are gated by `ownerUid` verification
+- **Admin Privileges**: To grant admin privileges (bypassing the 3 profiles and 5 AI imports limit), you must manually create a document inside the `admins` Firestore collection where the Document ID is exactly the user's Firebase UID.
 
 ---
 
