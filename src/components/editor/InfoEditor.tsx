@@ -85,15 +85,21 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   let countColor = 'text-text-secondary';
   let countStatus = 'Type your summary';
   if (charCount > 0) {
-    if (charCount < 150) {
+    if (charCount < 100) {
+      countColor = 'text-red-400';
+      countStatus = 'Too short (optimal: 250-400)';
+    } else if (charCount < 250) {
       countColor = 'text-yellow-400';
-      countStatus = 'Too short (optimal: 150-250)';
-    } else if (charCount >= 150 && charCount <= 250) {
+      countStatus = 'A bit short';
+    } else if (charCount <= 400) {
       countColor = 'text-green-400';
       countStatus = 'Optimal length!';
-    } else {
+    } else if (charCount <= 500) {
       countColor = 'text-yellow-400';
-      countStatus = 'A bit long (keep it concise)';
+      countStatus = 'A bit long';
+    } else {
+      countColor = 'text-red-400';
+      countStatus = 'Too long';
     }
   }
 
@@ -175,7 +181,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           
           <div className={`flex items-center gap-1.5 text-xs font-medium tracking-wider ${countColor}`} title={countStatus}>
              <LucideIcons.BarChart2 className="w-3.5 h-3.5" />
-             <span>{charCount} / 250</span>
+             <span>{charCount} / 400</span>
           </div>
         </div>
 

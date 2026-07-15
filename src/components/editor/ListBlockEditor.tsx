@@ -25,15 +25,23 @@ const ListBlockEditor = React.memo(({
 
   return (
     <div className="py-8">
-      <div className="flex items-center justify-between mb-12">
-        <input
-          ref={titleInput.ref as React.Ref<HTMLInputElement>}
-          defaultValue={titleInput.defaultValue}
-          onChange={titleInput.onChange}
-          onBlur={titleInput.onBlur}
-          className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
-          placeholder="Section Title"
-        />
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+        <div className="flex flex-wrap items-center gap-4">
+          <input
+            ref={titleInput.ref as React.Ref<HTMLInputElement>}
+            defaultValue={titleInput.defaultValue}
+            onChange={titleInput.onChange}
+            onBlur={titleInput.onBlur}
+            className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
+            placeholder="Section Title"
+          />
+          {block.items.length > 4 && (
+            <div className="flex items-center gap-1.5 text-yellow-400 text-xs bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/20">
+              <LucideIcons.AlertTriangle className="w-3 h-3" />
+              <span>Having more than 4 items may cause PDF text to become too small.</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <Droppable droppableId={block.id} type="list-items">
