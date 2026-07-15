@@ -384,7 +384,7 @@ export default function ViewPage() {
               )}
 
               {block.type === 'tags' && (
-                <div className="grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                   {block.items.map((item: TagItem) => {
                     let idx = item.text.indexOf(':');
                     if (idx === -1) idx = item.text.indexOf('：'); // Handle Chinese colon
