@@ -22,7 +22,7 @@
 | ⑥ 測試撰寫 | QA & Test Engineer | 與 ⑤ 同步進行，撰寫測試 |
 | ⑦ 測試執行 | QA & Test Engineer | 實作完成後執行測試 |
 | ⑧ 安全審查 | Security Engineer | 審查程式碼漏洞與風險，不通過則回 ⑤ 修正 |
-| ⑨ 文件更新與歸檔 | Orchestrator | 更新 HumanMap 與 AgentMap。若 HumanMap 紀錄超過 10 筆，須自動將舊紀錄剪下並 append 至 `.agents/UpdateLog/archive.md` 進行歸檔 |
+| ⑨ 文件更新 | Orchestrator | 更新 HumanMap.md → 更新 AgentMap.yaml |
 | ⑩ Git Commit | Orchestrator | 最後一步，僅 commit 原始碼（`.agents/` 不進 git） |
 
 > [!IMPORTANT]
@@ -39,8 +39,3 @@
 
 ### 4. 環境同步
 - 任何修改都必須檢查是否同時影響本地測試環境（`server.ts`）與正式部署環境（`api/`），並保持兩者同步。
-
-### 5. 功能修改強制對話機制 (Mandatory Dialog for Functional Changes)
-- 每次要進行任何功能方面的修改或是修復時，**必須**使用 `ask_question` 工具跳出選擇對話框。
-- 對話框中必須提供你的分析方案（至少提供 2~3 個不同方向的解決選項），讓使用者在修改前可以審核或給予指引。
-- 即使符合「簡化流程豁免」，只要涉及「版面呈現邏輯」或「使用者體驗」的決策，都必須先彈出選項詢問，不可自行做主實作。

@@ -116,7 +116,7 @@ globs:
    - 每筆紀錄之間**必須相隔一個空白行**。
    - 每筆紀錄應描述：改動了哪些檔案、新增或修改了什麼功能、是否影響現有流程或資料模型。
 
-5. **【自動歸檔機制】**：在更新時，請主動計算 `HumanMap.md` 內的紀錄筆數。如果超過 10 筆，Orchestrator 必須**自動將最舊的紀錄剪下**，並以 append 的方式整理至 `.agents/UpdateLog/archive.md` 中，確保主文件永遠保持乾淨（最多保留最新的 10 筆）。
+5. **歸檔檢查**：若兩個紀錄區塊的總筆數超過 20 筆，執行歸檔流程（見本文件「UpdateLog 歸檔規則」章節）。
 
 #### 9b. 更新 AgentMap.yaml
 
@@ -183,7 +183,7 @@ globs:
 !.agents/skills/project-map.md
 
 # HumanMap archive (local only, may contain sensitive dev notes)
-.agents/UpdateLog/
+UpdateLog/
 ```
 
 ### 追蹤 vs 不追蹤
@@ -194,19 +194,20 @@ globs:
 | `.agents/skills/project-map.md` | ✅ | 展示 AI 操作 SOP 設計，無敏感資訊 |
 | `.agents/AgentMap.yaml` | ❌ | 更新頻繁、可能含內部架構細節 |
 | `.agents/HumanMap.md` | ❌ | 可能含 API Key、Admin UID 等敏感開發紀錄 |
-| `.agents/UpdateLog/` | ❌ | 從 HumanMap 歸檔而來，內容同樣可能含敏感資訊 |
+| `UpdateLog/` | ❌ | 從 HumanMap 歸檔而來，內容同樣可能含敏感資訊 |
 
 ---
 
 ## 六、UpdateLog 歸檔規則
 
-- **目錄**：`.agents/UpdateLog/`
-- **用途**：將超過 10 筆的 `HumanMap.md` 歷史更新紀錄歸檔至此，確保 HumanMap 永遠保持輕量。
+- **目錄**：`UpdateLog/`（專案根目錄）
+- **用途**：將非今日的 `HumanMap.md` 歷史更新紀錄歸檔至此，確保 HumanMap 永遠保持輕量。
 - **歸檔流程**：
-  1. 在每次寫入 `HumanMap.md` 後，檢查更新紀錄的總筆數是否大於 10。
-  2. 若超過 10 筆，將最舊的紀錄完整剪下。
-  3. 以 append 的方式寫入 `.agents/UpdateLog/archive.md`。
-  4. 確保 `HumanMap.md` 更新紀錄區塊頂部有一個通用的歸檔連結：`> [查看歷史歸檔紀錄](.agents/UpdateLog/archive.md)`。
-- **歸檔時機**：在每次寫入 `HumanMap.md` 時執行。
+  1. 在每次寫入 `HumanMap.md` 前，掃描兩個紀錄區塊（專案本體、作業規範），找出所有**非今日**的日期區塊（例如今天為 2026-07-11，但檔案中存在 `#### 2026-07-09`）。
+  2. 將這些非今日的日期區塊完整剪下。
+  3. 以該日期作為檔名，建立或附加寫入 `UpdateLog/YYYY-MM-DD.md`（例如 `UpdateLog/2026-07-09.md`）。
+  4. 歸檔檔案內需維持與 `HumanMap.md` 相同的分類結構（分為「專案本體更新紀錄」與「作業與規範更新紀錄」兩大區塊）。
+  5. 確保 `HumanMap.md` 更新紀錄區塊頂部有一個通用的歸檔資料夾連結：`> [查看歷史歸檔紀錄](UpdateLog/)`。
+- **歸檔時機**：在每次寫入 `HumanMap.md` 時**優先**執行。
 
 
