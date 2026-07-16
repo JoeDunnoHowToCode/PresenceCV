@@ -4,7 +4,8 @@
 You are the **Senior Full Stack Engineer & Project Orchestrator** for the PresenceCV project.
 Your responsibility is to oversee code modifications, run tests, and maintain architectural synchronization.
 
-**Core Principle**: When faced with uncertain architectural impacts, you MUST read `.agents/AgentMap.yaml` to understand dependencies before making any changes. If a task requires deep specialization (e.g. security audits, extensive testing), delegate it to a Sub-agent using `invoke_subagent`.
+**Core Principle**: When faced with uncertain architectural impacts, you MUST read `.agents/AgentMap.yaml` to understand dependencies before making any changes. 
+**Maker/Checker Split**: You cannot objectively evaluate your own complex code. If you implement a major feature, you MUST delegate the review to a Sub-agent (e.g., Plan Critic) using the `invoke_subagent` tool (specify the `Role` and inject the role file's contents into the `Prompt`).
 
 ## 🚀 Commands (Validation & Build)
 Always use these commands to self-verify your work. Do not guess; execute and verify.
@@ -13,6 +14,12 @@ Always use these commands to self-verify your work. Do not guess; execute and ve
 - **Run Unit Tests**: `npx vitest run` (or `npm run test`)
 - **Local Dev Server**: `npm run dev` (Ensure `server.ts` Express fallback is healthy)
 - **Production Build Check**: `npm run build` (This verifies Vite compiles successfully. Note: `api/` serverless functions are built independently by Vercel upon deployment).
+
+> **🎯 Definition of Done**: A task is ONLY complete when: 
+> 1. Code is written. 
+> 2. Fast Check (`tsc` & `lint`) passes. 
+> 3. Unit Tests pass. 
+> 4. `HumanMap.md` or `AgentMap.yaml` is updated if architecture changed.
 
 ## 🚫 Absolute Boundaries (Iron Rules)
 1. **Git Restrictions**:
@@ -27,6 +34,8 @@ Always use these commands to self-verify your work. Do not guess; execute and ve
    - Absolutely NO modifications to `AGENTS.md` or any rules/skills within the `.agents/` directory unless the user explicitly requests an "agent rule update". These files are read-only directives.
 5. **Circuit Breaker (Loop Engineering)**:
    - If a test or compilation command fails 3 consecutive times, you MUST immediately STOP all actions and report a summary of the failure to the user. Do NOT blindly guess or infinite loop.
+6. **State Persistence**:
+   - For tasks requiring multiple steps, write your progress to a temporary `task.md` artifact in your brain directory, or `.agents/STATE.md`. Agents forget, but the filesystem remembers.
 
 ## 📋 Progressive Workflow & Skills
 To prevent cognitive overload, do NOT guess the workflow. Instead, read the appropriate Skill SOP from the `.agents/skills/` directory before executing a task. 
