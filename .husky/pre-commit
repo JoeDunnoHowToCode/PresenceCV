@@ -1,10 +1,21 @@
-# 1. Enforce npm run lint ONLY if TS/TSX files are staged
+# 1. Enforce linting ONLY on staged TS/TSX files
 STAGED_TS_FILES=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' || true)
+
 if [ -n "$STAGED_TS_FILES" ]; then
-  echo "TypeScript files staged. Running type check and linter..."
+  echo "TypeScript files staged. Running linter on modified files..."
+  
+  # 如果專案之後有安裝 eslint，可以取消註解下方這行來進行局部檢查：
+  # npx eslint $STAGED_TS_FILES
+  # if [ $? -ne 0 ]; then
+  #   echo "❌ Lint failed on staged files. Please fix before committing."
+  #   exit 1
+  # fi
+  
+  # 目前使用 tsc --noEmit 進行全域型別檢查
+  echo "Running global type check..."
   npm run lint
   if [ $? -ne 0 ]; then
-    echo "❌ Lint/Type check failed. Please fix before committing."
+    echo "❌ Type check failed. Please fix before committing."
     exit 1
   fi
 else
