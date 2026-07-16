@@ -14,9 +14,8 @@ firebase-blueprint.json
 # Agent development files (local only, except workflow rules)
 .agents/*
 !.agents/AGENTS.md
+!.agents/roles/
 !.agents/skills/
-.agents/skills/*
-!.agents/skills/project-map.md
 
 # HumanMap archive (local only, may contain sensitive dev notes)
 UpdateLog/
