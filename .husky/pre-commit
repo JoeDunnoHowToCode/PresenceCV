@@ -1,14 +1,19 @@
-# 1. Enforce npm run lint
-echo "Running type check and linter..."
-npm run lint
-if [ $? -ne 0 ]; then
-  echo "❌ Lint/Type check failed. Please fix before committing."
-  exit 1
+# 1. Enforce npm run lint ONLY if TS/TSX files are staged
+STAGED_TS_FILES=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$STAGED_TS_FILES" ]; then
+  echo "TypeScript files staged. Running type check and linter..."
+  npm run lint
+  if [ $? -ne 0 ]; then
+    echo "❌ Lint/Type check failed. Please fix before committing."
+    exit 1
+  fi
+else
+  echo "No TypeScript files staged, skipping linter."
 fi
 
 # 2. Block restricted files from entering version control
 echo "Checking for restricted files..."
-RESTRICTED_FILES=".agents/AgentMap.yaml .agents/HumanMap.md"
+RESTRICTED_FILES=".agents/AgentMap.yaml .agents/HumanMap.md .agents/STATE.md task.md pr_review.md"
 for file in $RESTRICTED_FILES; do
   if git diff --cached --name-only | grep -q "$file"; then
     echo "❌ ERROR: You are trying to commit a restricted file: $file"
