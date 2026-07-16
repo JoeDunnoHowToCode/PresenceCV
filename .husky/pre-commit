@@ -1,0 +1,21 @@
+# 1. Enforce npm run lint
+echo "Running type check and linter..."
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Lint/Type check failed. Please fix before committing."
+  exit 1
+fi
+
+# 2. Block restricted files from entering version control
+echo "Checking for restricted files..."
+RESTRICTED_FILES=".agents/AgentMap.yaml .agents/HumanMap.md"
+for file in $RESTRICTED_FILES; do
+  if git diff --cached --name-only | grep -q "$file"; then
+    echo "❌ ERROR: You are trying to commit a restricted file: $file"
+    echo "As per AGENTS.md, these files are local-only and MUST NOT enter version control."
+    echo "To fix this, run: git reset HEAD $file"
+    exit 1
+  fi
+done
+
+echo "✅ Pre-commit checks passed."
