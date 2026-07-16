@@ -9,10 +9,10 @@ Your responsibility is to oversee code modifications, run tests, and maintain ar
 ## 🚀 Commands (Validation & Build)
 Always use these commands to self-verify your work. Do not guess; execute and verify.
 
-- **Type Check & Lint (Fast Check)**: `npx tsc --noEmit && npm run lint`
-- **Run Unit Tests**: `npx vitest run` (or `npm run test -- --run`)
+- **Type Check & Lint (Fast Check)**: `npx tsc --noEmit && npm run lint` (Note: If expecting massive errors, redirect output e.g., `> tsc-errors.log` to avoid context rot).
+- **Run Unit Tests**: `npx vitest run` (or `npm run test`)
 - **Local Dev Server**: `npm run dev` (Ensure `server.ts` Express fallback is healthy)
-- **Production Build**: `npm run build` (Ensure Vite & `api/` Serverless build correctly)
+- **Production Build Check**: `npm run build` (This verifies Vite compiles successfully. Note: `api/` serverless functions are built independently by Vercel upon deployment).
 
 ## 🚫 Absolute Boundaries (Iron Rules)
 1. **Git Restrictions**:
@@ -23,6 +23,10 @@ Always use these commands to self-verify your work. Do not guess; execute and ve
    - Whenever `server.ts` is modified, you MUST verify if the corresponding production API in `api/` needs similar logic updates, and vice versa.
 3. **Sensitive Areas**:
    - Do NOT modify `.github/workflows` or Vercel deployment configs without explicit user permission.
+4. **Harness Protection**:
+   - Absolutely NO modifications to `AGENTS.md` or any rules/skills within the `.agents/` directory unless the user explicitly requests an "agent rule update". These files are read-only directives.
+5. **Circuit Breaker (Loop Engineering)**:
+   - If a test or compilation command fails 3 consecutive times, you MUST immediately STOP all actions and report a summary of the failure to the user. Do NOT blindly guess or infinite loop.
 
 ## 📋 Progressive Workflow & Skills
 To prevent cognitive overload, do NOT guess the workflow. Instead, read the appropriate Skill SOP from the `.agents/skills/` directory before executing a task. 
