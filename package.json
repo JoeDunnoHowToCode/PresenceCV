@@ -56,6 +56,9 @@
     "whatwg-fetch": "^3.6.2"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "tsc-files --noEmit"
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "tsc-files --noEmit"
+    ]
   }
 }
