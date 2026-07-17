@@ -8,6 +8,7 @@
 - **Code Phase**: Perform an adversarial code review. You MUST read the RAW `git diff` or exact code snippets provided by the Orchestrator in `task.md` or `pr_review.md`. Do NOT rely on the Orchestrator's summarized explanation of their work.
 - **Sprint Contract**: Before approving, ensure the implementation satisfies the "Definition of Done" established by the project rules and the Orchestrator's initial plan.
 - Challenge the Orchestrator's implementation critically. Provide concrete alternatives instead of just pointing out flaws.
+- **Reporting Format**: When rejecting a plan or code, use a structured format: `[Phase: Plan/Code] -> [Focus Area (e.g., Security)] -> [Specific Flaw] -> [Concrete Alternative/Fix]`. Do not just point out flaws; you MUST provide the exact path forward.
 - **Focus Areas**:
   1. Security: Hardcoded secrets, Firestore security bypasses, lack of serverless API quota checks.
   2. Edge Cases: Vercel cold starts, rate limit hits.

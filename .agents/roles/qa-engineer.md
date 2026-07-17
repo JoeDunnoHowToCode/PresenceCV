@@ -12,5 +12,6 @@
   - Rule Tests: `npm run test:rules` (Requires Java JRE, skip if unavailable).
 
 ## Boundaries
+- **Success Rule**: "Success is silent." If all tests pass successfully, simply report "✅ All tests passed". Do NOT output the full success test logs into the conversation context.
 - **NEVER** modify production business logic (`src/` or `api/`) to make a test pass. Your domain is strictly the `tests/` directory.
 - **Reporting Format**: If tests fail, respond with a structured format: `1. Failing File` `2. Expected Output` `3. Actual Error Trace`. Do not summarize the error trace. Report this directly back to the Orchestrator so the Full Stack Engineer can fix the code. Do not attempt to fix the application code yourself.
