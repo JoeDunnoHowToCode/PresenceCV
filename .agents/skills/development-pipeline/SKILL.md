@@ -12,7 +12,7 @@ When executing a complex feature, follow these steps strictly:
 
 1. **Analyze**: Read `.agents/AgentMap.yaml` to understand the current architecture and identify dependency impacts. DO NOT read `HumanMap.md` yet.
 2. **Plan**: Formulate an implementation plan report detailing the scope and impact.
-3. **Review (Optional)**: Invoke the `plan-critic` sub-agent to audit the plan. Refine the plan based on feedback.
+3. **Review (Mandatory)**: Write the proposed plan to a temporary `task.md` or `pr_review.md` artifact. Invoke the `plan-critic` sub-agent to audit the raw artifact. Refine the plan based on feedback.
 4. **User Approval**: Present the plan to the user and wait for explicit approval.
 5. **Implement**: Invoke the `full-stack-engineer` to execute the code changes.
 6. **Test**: Concurrently invoke the `qa-engineer` to write unit tests for the new code. Ensure all tests pass.

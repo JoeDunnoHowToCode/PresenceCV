@@ -21,11 +21,11 @@ The log is divided into two strict sections:
 - Prefix time: `- **HH:MM** - [Content]...`
 
 ## 3. Archiving Rule (The Ratchet System)
-To keep the main file lightweight:
-1. Before writing new entries, scan for any date blocks that are NOT today's date.
-2. Cut these non-today blocks.
-3. Save them to `UpdateLog/YYYY-MM-DD.md`.
-4. Ensure `> [查看歷史歸檔紀錄](UpdateLog/)` remains at the top of the update sections.
+To keep the main file lightweight and prevent copy-paste hallucination risks:
+1. Always run the archiving script before writing new entries:
+   `python3 .agents/skills/update-humanmap/scripts/archive-log.py`
+2. This script automatically scans `.agents/HumanMap.md` for date blocks that are NOT today's date, cuts them, and saves them to `UpdateLog/YYYY-MM-DD.md` safely.
+3. Ensure `> [查看歷史歸檔紀錄](UpdateLog/)` remains at the top of the update sections.
 
 ## 4. AgentMap.yaml Sync
 Always sync `.agents/AgentMap.yaml` alongside `HumanMap.md` if the codebase architecture (files, env vars, dependencies) changed.
