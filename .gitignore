@@ -19,3 +19,4 @@ firebase-blueprint.json
 
 # HumanMap archive (local only, may contain sensitive dev notes)
 UpdateLog/
+.vercel

@@ -32,7 +32,7 @@ const mockRunTransaction = vi.fn();
 const mockGet = vi.fn();
 const mockSet = vi.fn();
 
-vi.mock('../api/firebase-admin', () => ({
+vi.mock('../src/lib/firebase-admin', () => ({
   getFirebaseAdmin: vi.fn(() => ({
     adminAuth: { verifyIdToken: mockVerifyIdToken },
     adminDb: {

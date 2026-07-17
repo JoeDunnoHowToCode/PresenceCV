@@ -35,7 +35,7 @@ export const config = {
 };
 
 import { globalRateLimiter } from "../src/utils/rateLimiter.js";
-import { getFirebaseAdmin } from './firebase-admin.js';
+import { getFirebaseAdmin } from '../src/lib/firebase-admin.js';
 
 export default async function handler(req: any, res: any) {
   // Prevent any non-POST methods immediately
