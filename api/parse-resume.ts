@@ -22,7 +22,7 @@
  * Consumed by: ImportResumeModal.tsx (via fetch POST)
  */
 import { GoogleGenAI, Type } from "@google/genai";
-import { RESUME_PARSER_SYSTEM_PROMPT } from "../src/lib/aiPrompt";
+import { RESUME_PARSER_SYSTEM_PROMPT } from "../src/lib/aiPrompt.js";
 
 // Vercel serverless function configuration
 // We set a 4MB limit here to ensure that Base64 payloads don't exceed Vercel's 4.5MB hard limit
@@ -34,8 +34,8 @@ export const config = {
   },
 };
 
-import { globalRateLimiter } from "../src/utils/rateLimiter";
-import { getFirebaseAdmin } from './firebase-admin';
+import { globalRateLimiter } from "../src/utils/rateLimiter.js";
+import { getFirebaseAdmin } from './firebase-admin.js';
 
 export default async function handler(req: any, res: any) {
   // Prevent any non-POST methods immediately
