@@ -28,7 +28,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
-import { RESUME_PARSER_SYSTEM_PROMPT } from '../lib/aiPrompt';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
 
@@ -102,10 +101,8 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
           })
         });
 
-        if (response.status === 412 || response.status >= 500) {
-          // The backend specifically told us it has no key (412) 
-          // OR it failed with a server error (e.g. invalid key 500).
-          // Fall back to frontend proxy.
+        if (response.status === 412) {
+          // The backend specifically told us it has no Gemini key
           throw new Error("SERVER_UNAVAILABLE_OR_NO_KEY");
         } 
         
@@ -117,11 +114,11 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         parsedData = await response.json();
       } catch (backendError: any) {
         if (backendError.message !== "SERVER_UNAVAILABLE_OR_NO_KEY") {
-          throw backendError; // Stop if it's a real server error (like 400 Bad Request)
+          throw backendError; // Stop if it's a real server error (like 500 or 400)
         }
 
         console.warn('Server-side parsing unavailable (412). No client-side fallback configured.');
-        throw new Error('AI service unavailable. Please ensure the server is configured with a valid API key.');
+        throw new Error('AI service unavailable. Please ensure the server is configured with a valid API key.', { cause: backendError });
       }
 
       onImport(parsedData);
