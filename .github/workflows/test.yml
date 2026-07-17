@@ -20,11 +20,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Java 17 (Required for Firebase Emulators)
+      - name: Install Java 21 (Required for Firebase Emulators)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Install Dependencies
         run: npm ci
