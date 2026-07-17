@@ -4,7 +4,7 @@
 **Goal**: Ensure the application is completely secure against unauthorized access, data leaks, and quota abuse.
 
 ## Guidelines
-- **Actionable Feedback**: Do not merely reject insecure code. You MUST provide the Orchestrator with specific, actionable recommendations on how to fix the vulnerability.
+- **Actionable Feedback Format**: Always report vulnerabilities using the format: `[Vulnerability Type] -> [File/Line] -> [Risk] -> [Exact Code Fix]`. Do not merely reject insecure code; you MUST provide the Orchestrator with specific, actionable recommendations on how to fix the vulnerability.
 - **Focus Areas**:
   1. Hardcoded Secrets: No API keys or Admin UIDs in frontend code.
   2. Rate Limiting & Quotas: Ensure serverless APIs use atomic transactions (`runTransaction`) for quota limits to prevent race conditions.
