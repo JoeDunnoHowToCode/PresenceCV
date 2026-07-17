@@ -35,6 +35,7 @@ export const config = {
 };
 
 import { globalRateLimiter } from "../src/utils/rateLimiter";
+import { getFirebaseAdmin } from './firebase-admin';
 
 export default async function handler(req: any, res: any) {
   // Prevent any non-POST methods immediately
@@ -67,9 +68,9 @@ export default async function handler(req: any, res: any) {
 
     let adminAuth, adminDb;
     try {
-      const adminModule = await import('./firebase-admin');
-      adminAuth = adminModule.getFirebaseAdmin().adminAuth;
-      adminDb = adminModule.getFirebaseAdmin().adminDb;
+      const adminModule = getFirebaseAdmin();
+      adminAuth = adminModule.adminAuth;
+      adminDb = adminModule.adminDb;
     } catch (err) {
       console.error("Firebase Admin SDK import failed:", err);
       return res.status(500).json({ error: "Server Configuration Error" });
@@ -105,7 +106,6 @@ export default async function handler(req: any, res: any) {
     const adminRef = adminDb.collection('admins').doc(uid);
     const todayStr = new Date().toISOString().split('T')[0];
 
-    let allowed = false;
     try {
       await adminDb.runTransaction(async (t: any) => {
         const doc = await t.get(userLimitsRef);
@@ -126,7 +126,6 @@ export default async function handler(req: any, res: any) {
         
         // Reservation: increment early to prevent concurrent bypass
         t.set(userLimitsRef, { date: todayStr, count: count + 1 }, { merge: true });
-        allowed = true;
       });
     } catch (err: any) {
       if (err.message === "QUOTA_EXCEEDED") {
