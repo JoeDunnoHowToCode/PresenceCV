@@ -331,8 +331,8 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           </div>
           
           {data.profile.summary && (
-            <div className="mt-12 w-full text-lg leading-relaxed text-gray-700 italic font-['Georgia']">
-              "{data.profile.summary}"
+            <div className="mt-12 w-full text-lg leading-relaxed text-gray-700 italic font-['Georgia'] text-left">
+              {data.profile.summary}
             </div>
           )}
         </div>
@@ -542,13 +542,11 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
 
               <div className="max-w-[900px] w-full px-4 flex justify-center pb-12">
                 <div style={{ width: `${data.profile.summaryWidth || 100}%` }} className="relative">
-                  <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary">"</span>
                   <p 
-                    className="italic text-2xl leading-relaxed text-text-secondary hover-glow-text cursor-default font-['Georgia'] w-full md:w-[900px] text-center"
+                    className="italic text-2xl leading-relaxed text-text-secondary hover-glow-text cursor-default font-['Georgia'] w-full md:w-[900px] text-left"
                   >
                     {data.profile.summary}
                   </p>
-                  <span className="absolute -right-8 bottom-0 text-3xl font-serif italic text-text-secondary">"</span>
                 </div>
               </div>
             </motion.div>
