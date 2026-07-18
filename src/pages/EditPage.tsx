@@ -30,7 +30,6 @@ export default function EditPage() {
     createProfile,
     renameProfile,
     deleteProfile,
-    toggleAnimation,
     updateProfile,
     addContactItem,
     updateContactItem,
@@ -410,6 +409,25 @@ export default function EditPage() {
                   </div>
                 </div>
 
+                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-white/10 bg-white/5">
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <LucideIcons.Download className="w-4 h-4 text-accent" />
+                    Export PDF
+                  </div>
+                  <p className="text-xs text-text-secondary">
+                    Generate and download a high-quality PDF version of your resume.
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      onClick={handleExportPDF}
+                      className="flex-1 flex items-center justify-center gap-2 text-xs text-white bg-white/10 border border-white/10 rounded-lg px-3 py-2 hover:bg-white/20 transition-colors"
+                    >
+                      <LucideIcons.Download className="w-3 h-3" />
+                      Generate PDF
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -493,8 +511,25 @@ export default function EditPage() {
           </div>
         )}
 
-        <div className="max-w-5xl mx-auto w-full flex flex-col gap-8 mb-16 relative z-10">
+        {/* --- Top Left Control Panel (Fixed/Absolute) --- */}
+        <div className="absolute top-6 left-6 z-[60] hidden xl:flex flex-col gap-4">
           
+          {/* Row 1: Logo & Home */}
+          <div className="flex items-center gap-3 glass px-5 py-3 rounded-full border border-white/10 hover-glow group w-64 cursor-pointer" onClick={() => navigate('/')}>
+             {user?.photoURL ? (
+               <img src={user.photoURL} alt="User avatar" className="w-8 h-8 rounded-full border border-white/20 shrink-0" />
+             ) : (
+               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                 <LucideIcons.User className="w-4 h-4 text-white" />
+               </div>
+             )}
+             <span className="text-white font-serif tracking-widest text-lg group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all truncate">
+               PresenceCV
+             </span>
+             <LucideIcons.Home className="w-4 h-4 ml-auto text-text-secondary group-hover:text-white transition-colors shrink-0" />
+          </div>
+
+          {/* Row 2: Profile Switcher Dropdown */}
           <ProfileSwitcher 
             profiles={appState.profiles}
             activeProfileId={appState.activeProfileId}
@@ -502,23 +537,34 @@ export default function EditPage() {
             createProfile={createProfile}
             renameProfile={renameProfile}
             setProfileToDelete={setProfileToDelete}
-            user={user}
-            isMobile={isMobile}
-            navigate={navigate}
           />
-          
+
+          {/* Row 3: Theme Picker Dropdown */}
           <ThemePicker 
             themeColor={data.themeColor}
-            enableAnimation={data.enableAnimation}
             updateThemeColor={updateThemeColor}
-            toggleAnimation={toggleAnimation}
             THEME_COLORS={THEME_COLORS}
           />
 
-          {/* Row 2: Tabs & Add Block */}
+          {/* Row 4: Share Button */}
+          <button
+            onClick={openShareModal}
+            disabled={isSharing}
+            className="glass px-5 py-3 rounded-full flex items-center justify-between gap-4 w-64 text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white border border-white/10 hover:border-white/20 hover-glow disabled:opacity-50 disabled:cursor-not-allowed group"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0" />
+              <span className="font-medium truncate">Share</span>
+            </div>
+          </button>
+        </div>
+
+        <div className="max-w-5xl mx-auto w-full flex flex-col gap-8 mb-16 relative z-10 pt-4 xl:pt-0">
+          
+          {/* Row 1: Main Tabs & Add Block */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-3xl backdrop-blur-md border border-white/10 xl:w-[1310px] xl:-ml-[100px] w-full relative z-30"
+            className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-3xl backdrop-blur-md border border-white/10 xl:w-[1310px] xl:-ml-[100px] w-full relative z-[55]"
           >
             {isMobile ? (
               <div className="relative flex-[2]">
@@ -722,9 +768,9 @@ export default function EditPage() {
                   handleTabClick(newId);
                   if (isMobile) setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center justify-center gap-1 px-3 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
               >
-                <LucideIcons.Plus className="w-3 h-3" /> List
+                <LucideIcons.Plus className="w-3 h-3" /> List View
               </button>
               <button
                 onClick={() => {
@@ -732,43 +778,29 @@ export default function EditPage() {
                   handleTabClick(newId);
                   if (isMobile) setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center justify-center gap-1 px-3 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
               >
-                <LucideIcons.Plus className="w-3 h-3" /> Tags
+                <LucideIcons.Plus className="w-3 h-3" /> Tag View
               </button>
             </div>
           </motion.div>
 
-          {/* Row 3: Actions */}
+          {/* Row 2: Actions */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-4"
           >
             <button
-              onClick={openShareModal}
-              disabled={isSharing}
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-text-secondary hover:text-accent hover-glow whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LucideIcons.Share2 className="w-4 h-4" />
-              Share
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-text-secondary hover:text-accent hover-glow whitespace-nowrap"
-            >
-              <LucideIcons.Download className="w-4 h-4" /> Export PDF
-            </button>
-            <button
               onClick={() => setIsImportModalOpen(true)}
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-indigo-400 hover:text-indigo-300 hover-glow whitespace-nowrap"
+              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white hover:text-white border border-transparent hover:border-white/20 hover-glow whitespace-nowrap"
             >
-              <LucideIcons.Wand2 className="w-4 h-4" /> Import Your Resume
+              <LucideIcons.Upload className="w-4 h-4 text-accent" /> Import Resume
             </button>
             <Link
               to="/view"
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-accent hover-glow whitespace-nowrap"
+              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white hover:text-white border border-transparent hover:border-white/20 hover-glow whitespace-nowrap"
             >
-              <LucideIcons.Eye className="w-4 h-4" /> View Showcase
+              <LucideIcons.Eye className="w-4 h-4 text-accent" /> Profile Preview
             </Link>
           </motion.div>
         </div>

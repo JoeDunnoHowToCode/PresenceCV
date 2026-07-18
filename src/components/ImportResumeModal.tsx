@@ -151,30 +151,30 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-xl z-[101] overflow-hidden"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md glass rounded-2xl shadow-2xl z-[101] overflow-hidden border border-white/10"
           >
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-600" />
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-accent" />
                 Import Your Resume
               </h2>
               <button 
                 onClick={onClose}
                 disabled={isUploading}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+                className="p-2 text-text-secondary hover:text-white rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6">
-              <p className="text-gray-600 mb-6 text-sm text-center">
+              <p className="text-text-secondary mb-6 text-sm text-center">
                 Upload your existing resume (PDF, JPG, or PNG) and our AI will automatically extract and populate your profile. 
-                <br /> <span className="text-xs text-gray-400 mt-1 block">(Limit 5 times per day)</span>
+                <br /> <span className="text-xs text-text-secondary/70 mt-1 block">(Limit 5 times per day)</span>
               </p>
 
               {error && (
-                <div className="mb-6 p-4 bg-red-50 rounded-xl flex border border-red-100 text-red-700 gap-3 items-start">
+                <div className="mb-6 p-4 bg-red-500/10 rounded-xl flex border border-red-500/20 text-red-400 gap-3 items-start">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                   <p className="text-sm font-medium">{error}</p>
                 </div>
@@ -182,23 +182,23 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  isUploading ? 'border-gray-200 bg-gray-50' : 'border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer'
+                  isUploading ? 'border-white/10 bg-white/5' : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 cursor-pointer hover-glow'
                 }`}
                 onClick={() => !isUploading && fileInputRef.current?.click()}
               >
                 {isUploading ? (
                   <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-                    <p className="text-sm font-medium text-indigo-900">AI is analyzing your resume...</p>
-                    <p className="text-xs text-indigo-600/70">This might take up to 30 seconds.</p>
+                    <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                    <p className="text-sm font-medium text-white">AI is analyzing your resume...</p>
+                    <p className="text-xs text-text-secondary">This might take up to 30 seconds.</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-2 text-indigo-600">
+                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center shadow-sm mb-2 text-accent">
                       <Upload className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-medium text-indigo-900">Click to upload document</p>
-                    <p className="text-xs text-indigo-600/70">Max 3MB. Fast and secure.</p>
+                    <p className="text-sm font-medium text-white">Click to upload document</p>
+                    <p className="text-xs text-text-secondary">Max 3MB. Fast and secure.</p>
                   </div>
                 )}
                 
@@ -211,10 +211,10 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                 />
               </div>
 
-              <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-100 flex gap-2 w-full items-start">
-                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <p className="text-xs text-amber-800 leading-relaxed">
-                    <strong>Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after import to ensure AI accuracy.
+              <div className="mt-6 p-4 bg-accent/10 rounded-lg border border-accent/20 flex gap-2 w-full items-start">
+                  <AlertCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    <strong className="text-white">Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after import to ensure AI accuracy.
                   </p>
               </div>
             </div>
