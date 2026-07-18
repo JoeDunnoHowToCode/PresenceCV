@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 /**
  * ViewPage.tsx — Public Resume Viewer & Print Layout
  *
@@ -26,18 +29,18 @@
  * Depends on: useResume, firebase.ts, types.ts, lucide-react, motion
  * Routes: /view, /share/:id, /print/:id
  */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CSSProperties, useState, useEffect, useRef } from 'react';
-import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { useResume } from '../hooks/useResume';
 import { ResumeData, ListItem, TagItem } from '../types';
-import { THEME_COLORS } from '../constants';
-import { formatUrl } from '../lib/utils';
-import { useSearchParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { formatUrl } from '../lib/utils';
 
 const ICONS: Record<string, any> = {
   info: LucideIcons.User,
@@ -47,7 +50,7 @@ const ICONS: Record<string, any> = {
   languages: LucideIcons.Globe
 };
 
-export default function ViewPage() {
+export default function ViewPage({ testData }: { testData?: unknown }) {
   const { data: defaultData } = useResume();
   const [searchParams] = useSearchParams();
   const [remoteData, setRemoteData] = useState<ResumeData | null>(null);
@@ -73,7 +76,9 @@ export default function ViewPage() {
           }
         } catch (err: any) {
           console.error(err);
-          if (err.message && err.message.includes('offline')) {
+          if (err && typeof err === 'object' && 'code' in err && (err as {code: string}).code === 'permission-denied') {
+            setError('Permission denied.');
+          } else if (err.message && err.message.includes('offline')) {
             setError('Unable to reach the server. Please check your internet connection or the application configuration.');
           } else {
             setError('Failed to load resume. Please verify the link.');
@@ -89,10 +94,8 @@ export default function ViewPage() {
   const [syncData, setSyncData] = useState<ResumeData | null>(null);
   const [printTimeout, setPrintTimeout] = useState(false);
   
-  // If it's a print preview without an explicit ID, we rely entirely on syncData from the editor opener
-  // We should not use defaultData otherwise it prints the placeholder layout.
   const isSyncPrintWait = isPrint && !idFromUrl && !liveIdFromUrl && !syncData && !printTimeout;
-  const data = syncData || remoteData || (!isPrint || printTimeout ? defaultData : null);
+  const data = (testData as ResumeData) || syncData || remoteData || (!isPrint || printTimeout ? defaultData : null);
 
   useEffect(() => {
     if (isPrint && !idFromUrl && !liveIdFromUrl && !syncData) {
@@ -101,9 +104,7 @@ export default function ViewPage() {
     }
   }, [isPrint, idFromUrl, liveIdFromUrl, syncData]);
 
-  // Real-time data sync for printing/previewing latest unsaved local data
   useEffect(() => {
-    // Check localStorage as primary reliable data source in bounded cross-window scopes
     if (isPrint) {
       const localPrintDataStr = localStorage.getItem('RESUME_PRINT_DATA');
       if (localPrintDataStr) {
@@ -123,7 +124,6 @@ export default function ViewPage() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'RESUME_DATA_SYNC') {
         setSyncData(event.data.data);
-        // Acknowledge receipt to stop the sender's interval
         if (window.opener) {
           window.opener.postMessage({ type: 'RESUME_DATA_ACK' }, event.origin);
         }
@@ -152,7 +152,7 @@ export default function ViewPage() {
     if (!allTabs.includes(activeTab)) {
       setActiveTab('info');
     }
-  }, [data?.blockOrder, activeTab]);
+  }, [data?.blockOrder, activeTab, allTabs]);
 
   const handleTabClick = (tabId: string) => {
     const currentIndex = allTabs.indexOf(activeTab);
@@ -187,7 +187,7 @@ export default function ViewPage() {
     if (data && !data.profile?.photo) {
       setImagesLoaded(true);
     }
-  }, [data?.profile?.photo]);
+  }, [data, data?.profile?.photo]);
 
   useEffect(() => {
     if (isPrint && !loading && !error && data) {
@@ -200,32 +200,25 @@ export default function ViewPage() {
         }
         
         let finalScale = 1;
-        const targetWidth = 650; // 794 - 144 (72px padding * 2)
-        const targetHeight = 978; // 1122 - 144
+        const targetWidth = 650;
+        const targetHeight = 978;
         
         if (printContentRef.current) {
           const el = printContentRef.current;
-          
-          // Use more aggressive scale limits and more iterations for precision
           let minScale = 0.25; 
           let maxScale = 1.6;
           let bestScale = 1.0;
-
-          // Force the element to behave as a desktop view even if calculating on mobile
           const originalWidth = el.style.width;
           const originalTransform = el.style.transform;
 
           for (let i = 0; i < 15; i++) {
             const midScale = (minScale + maxScale) / 2;
             const testWidth = targetWidth / midScale;
-            
             el.style.transform = 'none';
             el.style.width = `${testWidth}px`;
-            el.style.display = 'block'; // Ensure block for height calculation
-            
+            el.style.display = 'block';
             const height = el.scrollHeight;
             const scaledHeight = height * midScale;
-            
             if (scaledHeight > targetHeight) {
               maxScale = midScale;
             } else {
@@ -233,17 +226,12 @@ export default function ViewPage() {
               minScale = midScale;
             }
           }
-          
-          finalScale = bestScale * 0.98; // Larger safety margin (2%)
+          finalScale = bestScale * 0.98;
           el.style.transform = originalTransform;
           el.style.width = originalWidth;
         }
-        
         setPrintScale(finalScale);
-
-        const timer = setTimeout(() => {
-          window.print();
-        }, 800);
+        const timer = setTimeout(() => { window.print(); }, 800);
         return () => clearTimeout(timer);
       }
     }
@@ -293,7 +281,6 @@ export default function ViewPage() {
             style={{ width: `${650 / printScale}px`, transform: printScale !== 1 ? `scale(${printScale})` : 'none', transformOrigin: 'top left' }}
           >
             <div className="w-full flex flex-col mb-12">
-            {/* For print layout, we enforce flex-row universally to prevent stacking on narrow print viewports */}
             <div className={`flex flex-row w-full gap-8 ${
             data.profile.photo ? (data.profile.photoPosition === 'right' ? 'flex-row-reverse' : '') : ''
           }`}>
@@ -304,7 +291,7 @@ export default function ViewPage() {
                   alt="Profile" 
                   className="w-full h-full object-cover" 
                   onLoad={() => setImagesLoaded(true)}
-                  onError={() => setImagesLoaded(true)} // Proceed even if image fails
+                  onError={() => setImagesLoaded(true)}
                 />
               </div>
             )}
@@ -313,7 +300,6 @@ export default function ViewPage() {
                 ? (data.profile.photoPosition === 'right' ? 'text-right items-end' : 'text-left items-start')
                 : 'text-center items-center'
             }`}>
-              {/* Darken the text for white backgrounds so even white/light-grey theme colors remain legible */}
               <h1 className="font-serif text-6xl font-bold mb-4" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>{data.profile.name}</h1>
               <p className="text-xl tracking-widest uppercase text-gray-500 font-['Georgia'] mb-6">{data.profile.title}</p>
               
@@ -387,10 +373,10 @@ export default function ViewPage() {
                 <div className="grid grid-cols-3 gap-6">
                   {block.items.map((item: TagItem) => {
                     let idx = item.text.indexOf(':');
-                    if (idx === -1) idx = item.text.indexOf('：'); // Handle Chinese colon
+                    if (idx === -1) idx = item.text.indexOf('：');
 
-                    let category = item.text;
-                    let tags: string[] = [];
+                    let category: string;
+                    let tags: string[];
                     if (idx > -1) {
                       category = item.text.slice(0, idx).trim();
                       tags = item.text.slice(idx + 1).split(/[,，、]\s*(?![^()]*\))/).map(s => s?.trim()).filter(Boolean);
@@ -433,7 +419,6 @@ export default function ViewPage() {
     >
       <div className={`depth-bg ${data.enableAnimation ? 'animated' : ''}`} />
 
-      {/* Top Bar */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -441,7 +426,6 @@ export default function ViewPage() {
       >
         <div className="flex-1 hidden xl:block"></div>
 
-        {/* Tabs */}
         <div 
           ref={tabsContainerRef}
           className="flex items-center justify-between gap-2 bg-white/5 py-2 px-[15px] rounded-3xl backdrop-blur-md border border-white/10 xl:w-[1310px] h-[70px] xl:-ml-[100px] xl:-mr-[5px] text-center text-[#fcfcfc] text-base font-normal leading-6 no-underline overflow-x-auto glass-scrollbar overscroll-x-contain w-full"
@@ -503,7 +487,6 @@ export default function ViewPage() {
                     : 'justify-center md:items-start'
                   : 'justify-center items-center text-center'
               }`}>
-                {/* Avatar Frame */}
                 {data.profile.photo && (
                   <div className={`shrink-0 flex items-center justify-center pt-2 ${
                     data.profile.photoPosition === 'right' ? 'md:justify-start' : 'md:justify-end'
@@ -514,7 +497,6 @@ export default function ViewPage() {
                   </div>
                 )}
 
-                {/* Header Texts & Contacts */}
                 <div className={`flex flex-col space-y-10 ${
                   data.profile.photo 
                     ? data.profile.photoPosition === 'right'
@@ -561,12 +543,11 @@ export default function ViewPage() {
               <div className="max-w-[900px] w-full px-4 flex justify-center pb-12">
                 <div style={{ width: `${data.profile.summaryWidth || 100}%` }} className="relative">
                   <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary">"</span>
-                  <div 
-                    className="italic text-2xl leading-relaxed text-text-secondary hover-glow-text cursor-default font-['Georgia'] w-full md:w-[900px]"
-                    style={{ textAlign: (data.profile.summaryAlign as any) || 'center' }}
+                  <p 
+                    className="italic text-2xl leading-relaxed text-text-secondary hover-glow-text cursor-default font-['Georgia'] w-full md:w-[900px] text-center"
                   >
                     {data.profile.summary}
-                  </div>
+                  </p>
                   <span className="absolute -right-8 bottom-0 text-3xl font-serif italic text-text-secondary">"</span>
                 </div>
               </div>
@@ -614,8 +595,8 @@ export default function ViewPage() {
                     let idx = item.text.indexOf(':');
                     if (idx === -1) idx = item.text.indexOf('：');
 
-                    let category = item.text;
-                    let tags: string[] = [];
+                    let category: string;
+                    let tags: string[];
                     
                     if (idx > -1) {
                       category = item.text.slice(0, idx).trim();

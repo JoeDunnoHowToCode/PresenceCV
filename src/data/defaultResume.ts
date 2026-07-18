@@ -23,7 +23,6 @@ export const DEFAULT_RESUME: ResumeData = {
     location: "Metropolis, Earth",
     email: "hello@alexrivera.design",
     summary: "Visionary Product Designer with a focus on creating intuitive, human-centered digital experiences. Expert in bridging the gap between user needs and business goals through elegant design and strategic thinking.",
-    summaryAlign: 'center',
     summaryWidth: 100,
     contactItems: [
       { id: "c1", icon: "MapPin", text: "Metropolis, Earth", url: "" },

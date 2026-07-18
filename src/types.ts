@@ -32,7 +32,6 @@ export interface Profile {
   email: string;
   summary: string;
   contactItems?: ContactItem[];
-  summaryAlign?: 'left' | 'center' | 'right' | 'justify';
   summaryWidth?: number;
   photo?: string;
   photoPosition?: 'left' | 'right';

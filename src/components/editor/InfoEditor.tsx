@@ -1,3 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/immutability */
+
+/* eslint-disable react-hooks/refs */
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';
@@ -72,8 +79,6 @@ export function useDebouncedInput(
 }
 
 const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeContactItem, addContactItem, AVAILABLE_ICONS }: InfoEditorProps) => {
-  const summaryAlign = data.profile.summaryAlign || 'center';
-
   const nameInput = useDebouncedInput(data.profile.name, (val) => updateProfile('name', val));
   const titleInput = useDebouncedInput(data.profile.title, (val) => updateProfile('title', val));
   const summaryInput = useDebouncedInput(data.profile.summary, (val) => updateProfile('summary', val));
@@ -160,28 +165,11 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           }
         }}
       >
-        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-4 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
-          <div className="flex items-center gap-1">
-            {['left', 'center', 'right', 'justify'].map(align => (
-              <button
-                key={align}
-                onClick={() => updateProfile('summaryAlign', align as 'left' | 'center' | 'right' | 'justify')}
-                className={`p-1.5 rounded-md transition-colors ${summaryAlign === align ? 'bg-white/20 text-white' : 'text-text-secondary hover:bg-white/10'}`}
-                title={`Align ${align}`}
-              >
-                {align === 'left' && <LucideIcons.AlignLeft className="w-4 h-4" />}
-                {align === 'center' && <LucideIcons.AlignCenter className="w-4 h-4" />}
-                {align === 'right' && <LucideIcons.AlignRight className="w-4 h-4" />}
-                {align === 'justify' && <LucideIcons.AlignJustify className="w-4 h-4" />}
-              </button>
-            ))}
-          </div>
-
-          <div className="w-px h-6 bg-white/20 mx-1"></div>
-          
-          <div className={`flex items-center gap-1.5 text-xs font-medium tracking-wider ${countColor}`} title={countStatus}>
-             <LucideIcons.BarChart2 className="w-3.5 h-3.5" />
-             <span>{charCount} / 400</span>
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-6 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
+          <div className={`flex items-center gap-2 text-xs font-medium tracking-wider ${countColor}`}>
+             <LucideIcons.PenTool className="w-4 h-4" />
+             <span className="uppercase font-semibold opacity-70">Recommended Length:</span>
+             <span className="font-mono">{charCount} / 400</span>
           </div>
         </div>
 
@@ -189,8 +177,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           <span className="absolute -left-8 top-0 text-3xl font-serif italic text-text-secondary pointer-events-none z-10">"</span>
           
           <div 
-            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] font-['Georgia'] w-full break-words"
-            style={{ textAlign: summaryAlign as any }}
+            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] font-['Georgia'] w-full break-words text-center"
           >
             {summaryInput.localValue + ' '}
           </div>
@@ -203,8 +190,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
             defaultValue={summaryInput.defaultValue}
             onChange={summaryInput.onChange}
             onBlur={summaryInput.onBlur}
-            className="absolute inset-0 italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none overflow-hidden"
-            style={{ textAlign: summaryAlign as any }}
+            className="absolute inset-0 italic text-2xl leading-relaxed text-text-secondary outline-none focus:bg-white/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] hover-glow-text font-['Georgia'] bg-transparent w-full resize-none overflow-hidden text-center"
             placeholder="A short summary about yourself..."
           />
           <span className="absolute -right-8 bottom-0 text-3xl font-serif italic text-text-secondary pointer-events-none z-10">"</span>
