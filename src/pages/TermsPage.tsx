@@ -11,7 +11,6 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as LucideIcons from 'lucide-react';
 
 export default function TermsPage() {
   return (

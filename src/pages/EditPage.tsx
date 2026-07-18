@@ -69,6 +69,7 @@ export default function EditPage() {
 
   useEffect(() => {
     if (location.state?.openImport) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsImportModalOpen(true);
       window.history.replaceState({}, document.title);
     }
@@ -92,6 +93,7 @@ export default function EditPage() {
 
   useEffect(() => {
     if (!allTabs.includes(activeTab)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('info');
     }
   }, [data.blockOrder, activeTab]);
@@ -255,7 +257,7 @@ export default function EditPage() {
     } finally {
       setIsInitializingLive(false);
     }
-  }, [appState, data, updateProfileData, user?.uid]);
+  }, [appState, data, updateProfileData, user]);
 
   const handleCopyLink = useCallback(async (url: string, section: 'snapshot' | 'live') => {
     await copyTextToClipboard(url);
@@ -632,7 +634,6 @@ export default function EditPage() {
                       {...provided.droppableProps} 
                       ref={(el) => {
                         provided.innerRef(el);
-                        // @ts-ignore
                         tabsContainerRef.current = el;
                       }}
                       className="flex gap-2 items-center overflow-x-auto glass-scrollbar flex-1 px-2 overscroll-x-contain"
@@ -645,7 +646,7 @@ export default function EditPage() {
                         const isActive = activeTab === blockId;
 
                         return (
-                          // @ts-expect-error key is valid in React
+                          // @ts-expect-error react-beautiful-dnd types missing key
                           <Draggable key={block.id} draggableId={block.id} index={index}>
                             {(provided, snapshot) => (
                               <div

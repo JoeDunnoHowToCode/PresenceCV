@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * useResume.ts — Central Resume State Management Hook
  *
@@ -56,7 +59,7 @@ export function useResume() {
   const sanitizeHtml = (str: string, maxLength: number = 2000) => {
     if (typeof str !== 'string') return str;
     if (str.startsWith('data:image/')) return str; // Allow full data URLs
-    let sanitized = str.replace(/<\/?(script|iframe|object|embed)[^>]*>/gi, '');
+    const sanitized = str.replace(/<\/?(script|iframe|object|embed)[^>]*>/gi, '');
     return sanitized.substring(0, maxLength);
   };
 
@@ -83,7 +86,9 @@ export function useResume() {
         if (parsed.activeProfileId && parsed.profiles) {
           return parsed;
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
     return {
       activeProfileId: 'main',
@@ -226,20 +231,20 @@ export function useResume() {
 
     // Extract and format contact items
     const rawContactItems = parsedData.contactItems || [];
-    let formattedContactItems = rawContactItems.map((item) => {
-      let textVal = (item.text || '').trim();
+    const formattedContactItems = rawContactItems.map((item) => {
+      const textVal = (item.text || '').trim();
       let finalUrl = (item.url || '').trim();
       
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       // Allow +, digits, spaces, hyphens, and parentheses, minimum 7 chars long for a phone number
-      const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/;
+      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
 
       // If AI forgot to provide URL but provided text, let's try to infer it
       if (!finalUrl && textVal) {
         if (emailRegex.test(textVal)) {
           finalUrl = `mailto:${textVal}`;
         } else if (phoneRegex.test(textVal) && textVal.replace(/\D/g, '').length >= 7) {
-          finalUrl = `tel:${textVal.replace(/[\s\-\(\)]/g, '')}`;
+          finalUrl = `tel:${textVal.replace(/[\s\-()]/g, '')}`;
         } else if (textVal.toLowerCase().includes('linkedin.com') || textVal.toLowerCase().includes('github.com')) {
           finalUrl = textVal.startsWith('http') ? textVal : `https://${textVal}`;
         }
@@ -248,7 +253,7 @@ export function useResume() {
          if (emailRegex.test(finalUrl) && !finalUrl.toLowerCase().startsWith('mailto:')) {
            finalUrl = `mailto:${finalUrl}`;
          } else if (phoneRegex.test(finalUrl) && finalUrl.replace(/\D/g, '').length >= 7 && !finalUrl.toLowerCase().startsWith('tel:')) {
-           finalUrl = `tel:${finalUrl.replace(/[\s\-\(\)]/g, '')}`;
+           finalUrl = `tel:${finalUrl.replace(/[\s\-()]/g, '')}`;
          }
       }
       
@@ -405,7 +410,7 @@ export function useResume() {
   const updateContactItem = useCallback( (id: string, field: string, value: string) => {
     setData(prev => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/;
+      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
 
       return {
         ...prev,
@@ -421,7 +426,7 @@ export function useResume() {
               if (emailRegex.test(value.trim()) && !value.toLowerCase().startsWith('mailto:')) {
                 updatedItem.url = `mailto:${value.trim()}`;
               } else if (phoneRegex.test(value.trim()) && value.replace(/\D/g, '').length >= 7 && !value.toLowerCase().startsWith('tel:')) {
-                updatedItem.url = `tel:${value.trim().replace(/[\s\-\(\)]/g, '')}`;
+                updatedItem.url = `tel:${value.trim().replace(/[\s\-()]/g, '')}`;
               }
             }
 
@@ -429,7 +434,7 @@ export function useResume() {
             if (field === 'text') {
               const currentUrl = (item.url || '').toLowerCase();
               const oldEmailAutoUrl = `mailto:${item.text.trim()}`.toLowerCase();
-              const oldPhoneAutoUrl = `tel:${item.text.replace(/[\s\-\(\)]/g, '')}`.toLowerCase();
+              const oldPhoneAutoUrl = `tel:${item.text.replace(/[\s\-()]/g, '')}`.toLowerCase();
               
               if (emailRegex.test(value.trim())) {
                 if (!currentUrl || currentUrl === oldEmailAutoUrl || currentUrl === oldPhoneAutoUrl) {
@@ -437,7 +442,7 @@ export function useResume() {
                 }
               } else if (phoneRegex.test(value.trim()) && value.replace(/\D/g, '').length >= 7) {
                  if (!currentUrl || currentUrl === oldPhoneAutoUrl || currentUrl === oldEmailAutoUrl) {
-                  updatedItem.url = `tel:${value.trim().replace(/[\s\-\(\)]/g, '')}`;
+                  updatedItem.url = `tel:${value.trim().replace(/[\s\-()]/g, '')}`;
                 }
               }
             }
