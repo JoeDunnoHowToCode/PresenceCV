@@ -290,9 +290,9 @@ export default function EditPage() {
         style={{ '--theme-accent': THEME_COLORS[0] } as CSSProperties}
       >
         <div className="depth-bg animated" />
-        <div className="glass p-8 rounded-2xl flex flex-col items-center gap-4 border border-white/10 shadow-2xl">
+        <div className="bg-white p-8 rounded-2xl flex flex-col items-center gap-4 border border-[#eceae4] shadow-xl">
           <LucideIcons.Loader2 className="w-8 h-8 animate-spin text-accent" />
-          <p className="text-text-secondary text-xs uppercase tracking-widest font-medium">Loading your profiles...</p>
+          <p className="text-[#5f5f5d] text-xs uppercase tracking-widest font-medium">Loading your profiles...</p>
         </div>
       </div>
     );
@@ -303,42 +303,42 @@ export default function EditPage() {
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div 
-        className="min-h-screen bg-bg relative overflow-x-hidden flex flex-row"
+        className="min-h-screen bg-bg relative overflow-x-hidden flex flex-row font-sans"
         style={{ '--theme-accent': data.themeColor } as CSSProperties}
       >
         {/* The Animated Background */}
         <div className={`depth-bg ${data.enableAnimation ? 'animated' : ''} absolute inset-0 z-0 pointer-events-none`} />
 
         {isShareModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="glass p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-white/10 shadow-2xl relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+            <div className="bg-white p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl relative">
               <button
                 onClick={() => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); }}
-                className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors p-2"
+                className="absolute top-4 right-4 text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2"
               >
                 <LucideIcons.X className="w-5 h-5" />
               </button>
 
               <LucideIcons.Share2 className="w-10 h-10 text-accent mb-4" />
-              <h3 className="text-2xl font-serif text-white mb-2">Share Your Resume</h3>
-              <p className="text-sm text-text-secondary mb-8">
+              <h3 className="text-2xl font-serif text-[#1c1c1c] mb-2">Share Your Resume</h3>
+              <p className="text-sm text-[#5f5f5d] mb-8">
                 Choose how you want to share your profile with the world.
               </p>
 
               <div className="flex flex-col gap-5 w-full">
-                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-white/10 bg-white/5">
+                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-[#eceae4] bg-[#f9f8f5]">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-white font-medium">
+                    <div className="flex items-center gap-2 text-[#1c1c1c] font-medium">
                       <LucideIcons.Camera className="w-4 h-4 text-accent" />
                       Snapshot Link
                     </div>
                   </div>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-[#5f5f5d]">
                     Captures your resume exactly as it is right now. Automatically updates only when you make changes.
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     {isSharing ? (
-                      <div className="flex-1 flex items-center gap-2 text-xs text-text-secondary bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                      <div className="flex-1 flex items-center gap-2 text-xs text-[#5f5f5d] bg-white border border-[#eceae4] rounded-lg px-3 py-2">
                         <LucideIcons.Loader2 className="w-3 h-3 animate-spin shrink-0" />
                         Generating…
                       </div>
@@ -347,41 +347,41 @@ export default function EditPage() {
                         readOnly
                         value={snapshotUrl}
                         onClick={e => (e.target as HTMLInputElement).select()}
-                        className="flex-1 text-xs bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-text-secondary outline-none cursor-text select-all"
+                        className="flex-1 text-xs bg-white border border-[#eceae4] rounded-lg px-3 py-2 text-[#5f5f5d] outline-none cursor-text select-all"
                       />
                     ) : (
-                      <div className="flex-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                      <div className="flex-1 text-xs text-red-400 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
                         Failed to generate. Close and reopen to retry.
                       </div>
                     )}
                     <button
                       onClick={() => snapshotUrl && handleCopyLink(snapshotUrl, 'snapshot')}
                       disabled={!snapshotUrl || isSharing}
-                      className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 disabled:opacity-40 transition-colors"
+                      className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-[#eceae4] hover:bg-[#dcdbd7] disabled:opacity-40 transition-colors"
                     >
                       {copiedSection === 'snapshot'
-                        ? <><LucideIcons.Check className="w-3 h-3 text-green-400" /> Copied!</>
+                        ? <><LucideIcons.Check className="w-3 h-3 text-green-600" /> Copied!</>
                         : <><LucideIcons.Copy className="w-3 h-3" /> Copy</>}
                     </button>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-accent/20 bg-accent/5">
-                  <div className="flex items-center gap-2 text-white font-medium">
+                  <div className="flex items-center gap-2 text-[#1c1c1c] font-medium">
                     <LucideIcons.Radio className="w-4 h-4 text-accent" />
                     Live Link
                     {data.liveId && (
-                      <span className="ml-auto text-[10px] uppercase tracking-widest text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                      <span className="ml-auto text-[10px] uppercase tracking-widest text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
                         Active
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-[#5f5f5d]">
                     A permanent link that always reflects your latest edits. Tied to this profile — deleting the profile removes the link.
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     {isInitializingLive ? (
-                      <div className="flex-1 flex items-center gap-2 text-xs text-text-secondary bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                      <div className="flex-1 flex items-center gap-2 text-xs text-[#5f5f5d] bg-white border border-[#eceae4] rounded-lg px-3 py-2">
                         <LucideIcons.Loader2 className="w-3 h-3 animate-spin shrink-0" />
                         Creating live link…
                       </div>
@@ -390,7 +390,7 @@ export default function EditPage() {
                         readOnly
                         value={`${window.location.origin}/view?live=${data.liveId}`}
                         onClick={e => (e.target as HTMLInputElement).select()}
-                        className="flex-1 text-xs bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-text-secondary outline-none cursor-text select-all"
+                        className="flex-1 text-xs bg-white border border-[#eceae4] rounded-lg px-3 py-2 text-[#5f5f5d] outline-none cursor-text select-all"
                       />
                     ) : (
                       <button
@@ -404,28 +404,28 @@ export default function EditPage() {
                     {data.liveId && (
                       <button
                         onClick={() => handleCopyLink(`${window.location.origin}/view?live=${data.liveId}`, 'live')}
-                        className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 transition-colors"
+                        className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium bg-[#eceae4] text-[#1c1c1c] hover:bg-[#dcdbd7] transition-colors"
                       >
                         {copiedSection === 'live'
-                          ? <><LucideIcons.Check className="w-3 h-3 text-green-400" /> Copied!</>
+                          ? <><LucideIcons.Check className="w-3 h-3 text-green-600" /> Copied!</>
                           : <><LucideIcons.Copy className="w-3 h-3" /> Copy</>}
                       </button>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-white/10 bg-white/5">
-                  <div className="flex items-center gap-2 text-white font-medium">
+                <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-[#eceae4] bg-[#f9f8f5]">
+                  <div className="flex items-center gap-2 text-[#1c1c1c] font-medium">
                     <LucideIcons.Download className="w-4 h-4 text-accent" />
                     Export PDF
                   </div>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-[#5f5f5d]">
                     Generate and download a high-quality PDF version of your resume.
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <button
                       onClick={handleExportPDF}
-                      className="flex-1 flex items-center justify-center gap-2 text-xs text-white bg-white/10 border border-white/10 rounded-lg px-3 py-2 hover:bg-white/20 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 text-xs text-[#1c1c1c] bg-[#eceae4] border border-[#eceae4] rounded-lg px-3 py-2 hover:bg-[#dcdbd7] transition-colors"
                     >
                       <LucideIcons.Download className="w-3 h-3" />
                       Generate PDF
@@ -439,17 +439,20 @@ export default function EditPage() {
         )}
 
         {blockToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="glass p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-white/10 shadow-2xl">
-              <LucideIcons.AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
-              <h3 className="text-xl font-medium text-white mb-2">Delete Section?</h3>
-              <p className="text-text-secondary mb-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
+            >
+              <LucideIcons.AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+              <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">Delete Section?</h3>
+              <p className="text-sm text-[#5f5f5d] mb-8">
                 Are you sure you want to delete "{data.blocks[blockToDelete]?.title}"? This action cannot be undone.
               </p>
               <div className="flex gap-4 w-full">
                 <button
                   onClick={() => setBlockToDelete(null)}
-                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+                  className="flex-1 py-3 rounded-xl bg-[#f7f4ed] hover:bg-[#eceae4] transition-colors text-[#1c1c1c] font-medium"
                 >
                   Cancel
                 </button>
@@ -459,29 +462,33 @@ export default function EditPage() {
                     if (activeTab === blockToDelete) setActiveTab('info');
                     setBlockToDelete(null);
                   }}
-                  className="flex-1 py-3 rounded-xl bg-red-500/80 hover:bg-red-500 transition-colors text-white font-medium"
+                  className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 transition-colors text-white font-medium"
                 >
                   Confirm
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
 
         {profileToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-            <div className="glass p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-white/10 shadow-2xl">
-              <LucideIcons.FileWarning className="w-12 h-12 text-red-400 mb-4" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
+            >
+              <LucideIcons.FileWarning className="w-12 h-12 text-red-500 mb-4" />
               {Object.keys(appState.profiles).length <= 1 ? (
                 <>
-                  <h3 className="text-xl font-medium text-white mb-2">Unable to delete the profile</h3>
-                  <p className="text-text-secondary mb-8">
+                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">Unable to delete the profile</h3>
+                  <p className="text-sm text-[#5f5f5d] mb-8">
                     At least one profile must be retained
                   </p>
                   <div className="flex gap-4 w-full">
                     <button
                       onClick={() => setProfileToDelete(null)}
-                      className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+                      className="flex-1 py-3 rounded-xl bg-[#f7f4ed] hover:bg-[#eceae4] transition-colors text-[#1c1c1c] font-medium"
                     >
                       Okay
                     </button>
@@ -489,14 +496,14 @@ export default function EditPage() {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-medium text-white mb-2">Delete Resume?</h3>
-                  <p className="text-text-secondary mb-8">
+                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">Delete Resume?</h3>
+                  <p className="text-sm text-[#5f5f5d] mb-8">
                     Are you sure you want to delete "{appState.profiles[profileToDelete]?.name}"? This action cannot be undone.
                   </p>
                   <div className="flex gap-4 w-full">
                     <button
                       onClick={() => setProfileToDelete(null)}
-                      className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white font-medium"
+                      className="flex-1 py-3 rounded-xl bg-[#f7f4ed] hover:bg-[#eceae4] transition-colors text-[#1c1c1c] font-medium"
                     >
                       Cancel
                     </button>
@@ -505,19 +512,19 @@ export default function EditPage() {
                         deleteProfile(profileToDelete);
                         setProfileToDelete(null);
                       }}
-                      className="flex-1 py-3 rounded-xl bg-red-500/80 hover:bg-red-500 transition-colors text-white font-medium"
+                      className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 transition-colors text-white font-medium"
                     >
                       Confirm
                     </button>
                   </div>
                 </>
               )}
-            </div>
+            </motion.div>
           </div>
         )}
 
         {/* --- Responsive Left Sidebar (Visible on all screens) --- */}
-        <div className="flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen w-20 md:w-24 lg:w-72 border-r border-white/5 bg-black/20 backdrop-blur-md overflow-visible transition-all">
+        <div className="flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen w-20 md:w-24 lg:w-72 border-r border-[#eceae4] bg-white/60 backdrop-blur-md overflow-visible transition-all">
           
           {/* Row 1: Logo & Brand */}
           <Link 
@@ -527,46 +534,47 @@ export default function EditPage() {
             <img 
               src="/favicon.png" 
               alt="PresenceCV Logo" 
-              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-transform duration-300" 
+              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300" 
+              style={{ mixBlendMode: 'multiply' }}
             />
-            <span className="text-white font-serif tracking-widest text-lg lg:text-xl group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all whitespace-nowrap absolute left-12 lg:relative lg:left-0 z-50 pointer-events-none lg:pointer-events-auto shadow-black/50 drop-shadow-lg">
+            <span className="hidden lg:inline-block text-[#1c1c1c] font-serif font-semibold tracking-widest text-lg lg:text-xl transition-all whitespace-nowrap lg:relative z-50 lg:pointer-events-auto">
               PresenceCV
             </span>
           </Link>
 
-          <div className="w-full h-px bg-white/5 my-2 shrink-0" />
+          <div className="w-full h-px bg-[#eceae4] my-2 shrink-0" />
 
           {/* Row 2: User Avatar & Logout */}
-          <div className="flex flex-col lg:flex-row items-center gap-3 lg:px-5 lg:py-3 p-2 rounded-2xl lg:rounded-full border border-white/10 glass justify-center lg:justify-start shrink-0 relative z-40">
+          <div className="flex flex-col lg:flex-row items-center gap-3 lg:px-5 lg:py-3 p-2 rounded-2xl lg:rounded-full border border-[#eceae4] bg-white/50 shadow-sm justify-center lg:justify-start shrink-0 relative z-40">
              {user?.photoURL ? (
-               <img src={user.photoURL} alt="User avatar" className="w-8 h-8 lg:w-7 lg:h-7 rounded-full border border-white/20 shrink-0 object-cover min-w-[32px] lg:min-w-[28px]" />
+               <img src={user.photoURL} alt="User avatar" className="w-8 h-8 lg:w-7 lg:h-7 rounded-full border border-[#eceae4] shrink-0 object-cover min-w-[32px] lg:min-w-[28px]" />
              ) : (
-               <div className="w-8 h-8 lg:w-7 lg:h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0 min-w-[32px] lg:min-w-[28px]">
-                 <LucideIcons.User className="w-4 h-4 text-white" />
+               <div className="w-8 h-8 lg:w-7 lg:h-7 rounded-full bg-[#1c1c1c]/5 flex items-center justify-center shrink-0 min-w-[32px] lg:min-w-[28px]">
+                 <LucideIcons.User className="w-4 h-4 text-[#1c1c1c]" />
                </div>
              )}
              <div className="flex-1 min-w-0 hidden lg:block">
-               <div className="text-xs text-text-secondary truncate">{user?.email || 'User'}</div>
+               <div className="text-xs text-[#5f5f5d] font-medium truncate">{user?.email || 'User'}</div>
              </div>
              
              {/* Log Out Buttons */}
              <button 
                onClick={() => setIsLogoutModalOpen(true)}
-               className="text-text-secondary hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10 hidden lg:block shrink-0"
+               className="text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2 rounded-full hover:bg-black/5 hidden lg:block shrink-0"
                title="Log Out"
              >
                <LucideIcons.LogOut className="w-4 h-4" />
              </button>
              <button 
                onClick={() => setIsLogoutModalOpen(true)}
-               className="lg:hidden flex items-center justify-center p-2 rounded-full text-text-secondary hover:text-red-400 transition-all hover:bg-red-500/10 shrink-0 mt-2 border border-white/5 bg-white/5"
+               className="lg:hidden flex items-center justify-center p-2 rounded-full text-[#5f5f5d] hover:text-[#1c1c1c] transition-all hover:bg-black/5 shrink-0 mt-2 border border-[#eceae4] bg-white/50 shadow-sm"
                title="Log Out"
              >
                <LucideIcons.LogOut className="w-4 h-4" />
              </button>
           </div>
 
-          <div className="w-full h-px bg-white/5 my-2 shrink-0 hidden lg:block" />
+          <div className="w-full h-px bg-[#eceae4] my-2 shrink-0 hidden lg:block" />
 
           {/* Row 3: Profile Switcher Dropdown */}
           <ProfileSwitcher 
@@ -589,7 +597,7 @@ export default function EditPage() {
           <button
             onClick={openShareModal}
             disabled={isSharing}
-            className="glass lg:px-5 lg:py-3 p-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white border border-white/10 hover:border-white/20 hover-glow disabled:opacity-50 disabled:cursor-not-allowed group shrink-0"
+            className="bg-white/50 lg:px-5 lg:py-3 p-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full text-sm uppercase tracking-widest hover:bg-white transition-colors text-[#1c1c1c] border border-[#eceae4] hover:border-[#eceae4] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed group shrink-0"
           >
             <div className="flex items-center gap-3 min-w-0">
               <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
@@ -604,13 +612,14 @@ export default function EditPage() {
           
           {/* Row 1: Main Tabs & Add Block */}
           <motion.div 
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-3xl backdrop-blur-md border border-white/10 w-full relative z-[55]"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="flex items-center justify-between gap-2 bg-white/60 p-2 rounded-3xl backdrop-blur-md border border-[#eceae4] w-full relative z-[55] shadow-sm"
           >
             {isMobile ? (
               <div className="relative flex-1 min-w-0">
                  <div 
-                   className="flex items-center justify-between w-full px-4 py-2.5 rounded-full whitespace-nowrap hover-glow bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)] cursor-pointer"
+                   className="flex items-center justify-between w-full px-4 py-2.5 rounded-full whitespace-nowrap  bg-[#eceae4] text-[#1c1c1c] font-medium  cursor-pointer"
                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                  >
                    <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -661,11 +670,11 @@ export default function EditPage() {
                    {isMobileMenuOpen && (
                      <motion.div 
                        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-                       className="absolute top-14 left-0 right-0 glass rounded-3xl flex flex-col p-2 gap-1 z-50 border border-white/10 shadow-2xl min-w-[200px]"
+                       className="absolute top-14 left-0 right-0 bg-white rounded-3xl flex flex-col p-2 gap-1 z-50 border border-[#eceae4] shadow-xl min-w-[200px]"
                      >
                        <button
                          onClick={() => { handleTabClick('info'); setIsMobileMenuOpen(false); }}
-                         className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${activeTab === 'info' ? 'bg-accent/20 text-white' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}
+                         className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${activeTab === 'info' ? 'bg-[#f7f4ed] text-[#1c1c1c]' : 'text-[#5f5f5d] hover:bg-black/5 hover:text-[#1c1c1c]'}`}
                        >
                          <LucideIcons.User className="w-4 h-4" />
                          <span className="text-sm tracking-widest uppercase font-medium">Info</span>
@@ -673,31 +682,28 @@ export default function EditPage() {
                        {data.blockOrder.map(blockId => {
                          const block = data.blocks[blockId];
                          if (!block) return null;
-                         const Icon = block.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase;
                          return (
-                           <div key={blockId} className="flex items-center gap-1 group">
-                             <button
-                               onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}
-                               className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-left truncate ${activeTab === blockId ? 'bg-accent/20 text-white' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}
-                             >
-                               <Icon className="w-4 h-4 shrink-0" />
+                           <div key={blockId} className="group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all cursor-pointer hover:bg-black/5 text-[#5f5f5d] hover:text-[#1c1c1c]" onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}>
+                             <div className="flex-1 flex items-center gap-3 min-w-0">
+                               {block.type === 'list' ? <LucideIcons.List className="w-4 h-4 shrink-0 text-accent" /> : <LucideIcons.Tags className="w-4 h-4 shrink-0 text-accent" />}
                                <span className="text-sm tracking-widest uppercase font-medium truncate">{block.title}</span>
-                             </button>
+                             </div>
                              <button
-                               onClick={() => {
+                               onClick={(e) => {
+                                 e.stopPropagation();
                                  setBlockToDelete(blockId);
-                                 setIsMobileMenuOpen(false);
                                }}
-                               className="p-3 text-text-secondary hover:text-red-400 transition-all rounded-xl hover:bg-red-500/10 shrink-0"
+                               className="p-1 rounded-full text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                               title="Delete Section"
                              >
-                               <LucideIcons.X className="w-4 h-4" />
+                               <LucideIcons.X className="w-3 h-3" />
                              </button>
                            </div>
                          )
                        })}
 
                         {/* Mobile Controls */}
-                        <div className="pt-2 border-t border-white/10 flex flex-col gap-2 pb-1 mt-1">
+                        <div className="pt-2 border-t border-[#eceae4] flex flex-col gap-2 pb-1 mt-1">
                           <ProfileSwitcher 
                             profiles={appState.profiles}
                             activeProfileId={appState.activeProfileId}
@@ -722,9 +728,9 @@ export default function EditPage() {
                 <button
                   onClick={() => handleTabClick('info')}
                   data-active={activeTab === 'info'}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap hover-glow shrink-0 ${
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 ${
                     activeTab === 'info' 
-                      ? 'bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)]' 
+                      ? 'bg-[#eceae4] text-[#1c1c1c] font-medium ' 
                       : 'text-text-secondary hover:text-accent hover:bg-white/5'
                   }`}
                 >
@@ -757,9 +763,9 @@ export default function EditPage() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 data-active={isActive}
-                                className={`relative flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap hover-glow shrink-0 group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} ${
+                                className={`relative flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} ${
                                   isActive 
-                                    ? 'bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)]' 
+                                    ? 'bg-[#eceae4] text-[#1c1c1c] font-medium ' 
                                     : 'text-text-secondary hover:text-accent hover:bg-white/5'
                                 }`}
                               >
@@ -826,7 +832,7 @@ export default function EditPage() {
                   handleTabClick(newId);
                   if (isMobile) setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors  whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
               >
                 <LucideIcons.Plus className="w-3 h-3" /> List View
               </button>
@@ -836,7 +842,7 @@ export default function EditPage() {
                   handleTabClick(newId);
                   if (isMobile) setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors hover-glow whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors  whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
               >
                 <LucideIcons.Plus className="w-3 h-3" /> Tag View
               </button>
@@ -850,13 +856,13 @@ export default function EditPage() {
           >
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white hover:text-white border border-transparent hover:border-white/20 hover-glow whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
             >
               <LucideIcons.Upload className="w-4 h-4 text-accent" /> Import Resume
             </button>
             <Link
               to="/view"
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white hover:text-white border border-transparent hover:border-white/20 hover-glow whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
             >
               <LucideIcons.Eye className="w-4 h-4 text-accent" /> Profile Preview
             </Link>
@@ -926,7 +932,7 @@ export default function EditPage() {
           </AnimatePresence>
         </main>
       </div>
-      </div>
+    </div>
 
       <ImportResumeModal 
         isOpen={isImportModalOpen}

@@ -35,9 +35,9 @@ export default function LogoutConfirmModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className={`relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border ${
+        className={`relative w-full max-w-sm rounded-2xl shadow-xl overflow-hidden border ${
           isDark 
-            ? 'glass border-white/10' 
+            ? 'bg-white border-[#eceae4]' 
             : 'bg-white border-gray-100'
         }`}
       >

@@ -151,26 +151,26 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md glass rounded-2xl shadow-2xl z-[101] overflow-hidden border border-white/10"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-xl z-[101] overflow-hidden border border-[#eceae4]"
           >
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <div className="p-6 border-b border-[#eceae4] flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-[#1c1c1c] flex items-center gap-2">
                 <FileText className="w-5 h-5 text-accent" />
                 Import Your Resume
               </h2>
               <button 
                 onClick={onClose}
                 disabled={isUploading}
-                className="p-2 text-text-secondary hover:text-white rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
+                className="p-2 text-[#5f5f5d] hover:text-[#1c1c1c] rounded-full hover:bg-black/5 transition-colors disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6">
-              <p className="text-text-secondary mb-6 text-sm text-center">
+              <p className="text-[#5f5f5d] mb-6 text-sm text-center">
                 Upload your existing resume (PDF, JPG, or PNG) and our AI will automatically extract and populate your profile. 
-                <br /> <span className="text-xs text-text-secondary/70 mt-1 block">(Limit 5 times per day)</span>
+                <br /> <span className="text-xs text-[#5f5f5d]/70 mt-1 block">(Limit 5 times per day)</span>
               </p>
 
               {error && (
@@ -182,23 +182,23 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  isUploading ? 'border-white/10 bg-white/5' : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 cursor-pointer hover-glow'
+                  isUploading ? 'border-[#eceae4] bg-black/5' : 'border-[#eceae4] bg-white hover:bg-black/5 hover:border-[#1c1c1c]/20 cursor-pointer '
                 }`}
                 onClick={() => !isUploading && fileInputRef.current?.click()}
               >
                 {isUploading ? (
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-8 h-8 text-accent animate-spin" />
-                    <p className="text-sm font-medium text-white">AI is analyzing your resume...</p>
-                    <p className="text-xs text-text-secondary">This might take up to 30 seconds.</p>
+                    <p className="text-sm font-medium text-[#1c1c1c]">AI is analyzing your resume...</p>
+                    <p className="text-xs text-[#5f5f5d]">This might take up to 30 seconds.</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center shadow-sm mb-2 text-accent">
+                    <div className="w-12 h-12 bg-[#eceae4]/50 rounded-full flex items-center justify-center shadow-sm mb-2 text-accent">
                       <Upload className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-medium text-white">Click to upload document</p>
-                    <p className="text-xs text-text-secondary">Max 3MB. Fast and secure.</p>
+                    <p className="text-sm font-medium text-[#1c1c1c]">Click to upload document</p>
+                    <p className="text-xs text-[#5f5f5d]">Max 3MB. Fast and secure.</p>
                   </div>
                 )}
                 
@@ -213,8 +213,8 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               <div className="mt-6 p-4 bg-accent/10 rounded-lg border border-accent/20 flex gap-2 w-full items-start">
                   <AlertCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                  <p className="text-xs text-text-secondary leading-relaxed">
-                    <strong className="text-white">Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after import to ensure AI accuracy.
+                  <p className="text-xs text-[#5f5f5d] leading-relaxed">
+                    <strong className="text-[#1c1c1c]">Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after import to ensure AI accuracy.
                   </p>
               </div>
             </div>

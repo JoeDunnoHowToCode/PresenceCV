@@ -30,13 +30,13 @@ const ThemePicker = React.memo(({
     <div className="relative z-[50] w-full" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="glass p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full hover:bg-white/10 transition-colors border border-white/10 hover:border-white/20 hover-glow group"
+        className="p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm  group"
       >
         <div className="flex items-center gap-3">
           <LucideIcons.Palette className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-          <span className="text-sm tracking-widest uppercase font-medium text-white hidden lg:block">Themes</span>
+          <span className="text-sm tracking-widest uppercase font-medium text-[#1c1c1c] hidden lg:block">Themes</span>
         </div>
-        <LucideIcons.ChevronDown className={`w-4 h-4 text-text-secondary transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
+        <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -46,22 +46,22 @@ const ThemePicker = React.memo(({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 glass p-4 rounded-2xl flex flex-col gap-3 w-64 border border-white/10 shadow-2xl backdrop-blur-xl bg-black/40"
+            className="absolute top-full left-0 mt-2 bg-white p-4 rounded-2xl flex flex-col gap-3 w-64 border border-[#eceae4] shadow-xl z-50"
           >
             <div className="grid grid-cols-4 gap-4 justify-items-center">
               {THEME_COLORS.map(color => (
                 <button
                   key={color}
                   onClick={() => { updateThemeColor(color); setIsOpen(false); }}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform ${themeColor === color ? 'border-white scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent hover:scale-110 shadow-sm'}`}
+                  className={`w-8 h-8 rounded-full border-2 transition-transform ${themeColor === color ? 'border-[#1c1c1c] scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent hover:scale-110 shadow-sm'}`}
                   style={{ backgroundColor: color, color: color }}
                   title={color}
                 />
               ))}
               
               {/* Custom Color Picker */}
-              <div className="relative w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer group">
-                <LucideIcons.Pipette className="w-4 h-4 text-white" />
+              <div className="relative w-8 h-8 rounded-full bg-[#f7f4ed] border border-[#eceae4] flex items-center justify-center hover:bg-[#eceae4] transition-colors cursor-pointer group shadow-sm">
+                <LucideIcons.Pipette className="w-4 h-4 text-[#1c1c1c]" />
                 <input 
                   type="color" 
                   value={themeColor}

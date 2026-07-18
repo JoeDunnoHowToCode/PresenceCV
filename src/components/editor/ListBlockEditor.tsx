@@ -32,7 +32,7 @@ const ListBlockEditor = React.memo(({
             defaultValue={titleInput.defaultValue}
             onChange={titleInput.onChange}
             onBlur={titleInput.onBlur}
-            className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
+            className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
             placeholder="Section Title"
           />
           {block.items.length > 4 && (
@@ -65,7 +65,7 @@ const ListBlockEditor = React.memo(({
             {provided.placeholder}
             <button
               onClick={() => addListItem(block.id)}
-              className="w-full glass py-4 rounded-2xl flex items-center justify-center gap-2 text-text-secondary hover:text-accent hover:bg-white/5 transition-all hover-glow"
+              className="w-full bg-white/50 border border-[#eceae4] py-4 rounded-2xl flex items-center justify-center gap-2 text-[#5f5f5d] hover:text-accent hover:bg-white transition-all  shadow-sm"
             >
               <LucideIcons.Plus className="w-4 h-4" />
               <span className="text-xs tracking-widest uppercase">Add Item</span>
@@ -98,17 +98,17 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
     <div 
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`glass p-6 rounded-2xl space-y-4 relative group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}`}
+      className={`bg-white border border-[#eceae4] shadow-sm p-6 rounded-2xl space-y-4 relative group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}`}
     >
       <div 
         {...provided.dragHandleProps}
-        className="absolute left-4 top-4 text-white/20 hover:text-accent cursor-grab active:cursor-grabbing transition-colors"
+        className="absolute left-4 top-4 text-[#eceae4] hover:text-accent cursor-grab active:cursor-grabbing transition-colors"
       >
         <LucideIcons.GripVertical className="w-5 h-5" />
       </div>
       <button 
         onClick={() => removeListItem(blockId, item.id)} 
-        className="absolute top-4 right-4 text-text-secondary hover:text-red-400 transition-colors"
+        className="absolute top-4 right-4 text-[#5f5f5d] hover:text-red-400 transition-colors"
       >
         <LucideIcons.X className="w-4 h-4" />
       </button>
@@ -118,7 +118,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none font-serif text-2xl pb-1 transition-colors hover-glow"
+          className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none font-serif text-2xl pb-1 text-[#1c1c1c] transition-colors "
           placeholder="Role / Degree"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -127,7 +127,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
             defaultValue={subtitleInput.defaultValue}
             onChange={subtitleInput.onChange}
             onBlur={subtitleInput.onBlur}
-            className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 transition-colors hover-glow-text"
+            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 text-[#5f5f5d] transition-colors "
             placeholder="Company / Institution"
           />
           <input
@@ -135,7 +135,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
             defaultValue={periodInput.defaultValue}
             onChange={periodInput.onChange}
             onBlur={periodInput.onBlur}
-            className="w-full bg-transparent border-b border-white/20 focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 transition-colors hover-glow-text"
+            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 text-[#5f5f5d] transition-colors "
             placeholder="Period (e.g. 2021 - Present)"
           />
         </div>
@@ -144,7 +144,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
           defaultValue={descInput.defaultValue}
           onChange={descInput.onChange}
           onBlur={descInput.onBlur}
-          className="w-full mt-4 bg-white/5 border border-white/10 rounded-xl p-4 text-sm focus:border-accent/50 outline-none resize-none transition-colors hover-glow-text"
+          className="w-full mt-4 bg-[#f9f8f5] border border-[#eceae4] text-[#1c1c1c] rounded-xl p-4 text-sm focus:border-accent/50 outline-none resize-none transition-colors "
           rows={3}
           placeholder="Description..."
         />

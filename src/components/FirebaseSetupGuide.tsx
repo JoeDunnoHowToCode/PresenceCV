@@ -19,7 +19,7 @@ import * as LucideIcons from 'lucide-react';
 export default function FirebaseSetupGuide() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6 font-sans">
-      <div className="max-w-md w-full glass p-8 rounded-3xl border border-white/10 shadow-2xl space-y-6">
+      <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-[#eceae4] shadow-xl space-y-6">
         <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-2">
           <LucideIcons.ShieldAlert className="w-8 h-8 text-red-500" />
         </div>

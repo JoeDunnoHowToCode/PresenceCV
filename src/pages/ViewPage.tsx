@@ -428,7 +428,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
 
         <div 
           ref={tabsContainerRef}
-          className="flex items-center justify-between gap-2 bg-white/5 py-2 px-[15px] rounded-3xl backdrop-blur-md border border-white/10 xl:w-[1310px] h-[70px] xl:-ml-[100px] xl:-mr-[5px] text-center text-[#fcfcfc] text-base font-normal leading-6 no-underline overflow-x-auto glass-scrollbar overscroll-x-contain w-full"
+          className="flex items-center justify-between gap-2 bg-white/50 py-2 px-[15px] rounded-3xl backdrop-blur-md border border-[#eceae4] xl:w-[1310px] h-[70px] xl:-ml-[100px] xl:-mr-[5px] text-center text-[#1c1c1c] text-base font-normal leading-6 no-underline overflow-x-auto glass-scrollbar overscroll-x-contain w-full shadow-sm"
         >
           {allTabs.map((blockId) => {
             const isInfo = blockId === 'info';
@@ -442,10 +442,10 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                 key={block.id}
                 onClick={() => handleTabClick(blockId)}
                 data-active={isActive}
-                className={`flex items-center justify-center gap-2 w-[150px] h-[45px] rounded-full transition-all whitespace-nowrap hover-glow shrink-0 ${
+                className={`flex items-center justify-center gap-2 w-[150px] h-[45px] rounded-full transition-all whitespace-nowrap  shrink-0 ${
                   isActive 
-                    ? 'bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)]' 
-                    : 'text-text-secondary hover:text-accent hover:bg-white/5'
+                    ? 'bg-accent text-[#f7f4ed] font-medium shadow-md shadow-accent/20' 
+                    : 'text-[#5f5f5d] hover:text-accent hover:bg-black/5'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -459,7 +459,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           {!isShared && (
             <Link
               to="/edit"
-              className="glass px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-text-secondary hover:text-accent hover-glow whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm hover:text-accent  whitespace-nowrap"
             >
               <LucideIcons.Edit2 className="w-4 h-4" /> Edit Profile
             </Link>
@@ -491,7 +491,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                   <div className={`shrink-0 flex items-center justify-center pt-2 ${
                     data.profile.photoPosition === 'right' ? 'md:justify-start' : 'md:justify-end'
                   }`}>
-                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-[2rem] overflow-hidden glass p-2 border border-accent/20 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-xl">
+                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-[2rem] overflow-hidden bg-white p-2 border border-[#eceae4] rotate-3 hover:rotate-0 transition-transform duration-500 shadow-xl">
                        <img src={data.profile.photo} alt="Profile" className="w-full h-full object-cover rounded-[1.5rem]" />
                      </div>
                   </div>
@@ -505,11 +505,11 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     : 'items-center text-center'
                 }`}>
                   <div>
-                    <h1 className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6 hover-glow cursor-default">{data.profile.name}</h1>
-                    <p className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary hover-glow-text cursor-default font-['Georgia']">{data.profile.title}</p>
+                    <h1 className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6  cursor-default">{data.profile.name}</h1>
+                    <p className="text-lg md:text-xl tracking-[0.4em] uppercase text-[#5f5f5d]  cursor-default font-['Georgia']">{data.profile.title}</p>
                   </div>
 
-                  <div className={`flex flex-wrap items-center gap-6 md:gap-8 text-text-secondary ${
+                  <div className={`flex flex-wrap items-center gap-6 md:gap-8 text-[#5f5f5d] ${
                     data.profile.photo 
                       ? data.profile.photoPosition === 'right'
                         ? 'justify-center md:justify-end'
@@ -519,7 +519,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     {data.profile.contactItems?.map(item => {
                       const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
                       return (
-                        <div key={item.id} className={`flex items-center hover-glow-text cursor-pointer ${
+                        <div key={item.id} className={`flex items-center  cursor-pointer ${
                           data.profile.photo && data.profile.photoPosition === 'right' ? 'flex-row-reverse md:flex-row' : ''
                         }`}>
                           {item.url ? (
@@ -543,7 +543,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
               <div className="max-w-[900px] w-full px-4 flex justify-center pb-12">
                 <div style={{ width: `${data.profile.summaryWidth || 100}%` }} className="relative">
                   <p 
-                    className="italic text-2xl leading-relaxed text-text-secondary hover-glow-text cursor-default font-['Georgia'] w-full md:w-[900px] text-left"
+                    className="italic text-2xl leading-relaxed text-[#5f5f5d]  cursor-default font-['Georgia'] w-full md:w-[900px] text-left"
                   >
                     {data.profile.summary}
                   </p>
@@ -566,18 +566,18 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                   {activeBlock.items.map((item: ListItem) => (
                     <div 
                       key={item.id} 
-                      className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-white/10"
+                      className="relative pl-8 before:absolute before:left-0 before:top-2 before:bottom-0 before:w-px before:bg-[#eceae4]"
                     >
-                      <div className="absolute left-[-4px] top-2.5 w-2 h-2 rounded-full bg-accent hover-glow" />
+                      <div className="absolute left-[-4px] top-2.5 w-2 h-2 rounded-full bg-accent " />
                       <div className="group">
-                        <h3 className="font-serif text-3xl mb-2 group-hover:text-accent transition-colors hover-glow cursor-default">{item.title}</h3>
-                        <div className="text-xs tracking-widest text-text-secondary mb-4 hover-glow-text cursor-default">
-                          {item.subtitle && <span className="text-white/80">{item.subtitle}</span>} 
+                        <h3 className="font-serif text-3xl mb-2 group-hover:text-accent transition-colors  cursor-default">{item.title}</h3>
+                        <div className="text-xs tracking-widest text-[#5f5f5d] mb-4  cursor-default">
+                          {item.subtitle && <span className="text-[#1c1c1c] font-medium">{item.subtitle}</span>} 
                           {item.subtitle && item.period && " • "} 
                           {item.period}
                         </div>
                         {item.description && (
-                          <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap hover-glow-text cursor-default">
+                          <p className="text-sm text-[#5f5f5d] leading-relaxed whitespace-pre-wrap  cursor-default">
                             {item.description}
                           </p>
                         )}
@@ -610,19 +610,19 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     return (
                       <div 
                         key={item.id} 
-                        className="glass p-6 md:p-8 rounded-3xl flex flex-col gap-6 border-accent/10 hover-glow cursor-default transition-all duration-300 xl:min-h-[350px] min-h-[150px] shadow-lg hover:-translate-y-1 content-start"
+                        className="bg-white p-6 md:p-8 rounded-3xl flex flex-col gap-6 border border-[#eceae4]  cursor-default transition-all duration-300 xl:min-h-[350px] min-h-[150px] shadow-sm hover:shadow-md hover:-translate-y-1 content-start"
                       >
-                        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                           <div className="w-1.5 h-1.5 rounded-full bg-accent hover-glow" />
-                           <h4 className="text-sm xl:text-base tracking-widest text-white font-medium">{category.toUpperCase()}</h4>
+                        <div className="flex items-center gap-3 border-b border-[#eceae4] pb-4">
+                           <div className="w-1.5 h-1.5 rounded-full bg-accent " />
+                           <h4 className="text-sm xl:text-base tracking-widest text-[#1c1c1c] font-medium">{category.toUpperCase()}</h4>
                         </div>
                         <div className="flex flex-wrap xl:flex-col gap-2 xl:gap-4 mt-2">
                           {tags.map((t, i) => (
                             <span 
                               key={i} 
-                              className="px-4 py-2 xl:px-0 xl:py-1 xl:bg-transparent bg-white/5 rounded-lg xl:rounded-none text-xs xl:text-sm text-text-secondary xl:border-none border border-white/5 hover:text-accent hover:bg-white/10 xl:hover:bg-transparent xl:hover:translate-x-2 transition-all flex items-center w-auto xl:w-full"
+                              className="px-4 py-2 xl:px-0 xl:py-1 xl:bg-transparent bg-black/5 rounded-lg xl:rounded-none text-xs xl:text-sm text-[#5f5f5d] xl:border-none border border-transparent hover:text-accent hover:bg-black/10 xl:hover:bg-transparent xl:hover:translate-x-2 transition-all flex items-center w-auto xl:w-full"
                             >
-                              <span className="hidden xl:inline-block w-1 h-1 bg-white/20 rounded-full mr-3.5 flex-shrink-0" />
+                              <span className="hidden xl:inline-block w-1 h-1 bg-[#eceae4] rounded-full mr-3.5 flex-shrink-0" />
                               {t}
                             </span>
                           ))}

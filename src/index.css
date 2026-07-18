@@ -2,20 +2,20 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Camera Plain Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-serif: "Cormorant Garamond", "Songti TC", "PMingLiU", "Times New Roman", Times, serif;
 
-  --color-bg: #050505;
-  --color-glass: rgba(255, 255, 255, 0.03);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-accent: var(--theme-accent, #e5e5e5);
+  --color-bg: #f7f4ed;
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-glass-border: #eceae4;
+  --color-text-primary: #1c1c1c;
+  --color-text-secondary: #5f5f5d;
+  --color-accent: var(--theme-accent, #1c1c1c);
 }
 
 @layer base {
   body {
-    @apply bg-bg text-text-primary font-sans antialiased overflow-x-hidden selection:bg-white/20;
+    @apply bg-bg text-text-primary font-sans antialiased overflow-x-hidden selection:bg-[#1c1c1c] selection:text-[#f7f4ed];
     overscroll-behavior-x: none;
   }
 }
@@ -23,15 +23,15 @@
 @layer components {
   .glass {
     @apply backdrop-blur-xl border border-glass-border;
-    background-color: color-mix(in srgb, var(--theme-accent) 3%, rgba(255, 255, 255, 0.02));
+    background-color: color-mix(in srgb, var(--theme-accent) 3%, rgba(255, 255, 255, 0.6));
   }
 
   .depth-bg {
     @apply fixed inset-0 -z-10;
-    background-color: #050505;
+    background-color: #f7f4ed;
     background-image:
-      radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--theme-accent) 15%, transparent) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--theme-accent) 15%, transparent) 0%, transparent 50%);
+      radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 50%),
+      radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 50%);
     background-size: 200% 200%;
   }
 
@@ -43,9 +43,9 @@
   input[type="range"] {
     -webkit-appearance: none;
     @apply h-1.5 rounded-full cursor-pointer outline-none transition-all;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
   input[type="range"]:focus {
@@ -83,21 +83,13 @@
 }
 
 @layer utilities {
-  .hover-glow {
-    @apply transition-all duration-300;
-  }
+  
 
-  .hover-glow:hover {
-    text-shadow: 0 0 15px var(--theme-accent);
-  }
+  
 
-  .hover-glow-text {
-    @apply transition-all duration-300;
-  }
+  
 
-  .hover-glow-text:hover {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
+  
 
   /* Global Glassy Scrollbar */
   * {

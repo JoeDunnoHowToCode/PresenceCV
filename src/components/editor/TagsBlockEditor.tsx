@@ -39,7 +39,7 @@ const TagsBlockEditor = React.memo(({
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="bg-transparent border-b border-transparent hover:border-white/20 focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-text-secondary pb-1 transition-colors hover-glow-text"
+          className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
           placeholder="Section Title"
         />
       </div>
@@ -63,14 +63,14 @@ const TagsBlockEditor = React.memo(({
               </Draggable>
             ))}
             {provided.placeholder}
-            <div className="glass p-4 rounded-xl flex items-center gap-4">
-              <LucideIcons.Plus className="w-5 h-5 text-text-secondary opacity-50" />
+            <div className="bg-white/50 border border-[#eceae4] p-4 rounded-xl flex items-center gap-4">
+              <LucideIcons.Plus className="w-5 h-5 text-[#5f5f5d] opacity-50" />
               <input
                 value={newTagText}
                 onChange={e => setNewTagText(e.target.value)}
                 onKeyDown={handleTagKeyDown}
                 placeholder="Add new category/skills (e.g., Python: ML, NLP) (Press Enter)"
-                className="flex-1 bg-transparent border-b border-white/20 focus:border-accent outline-none text-sm tracking-wide px-1 pb-1 transition-colors text-text-secondary"
+                className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-sm tracking-wide px-1 pb-1 transition-colors text-[#5f5f5d]"
               />
             </div>
           </div>
@@ -98,11 +98,11 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
     <div 
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`glass p-4 rounded-xl flex items-center gap-4 border-accent/20 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} hover-glow group`}
+      className={`bg-white border border-[#eceae4] shadow-sm p-4 rounded-xl flex items-center gap-4 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}  group`}
     >
       <div 
         {...provided.dragHandleProps}
-        className="cursor-grab active:cursor-grabbing text-white/20 hover:text-accent transition-colors"
+        className="cursor-grab active:cursor-grabbing text-[#eceae4] hover:text-accent transition-colors"
       >
         <LucideIcons.GripVertical className="w-5 h-5" />
       </div>
@@ -112,11 +112,11 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
         onChange={textInput.onChange}
         onBlur={textInput.onBlur}
         placeholder="Category/skills"
-        className="flex-1 bg-transparent border-b border-white/10 hover:border-white/30 focus:border-accent outline-none text-base tracking-wide text-white transition-colors pb-1 font-['Georgia']"
+        className="flex-1 bg-transparent border-b border-[#eceae4] hover:border-[#1c1c1c]/20 focus:border-accent outline-none text-base tracking-wide text-[#1c1c1c] transition-colors pb-1 font-['Georgia']"
       />
       <button 
         onClick={() => removeTagItem(blockId, item.id)} 
-        className="text-text-secondary hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+        className="text-[#5f5f5d] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
       >
         <LucideIcons.X className="w-4 h-4" />
       </button>

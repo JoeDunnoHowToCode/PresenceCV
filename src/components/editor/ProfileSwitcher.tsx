@@ -49,13 +49,13 @@ const ProfileSwitcher = React.memo(({
     <div className="relative z-[60] w-full" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="glass p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full hover:bg-white/10 transition-colors border border-white/10 hover:border-white/20 hover-glow group"
+        className="p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm  group"
       >
         <div className="flex items-center gap-3 min-w-0">
           <LucideIcons.FileText className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-          <span className="text-sm tracking-widest uppercase truncate font-medium text-white hidden lg:block">{activeProfile?.name || 'Resume'}</span>
+          <span className="text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] hidden lg:block">{activeProfile?.name || 'Resume'}</span>
         </div>
-        <LucideIcons.ChevronDown className={`w-4 h-4 text-text-secondary transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
+        <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -65,21 +65,21 @@ const ProfileSwitcher = React.memo(({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 glass p-2 rounded-2xl flex flex-col gap-1 w-80 border border-white/10 shadow-2xl backdrop-blur-xl bg-black/40"
+            className="absolute top-full left-0 mt-2 bg-white p-2 rounded-2xl flex flex-col gap-1 w-80 border border-[#eceae4] shadow-xl z-50"
           >
             <button
               onClick={() => { createProfile('New Resume'); setIsOpen(false); }}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-text-secondary hover:text-white group"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 transition-colors text-[#5f5f5d] hover:text-[#1c1c1c] group"
             >
               <LucideIcons.Copy className="w-4 h-4 group-hover:text-accent transition-colors" />
               <span className="text-sm tracking-widest uppercase font-medium">Copy Current Profile</span>
             </button>
             
-            <div className="w-full h-px bg-white/10 my-1" />
+            <div className="w-full h-px bg-[#eceae4] my-1" />
             
-            <div className="max-h-64 overflow-y-auto glass-scrollbar flex flex-col gap-1">
+            <div className="max-h-64 overflow-y-auto flex flex-col gap-1">
               {sortedProfiles.map((profile: any) => (
-                <div key={profile.id} className="flex items-center group relative rounded-xl hover:bg-white/5 transition-colors">
+                <div key={profile.id} className="flex items-center group relative rounded-xl hover:bg-black/5 transition-colors">
                   <button
                     onClick={() => { 
                       if (editingProfileId !== profile.id) {
@@ -88,7 +88,7 @@ const ProfileSwitcher = React.memo(({
                       }
                     }}
                     className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left truncate ${
-                      activeProfileId === profile.id ? 'bg-accent/10 text-white border border-accent/20' : 'text-text-secondary hover:text-white border border-transparent'
+                      activeProfileId === profile.id ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'
                     }`}
                   >
                     {activeProfileId === profile.id && editingProfileId !== profile.id && (
@@ -103,35 +103,41 @@ const ProfileSwitcher = React.memo(({
                           if (e.target.value.trim()) renameProfile(profile.id, e.target.value.trim());
                           setEditingProfileId(null);
                         }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            if (e.currentTarget.value.trim()) renameProfile(profile.id, e.currentTarget.value.trim());
-                            setEditingProfileId(null);
-                          }
-                        }}
-                        onClick={e => e.stopPropagation()}
-                        className="bg-black/20 border border-accent/50 outline-none text-sm w-full text-white px-2 py-1 rounded tracking-widest uppercase"
-                      />
-                    ) : (
-                      <span className={`text-sm tracking-widest uppercase truncate font-medium ${activeProfileId === profile.id ? 'pl-2' : ''}`}>
-                        {profile.name}
-                      </span>
-                    )}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              renameProfile(profile.id, e.currentTarget.value);
+                              setEditingProfileId(null);
+                            } else if (e.key === 'Escape') {
+                              setEditingProfileId(null);
+                            }
+                          }}
+                          className="w-full bg-transparent border-none outline-none text-sm tracking-widest uppercase font-medium text-[#1c1c1c]"
+                        />
+                      ) : (
+                        <span className="text-sm tracking-widest uppercase font-medium truncate">
+                          {profile.name}
+                        </span>
+                      )}
                   </button>
                   
-                  {editingProfileId !== profile.id && (
-                    <div className="absolute right-2 flex gap-1 bg-gradient-to-l from-bg via-bg to-transparent pl-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {activeProfileId !== profile.id && (
+                    <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setEditingProfileId(profile.id); }}
-                        className="p-2 text-text-secondary hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                        title="Edit Name"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingProfileId(profile.id);
+                        }}
+                        className="p-1.5 rounded-lg text-[#5f5f5d] hover:text-[#1c1c1c] hover:bg-black/10 transition-colors"
                       >
-                        <LucideIcons.Edit2 className="w-3.5 h-3.5" />
+                        <LucideIcons.Edit2 className="w-3 h-3" />
                       </button>
                       {Object.keys(profiles).length > 1 && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setProfileToDelete(profile.id); setIsOpen(false); }}
-                          className="p-2 text-text-secondary hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileToDelete(profile.id);
+                          }}
+                          className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                           title="Delete Profile"
                         >
                           <LucideIcons.Trash2 className="w-3.5 h-3.5" />
