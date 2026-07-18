@@ -23,9 +23,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as LucideIcons from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LogoutConfirmModal from '../components/LogoutConfirmModal';
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { user, signInWithGoogle, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -56,7 +58,7 @@ export default function LandingPage() {
   };
 
   const handleLogout = async () => {
-    await signOut();
+    setIsLogoutModalOpen(true);
   };
 
   return (
@@ -83,13 +85,22 @@ export default function LandingPage() {
               {user ? 'Resume Editor' : 'Log In'}
             </button>
             {user && (
-              <button 
-                onClick={handleLogout}
-                className="bg-[#1c1c1c] text-[#fcfbf8] rounded-md px-4 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
-                style={{ boxShadow: 'rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px' }}
-              >
-                Log Out
-              </button>
+              <div className="flex items-center gap-3 pl-4 border-l border-[#eceae4]">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="User avatar" className="w-8 h-8 rounded-full border border-[#eceae4]" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#1c1c1c]/10 flex items-center justify-center">
+                    <LucideIcons.User className="w-4 h-4 text-[#1c1c1c]" />
+                  </div>
+                )}
+                <button 
+                  onClick={handleLogout}
+                  className="bg-[#1c1c1c] text-[#fcfbf8] rounded-md px-4 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                  style={{ boxShadow: 'rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px' }}
+                >
+                  Log Out
+                </button>
+              </div>
             )}
           </div>
 
@@ -122,13 +133,25 @@ export default function LandingPage() {
                   {user ? 'Resume Editor' : 'Log In'}
                 </button>
                 {user && (
-                   <button 
-                     onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
-                     className="w-full text-center bg-[#1c1c1c] text-[#fcfbf8] rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
-                     style={{ boxShadow: 'rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px' }}
-                   >
-                     Log Out
-                   </button>
+                   <div className="flex flex-col gap-4 pt-4 mt-2 border-t border-[#eceae4]">
+                     <div className="flex items-center justify-center gap-3">
+                       {user.photoURL ? (
+                         <img src={user.photoURL} alt="User avatar" className="w-8 h-8 rounded-full border border-[#eceae4]" />
+                       ) : (
+                         <div className="w-8 h-8 rounded-full bg-[#1c1c1c]/10 flex items-center justify-center">
+                           <LucideIcons.User className="w-4 h-4 text-[#1c1c1c]" />
+                         </div>
+                       )}
+                       <span className="text-sm font-medium text-[#1c1c1c]">{user.email || 'User'}</span>
+                     </div>
+                     <button 
+                       onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                       className="w-full text-center bg-[#1c1c1c] text-[#fcfbf8] rounded-md px-4 py-2 text-sm font-medium hover:opacity-80"
+                       style={{ boxShadow: 'rgba(255,255,255,0.2) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset, rgba(0,0,0,0.05) 0px 1px 2px 0px' }}
+                     >
+                       Log Out
+                     </button>
+                   </div>
                 )}
               </div>
             </motion.div>
@@ -278,6 +301,16 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={async () => {
+          setIsLogoutModalOpen(false);
+          await signOut();
+        }}
+        theme="light"
+      />
     </div>
   );
 }

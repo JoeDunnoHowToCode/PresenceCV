@@ -27,16 +27,16 @@ const ThemePicker = React.memo(({
   }, []);
 
   return (
-    <div className="relative z-[50]" ref={dropdownRef}>
+    <div className="relative z-[50] w-full" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="glass px-5 py-3 rounded-full flex items-center justify-between gap-4 w-64 hover:bg-white/10 transition-colors border border-white/10 hover:border-white/20 hover-glow group"
+        className="glass p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full hover:bg-white/10 transition-colors border border-white/10 hover:border-white/20 hover-glow group"
       >
         <div className="flex items-center gap-3">
-          <LucideIcons.Palette className="w-4 h-4 text-accent shrink-0" />
-          <span className="text-sm tracking-widest uppercase font-medium text-white">Themes</span>
+          <LucideIcons.Palette className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
+          <span className="text-sm tracking-widest uppercase font-medium text-white hidden lg:block">Themes</span>
         </div>
-        <LucideIcons.ChevronDown className={`w-4 h-4 text-text-secondary transition-transform shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+        <LucideIcons.ChevronDown className={`w-4 h-4 text-text-secondary transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>

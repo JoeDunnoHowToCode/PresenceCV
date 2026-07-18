@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, CSSProperties, useCallback } from 'react';
 import { DragDropContext, DropResult, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
+import LogoutConfirmModal from '../components/LogoutConfirmModal';
 import { useResume } from '../hooks/useResume';
 import { ICONS, AVAILABLE_BLOCK_ICONS, THEME_COLORS, AVAILABLE_ICONS } from '../constants';
 import { ImportResumeModal } from '../components/ImportResumeModal';
@@ -18,9 +19,12 @@ import ListBlockEditor from '../components/editor/ListBlockEditor';
 import TagsBlockEditor from '../components/editor/TagsBlockEditor';
 
 export default function EditPage() {
+  useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
   const {
     data,
     appState,
@@ -299,10 +303,11 @@ export default function EditPage() {
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div 
-        className="min-h-screen relative p-6 md:p-12 lg:p-24 overflow-x-hidden flex flex-col"
+        className="min-h-screen bg-bg relative overflow-x-hidden flex flex-row"
         style={{ '--theme-accent': data.themeColor } as CSSProperties}
       >
-        <div className={`depth-bg ${data.enableAnimation ? 'animated' : ''}`} />
+        {/* The Animated Background */}
+        <div className={`depth-bg ${data.enableAnimation ? 'animated' : ''} absolute inset-0 z-0 pointer-events-none`} />
 
         {isShareModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -511,25 +516,59 @@ export default function EditPage() {
           </div>
         )}
 
-        {/* --- Top Left Control Panel (Fixed/Absolute) --- */}
-        <div className="absolute top-6 left-6 z-[60] hidden xl:flex flex-col gap-4">
+        {/* --- Responsive Left Sidebar (Visible on all screens) --- */}
+        <div className="flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen w-20 md:w-24 lg:w-72 border-r border-white/5 bg-black/20 backdrop-blur-md overflow-visible transition-all">
           
-          {/* Row 1: Logo & Home */}
-          <div className="flex items-center gap-3 glass px-5 py-3 rounded-full border border-white/10 hover-glow group w-64 cursor-pointer" onClick={() => navigate('/')}>
+          {/* Row 1: Logo & Brand */}
+          <Link 
+            to="/"
+            className="flex items-center gap-3 p-2 group overflow-visible shrink-0 relative lg:ml-2"
+          >
+            <img 
+              src="/favicon.png" 
+              alt="PresenceCV Logo" 
+              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-transform duration-300" 
+            />
+            <span className="text-white font-serif tracking-widest text-lg lg:text-xl group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all whitespace-nowrap absolute left-12 lg:relative lg:left-0 z-50 pointer-events-none lg:pointer-events-auto shadow-black/50 drop-shadow-lg">
+              PresenceCV
+            </span>
+          </Link>
+
+          <div className="w-full h-px bg-white/5 my-2 shrink-0" />
+
+          {/* Row 2: User Avatar & Logout */}
+          <div className="flex flex-col lg:flex-row items-center gap-3 lg:px-5 lg:py-3 p-2 rounded-2xl lg:rounded-full border border-white/10 glass justify-center lg:justify-start shrink-0 relative z-40">
              {user?.photoURL ? (
-               <img src={user.photoURL} alt="User avatar" className="w-8 h-8 rounded-full border border-white/20 shrink-0" />
+               <img src={user.photoURL} alt="User avatar" className="w-8 h-8 lg:w-7 lg:h-7 rounded-full border border-white/20 shrink-0 object-cover min-w-[32px] lg:min-w-[28px]" />
              ) : (
-               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+               <div className="w-8 h-8 lg:w-7 lg:h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0 min-w-[32px] lg:min-w-[28px]">
                  <LucideIcons.User className="w-4 h-4 text-white" />
                </div>
              )}
-             <span className="text-white font-serif tracking-widest text-lg group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all truncate">
-               PresenceCV
-             </span>
-             <LucideIcons.Home className="w-4 h-4 ml-auto text-text-secondary group-hover:text-white transition-colors shrink-0" />
+             <div className="flex-1 min-w-0 hidden lg:block">
+               <div className="text-xs text-text-secondary truncate">{user?.email || 'User'}</div>
+             </div>
+             
+             {/* Log Out Buttons */}
+             <button 
+               onClick={() => setIsLogoutModalOpen(true)}
+               className="text-text-secondary hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10 hidden lg:block shrink-0"
+               title="Log Out"
+             >
+               <LucideIcons.LogOut className="w-4 h-4" />
+             </button>
+             <button 
+               onClick={() => setIsLogoutModalOpen(true)}
+               className="lg:hidden flex items-center justify-center p-2 rounded-full text-text-secondary hover:text-red-400 transition-all hover:bg-red-500/10 shrink-0 mt-2 border border-white/5 bg-white/5"
+               title="Log Out"
+             >
+               <LucideIcons.LogOut className="w-4 h-4" />
+             </button>
           </div>
 
-          {/* Row 2: Profile Switcher Dropdown */}
+          <div className="w-full h-px bg-white/5 my-2 shrink-0 hidden lg:block" />
+
+          {/* Row 3: Profile Switcher Dropdown */}
           <ProfileSwitcher 
             profiles={appState.profiles}
             activeProfileId={appState.activeProfileId}
@@ -546,30 +585,32 @@ export default function EditPage() {
             THEME_COLORS={THEME_COLORS}
           />
 
-          {/* Row 4: Share Button */}
+          {/* Row 5: Share Button */}
           <button
             onClick={openShareModal}
             disabled={isSharing}
-            className="glass px-5 py-3 rounded-full flex items-center justify-between gap-4 w-64 text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white border border-white/10 hover:border-white/20 hover-glow disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="glass lg:px-5 lg:py-3 p-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full text-sm uppercase tracking-widest hover:bg-white/10 transition-colors text-white border border-white/10 hover:border-white/20 hover-glow disabled:opacity-50 disabled:cursor-not-allowed group shrink-0"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0" />
-              <span className="font-medium truncate">Share</span>
+              <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
+              <span className="font-medium truncate hidden lg:block">Share</span>
             </div>
           </button>
         </div>
 
-        <div className="max-w-5xl mx-auto w-full flex flex-col gap-8 mb-16 relative z-10 pt-4 xl:pt-0">
+        {/* --- Main Content Area --- */}
+        <div className="flex-1 flex flex-col relative z-10 h-screen overflow-y-auto min-w-0">
+          <div className="max-w-5xl mx-auto w-full flex flex-col gap-6 lg:gap-8 mb-16 p-4 lg:p-6 pt-6 lg:pt-10 shrink-0">
           
           {/* Row 1: Main Tabs & Add Block */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-3xl backdrop-blur-md border border-white/10 xl:w-[1310px] xl:-ml-[100px] w-full relative z-[55]"
+            className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-3xl backdrop-blur-md border border-white/10 w-full relative z-[55]"
           >
             {isMobile ? (
-              <div className="relative flex-[2]">
+              <div className="relative flex-1 min-w-0">
                  <div 
-                   className="flex items-center justify-between w-full px-5 py-2.5 rounded-full whitespace-nowrap hover-glow bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)] cursor-pointer"
+                   className="flex items-center justify-between w-full px-4 py-2.5 rounded-full whitespace-nowrap hover-glow bg-accent text-bg font-medium shadow-[0_0_15px_var(--theme-accent)] cursor-pointer"
                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                  >
                    <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -616,7 +657,6 @@ export default function EditPage() {
                      <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
                    </div>
                  </div>
-
                  <AnimatePresence>
                    {isMobileMenuOpen && (
                      <motion.div 
@@ -655,6 +695,24 @@ export default function EditPage() {
                            </div>
                          )
                        })}
+
+                        {/* Mobile Controls */}
+                        <div className="pt-2 border-t border-white/10 flex flex-col gap-2 pb-1 mt-1">
+                          <ProfileSwitcher 
+                            profiles={appState.profiles}
+                            activeProfileId={appState.activeProfileId}
+                            switchProfile={switchProfile}
+                            createProfile={createProfile}
+                            renameProfile={renameProfile}
+                            deleteProfile={deleteProfile}
+                            user={user}
+                          />
+                          <ThemePicker 
+                            themeColor={data.themeColor}
+                            updateThemeColor={updateThemeColor}
+                            THEME_COLORS={THEME_COLORS}
+                          />
+                        </div>
                      </motion.div>
                    )}
                  </AnimatePresence>
@@ -805,7 +863,7 @@ export default function EditPage() {
           </motion.div>
         </div>
 
-        <main className="max-w-4xl mx-auto w-full flex-1 relative">
+        <main className="max-w-4xl mx-auto w-full flex-1 relative px-4 lg:px-6 pb-24 shrink-0 min-w-0">
           <AnimatePresence mode="wait" custom={direction}>
             {activeTab === 'info' ? (
               <motion.div 
@@ -868,6 +926,7 @@ export default function EditPage() {
           </AnimatePresence>
         </main>
       </div>
+      </div>
 
       <ImportResumeModal 
         isOpen={isImportModalOpen}
@@ -879,6 +938,18 @@ export default function EditPage() {
           );
         }}
       />
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={async () => {
+          setIsLogoutModalOpen(false);
+          await signOut();
+          navigate('/');
+        }}
+        theme="dark"
+      />
+
     </DragDropContext>
   );
 }
