@@ -3,6 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ThemePickerProps {
+  isCollapsed?: boolean;
   themeColor: string;
   updateThemeColor: (color: string) => void;
   THEME_COLORS: string[];
@@ -11,7 +12,8 @@ interface ThemePickerProps {
 const ThemePicker = React.memo(({
   themeColor,
   updateThemeColor,
-  THEME_COLORS
+  THEME_COLORS,
+  isCollapsed,
 }: ThemePickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,13 +32,13 @@ const ThemePicker = React.memo(({
     <div className="relative z-[50] w-full" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm  group"
+        className={`p-2 rounded-2xl lg:rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm group ${isCollapsed ? 'lg:p-2 lg:justify-center lg:rounded-2xl' : 'lg:px-5 lg:py-3'}`}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <LucideIcons.Palette className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-          <span className="text-sm tracking-widest uppercase font-medium text-[#1c1c1c] hidden lg:block">Themes</span>
+          <span className={`text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'hidden lg:block'}`}>Themes</span>
         </div>
-        <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 hidden lg:block ${isOpen ? 'rotate-180' : ''}`} />
+        <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 ${isCollapsed ? 'hidden' : 'hidden lg:block'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>

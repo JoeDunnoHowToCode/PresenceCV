@@ -118,7 +118,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           defaultValue={nameInput.defaultValue}
           onChange={nameInput.onChange}
           onBlur={nameInput.onBlur}
-          className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px]  text-center bg-transparent w-full"
+          className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] text-center bg-transparent w-full"
           placeholder="Your Name"
         />
         <input
@@ -126,7 +126,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px]  text-center font-['Georgia'] bg-transparent w-full"
+          className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px]  text-center bg-transparent w-full"
           placeholder="Professional Title"
         />
       </div>
@@ -167,11 +167,10 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           }
         }}
       >
-        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all bg-white border border-[#eceae4] shadow-sm px-6 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
-          <div className={`flex items-center gap-2 text-xs font-medium tracking-wider ${countColor}`}>
-             <LucideIcons.PenTool className="w-4 h-4" />
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all z-20 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
+          <div className={`flex items-center gap-2 text-xs font-medium tracking-wider whitespace-nowrap ${countColor}`}>
              <span className="uppercase font-semibold opacity-70">Recommended Length: 250-400</span>
-             <span className="font-mono ml-2 pl-2">{charCount} chars</span>
+             <span className="font-mono ml-2 pl-2 border-l border-current/20">{charCount} chars</span>
              {charCount > 0 && (
                <span className="ml-1 opacity-90">{countStatus}</span>
              )}
@@ -181,7 +180,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         <div className="relative transition-all duration-300 w-full flex flex-col mt-4">
           
           <div 
-            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] font-['Georgia'] w-full break-words text-left"
+            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] w-full break-words text-left"
           >
             {summaryInput.localValue + ' '}
           </div>
@@ -194,7 +193,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
             defaultValue={summaryInput.defaultValue}
             onChange={summaryInput.onChange}
             onBlur={summaryInput.onBlur}
-            className="absolute inset-0 italic text-2xl leading-relaxed text-[#5f5f5d] outline-none focus:bg-black/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px]  font-['Georgia'] bg-transparent w-full resize-none overflow-hidden text-left"
+            className="absolute inset-0 italic text-2xl leading-relaxed text-[#5f5f5d] outline-none focus:bg-black/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] bg-transparent w-full resize-none overflow-hidden text-left"
             placeholder="A short summary about yourself..."
           />
         </div>
@@ -208,20 +207,26 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeContactItem, AVAILABLE_ICONS }: any) => {
   const textInput = useDebouncedInput(item.text, (val) => updateContactItem(item.id, 'text', val));
   const urlInput = useDebouncedInput(item.url || '', (val) => updateContactItem(item.id, 'url', val));
+  const [isIconMenuOpen, setIsIconMenuOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-3 w-full group relative">
-      <div className="relative">
-        <select
-          value={item.icon}
-          onChange={(e) => updateContactItem(item.id, 'icon', e.target.value)}
-          className="absolute inset-0 opacity-0 cursor-pointer w-full"
-        >
-          {AVAILABLE_ICONS.map((iconName: string) => (
-            <option key={iconName} value={iconName}>{iconName}</option>
-          ))}
-        </select>
-        <Icon className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+      <div className="relative shrink-0">
+        <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+        {isIconMenuOpen && (
+          <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+            {AVAILABLE_ICONS.map((iconName: string) => {
+              const OptionIcon = (LucideIcons as any)[iconName];
+              return OptionIcon ? (
+                <OptionIcon 
+                  key={iconName} 
+                  className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                  onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
+                />
+              ) : null;
+            })}
+          </div>
+        )}
       </div>
       <input
         ref={textInput.ref as any}
@@ -229,7 +234,7 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         onChange={textInput.onChange}
         onBlur={textInput.onBlur}
         placeholder="Display Text"
-        className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-lg text-[#1c1c1c] transition-colors  font-['Georgia']"
+        className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-lg text-[#1c1c1c] transition-colors"
       />
       <input
         ref={urlInput.ref as any}

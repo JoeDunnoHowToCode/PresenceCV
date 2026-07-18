@@ -300,8 +300,8 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                 ? (data.profile.photoPosition === 'right' ? 'text-right items-end' : 'text-left items-start')
                 : 'text-center items-center'
             }`}>
-              <h1 className="font-serif text-6xl font-bold mb-4" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>{data.profile.name}</h1>
-              <p className="text-xl tracking-widest uppercase text-gray-500 font-['Georgia'] mb-6">{data.profile.title}</p>
+              <h1 className="text-[64px] font-semibold tracking-[-2.5px] leading-[1.05] mb-4" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>{data.profile.name}</h1>
+              <p className="text-xl tracking-widest uppercase text-gray-500 mb-6">{data.profile.title}</p>
               
               <div className={`flex flex-wrap items-center gap-6 text-gray-600 ${
                 data.profile.photo 
@@ -313,14 +313,14 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                   return (
                     <div key={item.id} className="flex items-center gap-2">
                       {item.url ? (
-                        <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-['Georgia']" style={{ color: 'inherit', textDecoration: 'none' }}>
+                        <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm" style={{ color: 'inherit', textDecoration: 'none' }}>
                           <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
                           {item.text}
                         </a>
                       ) : (
                         <>
                           <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
-                          <span className="text-sm font-['Georgia']">{item.text}</span>
+                          <span className="text-sm">{item.text}</span>
                         </>
                       )}
                     </div>
@@ -331,7 +331,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           </div>
           
           {data.profile.summary && (
-            <div className="mt-12 w-full text-lg leading-relaxed text-gray-700 italic font-['Georgia'] text-left">
+            <div className="mt-12 w-full text-lg leading-relaxed text-gray-700 italic text-left">
               {data.profile.summary}
             </div>
           )}
@@ -342,7 +342,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           if (!block) return null;
           return (
             <div key={block.id} className="w-full mb-12">
-              <h2 className="text-2xl font-serif mb-8 border-b-2 pb-2 uppercase tracking-wider" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
+              <h2 className="text-2xl mb-8 border-b-2 pb-2 uppercase tracking-wider" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
                 {block.title}
               </h2>
               
@@ -351,7 +351,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                   {block.items.map((item: ListItem) => (
                     <div key={item.id} className="flex flex-col gap-1">
                       <div className="flex justify-between items-baseline">
-                        <h3 className="font-serif text-xl font-bold text-gray-900">{item.title}</h3>
+                        <h3 className=" text-xl font-bold text-gray-900">{item.title}</h3>
                         <span className="text-sm tracking-widest uppercase text-gray-500 whitespace-nowrap ml-4">{item.period}</span>
                       </div>
                       {item.subtitle && (
@@ -505,8 +505,8 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     : 'items-center text-center'
                 }`}>
                   <div>
-                    <h1 className="font-serif text-6xl md:text-8xl font-light leading-none text-accent mb-6  cursor-default">{data.profile.name}</h1>
-                    <p className="text-lg md:text-xl tracking-[0.4em] uppercase text-[#5f5f5d]  cursor-default font-['Georgia']">{data.profile.title}</p>
+                    <h1 className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-accent mb-6 cursor-default">{data.profile.name}</h1>
+                    <p className="text-lg md:text-xl tracking-[0.4em] uppercase text-[#5f5f5d]  cursor-default">{data.profile.title}</p>
                   </div>
 
                   <div className={`flex flex-wrap items-center gap-6 md:gap-8 text-[#5f5f5d] ${
@@ -523,14 +523,14 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                           data.profile.photo && data.profile.photoPosition === 'right' ? 'flex-row-reverse md:flex-row' : ''
                         }`}>
                           {item.url ? (
-                            <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-lg hover:text-accent transition-colors font-['Georgia'] font-bold">
+                            <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-lg hover:text-accent transition-colors font-bold">
                               <Icon className="w-5 h-5 shrink-0 text-accent" />
                               {item.text}
                             </a>
                           ) : (
                             <div className="flex items-center gap-3">
                               <Icon className="w-5 h-5 shrink-0 text-accent" />
-                              <span className="text-lg font-['Georgia'] cursor-default">{item.text}</span>
+                              <span className="text-lg cursor-default">{item.text}</span>
                             </div>
                           )}
                         </div>
@@ -543,7 +543,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
               <div className="max-w-[900px] w-full px-4 flex justify-center pb-12">
                 <div style={{ width: `${data.profile.summaryWidth || 100}%` }} className="relative">
                   <p 
-                    className="italic text-2xl leading-relaxed text-[#5f5f5d]  cursor-default font-['Georgia'] w-full md:w-[900px] text-left"
+                    className="italic text-2xl leading-relaxed text-[#5f5f5d]  cursor-default w-full md:w-[900px] text-left"
                   >
                     {data.profile.summary}
                   </p>
@@ -570,7 +570,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     >
                       <div className="absolute left-[-4px] top-2.5 w-2 h-2 rounded-full bg-accent " />
                       <div className="group">
-                        <h3 className="font-serif text-3xl mb-2 group-hover:text-accent transition-colors  cursor-default">{item.title}</h3>
+                        <h3 className=" text-3xl mb-2 group-hover:text-accent transition-colors  cursor-default">{item.title}</h3>
                         <div className="text-xs tracking-widest text-[#5f5f5d] mb-4  cursor-default">
                           {item.subtitle && <span className="text-[#1c1c1c] font-medium">{item.subtitle}</span>} 
                           {item.subtitle && item.period && " • "} 

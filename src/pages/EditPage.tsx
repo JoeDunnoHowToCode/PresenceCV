@@ -61,6 +61,8 @@ export default function EditPage() {
   const [direction, setDirection] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [openIconMenuId, setOpenIconMenuId] = useState<string | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
@@ -320,7 +322,7 @@ export default function EditPage() {
               </button>
 
               <LucideIcons.Share2 className="w-10 h-10 text-accent mb-4" />
-              <h3 className="text-2xl font-serif text-[#1c1c1c] mb-2">Share Your Resume</h3>
+              <h3 className="text-2xl text-[#1c1c1c] mb-2">Share Your Resume</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 Choose how you want to share your profile with the world.
               </p>
@@ -524,20 +526,29 @@ export default function EditPage() {
         )}
 
         {/* --- Responsive Left Sidebar (Visible on all screens) --- */}
-        <div className="flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen w-20 md:w-24 lg:w-72 border-r border-[#eceae4] bg-white/60 backdrop-blur-md overflow-visible transition-all">
+        <div className={`flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen border-r border-[#eceae4] bg-white/60 backdrop-blur-md overflow-visible transition-all duration-300 relative ${isSidebarCollapsed ? 'w-20 md:w-24 lg:p-4' : 'w-20 md:w-24 lg:w-72'}`}>
+          
+          {/* Collapse Toggle Button */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white border border-[#eceae4] text-[#5f5f5d] hover:text-[#1c1c1c] hover:bg-[#f7f4ed] shadow-sm z-50 transition-colors"
+            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <LucideIcons.ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
+          </button>
           
           {/* Row 1: Logo & Brand */}
           <Link 
             to="/"
-            className="flex items-center gap-3 p-2 group overflow-visible shrink-0 relative lg:ml-2"
+            className={`flex items-center gap-3 p-2 group overflow-visible shrink-0 relative lg:ml-2 ${isSidebarCollapsed ? 'justify-center lg:ml-0 lg:p-3' : ''}`}
           >
             <img 
               src="/favicon.png" 
               alt="PresenceCV Logo" 
-              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300" 
+              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300 min-w-[32px] lg:min-w-[36px]" 
               style={{ mixBlendMode: 'multiply' }}
             />
-            <span className="hidden lg:inline-block text-[#1c1c1c] font-serif font-semibold tracking-widest text-lg lg:text-xl transition-all whitespace-nowrap lg:relative z-50 lg:pointer-events-auto">
+            <span className={`text-[#1c1c1c] font-semibold tracking-widest text-lg lg:text-xl transition-all whitespace-nowrap lg:relative z-50 lg:pointer-events-auto ${isSidebarCollapsed ? 'hidden' : 'hidden lg:inline-block'}`}>
               PresenceCV
             </span>
           </Link>
@@ -545,7 +556,7 @@ export default function EditPage() {
           <div className="w-full h-px bg-[#eceae4] my-2 shrink-0" />
 
           {/* Row 2: User Avatar & Logout */}
-          <div className="flex flex-col lg:flex-row items-center gap-3 lg:px-5 lg:py-3 p-2 rounded-2xl lg:rounded-full border border-[#eceae4] bg-white/50 shadow-sm justify-center lg:justify-start shrink-0 relative z-40">
+          <div className={`flex items-center gap-3 lg:px-5 lg:py-3 p-2 rounded-2xl border border-[#eceae4] bg-white/50 shadow-sm justify-center shrink-0 relative z-40 ${isSidebarCollapsed ? 'flex-col lg:p-3 lg:rounded-2xl' : 'flex-col lg:flex-row lg:justify-start lg:rounded-full'}`}>
              {user?.photoURL ? (
                <img src={user.photoURL} alt="User avatar" className="w-8 h-8 lg:w-7 lg:h-7 rounded-full border border-[#eceae4] shrink-0 object-cover min-w-[32px] lg:min-w-[28px]" />
              ) : (
@@ -553,21 +564,21 @@ export default function EditPage() {
                  <LucideIcons.User className="w-4 h-4 text-[#1c1c1c]" />
                </div>
              )}
-             <div className="flex-1 min-w-0 hidden lg:block">
+             <div className={`flex-1 min-w-0 ${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}>
                <div className="text-xs text-[#5f5f5d] font-medium truncate">{user?.email || 'User'}</div>
              </div>
              
              {/* Log Out Buttons */}
              <button 
                onClick={() => setIsLogoutModalOpen(true)}
-               className="text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2 rounded-full hover:bg-black/5 hidden lg:block shrink-0"
+               className={`text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2 rounded-full hover:bg-black/5 shrink-0 ${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}
                title="Log Out"
              >
                <LucideIcons.LogOut className="w-4 h-4" />
              </button>
              <button 
                onClick={() => setIsLogoutModalOpen(true)}
-               className="lg:hidden flex items-center justify-center p-2 rounded-full text-[#5f5f5d] hover:text-[#1c1c1c] transition-all hover:bg-black/5 shrink-0 mt-2 border border-[#eceae4] bg-white/50 shadow-sm"
+               className={`flex items-center justify-center p-2 rounded-full text-[#5f5f5d] hover:text-[#1c1c1c] transition-all hover:bg-black/5 shrink-0 mt-2 border border-[#eceae4] bg-white/50 shadow-sm ${isSidebarCollapsed ? 'lg:flex lg:mt-0 lg:border-none lg:bg-transparent lg:shadow-none' : 'lg:hidden'}`}
                title="Log Out"
              >
                <LucideIcons.LogOut className="w-4 h-4" />
@@ -584,6 +595,7 @@ export default function EditPage() {
             createProfile={createProfile}
             renameProfile={renameProfile}
             setProfileToDelete={setProfileToDelete}
+            isCollapsed={isSidebarCollapsed}
           />
 
           {/* Row 3: Theme Picker Dropdown */}
@@ -591,17 +603,18 @@ export default function EditPage() {
             themeColor={data.themeColor}
             updateThemeColor={updateThemeColor}
             THEME_COLORS={THEME_COLORS}
+            isCollapsed={isSidebarCollapsed}
           />
 
           {/* Row 5: Share Button */}
           <button
             onClick={openShareModal}
             disabled={isSharing}
-            className="bg-white/50 lg:px-5 lg:py-3 p-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full text-sm uppercase tracking-widest hover:bg-white transition-colors text-[#1c1c1c] border border-[#eceae4] hover:border-[#eceae4] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed group shrink-0"
+            className={`p-3 lg:px-5 lg:py-3 rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 text-[#1c1c1c] hover:bg-white transition-colors disabled:opacity-50 border border-[#eceae4] shadow-sm group shrink-0 ${isSidebarCollapsed ? 'lg:p-3 lg:justify-center lg:rounded-2xl' : ''}`}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3">
               <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-              <span className="font-medium truncate hidden lg:block">Share</span>
+              <span className={`text-sm tracking-widest uppercase font-medium ${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}>Share</span>
             </div>
           </button>
         </div>
@@ -619,7 +632,7 @@ export default function EditPage() {
             {isMobile ? (
               <div className="relative flex-1 min-w-0">
                  <div 
-                   className="flex items-center justify-between w-full px-4 py-2.5 rounded-full whitespace-nowrap  bg-[#eceae4] text-[#1c1c1c] font-medium  cursor-pointer"
+                   className="flex items-center justify-between w-full px-4 py-2.5 rounded-full whitespace-nowrap bg-[#1c1c1c] text-white font-medium cursor-pointer"
                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                  >
                    <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -627,16 +640,25 @@ export default function EditPage() {
                        const block = data.blocks[activeTab];
                        const FinalIcon = block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase;
                        return (
-                         <div className="relative shrink-0 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-                           <select 
-                             value={block?.icon || 'Briefcase'} 
-                             onChange={e => updateBlockIcon(activeTab, e.target.value)}
-                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                           >
-                             <option disabled value="">Icon</option>
-                             {AVAILABLE_BLOCK_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
-                           </select>
-                           <FinalIcon className="w-4 h-4" />
+                         <div className="relative shrink-0 flex items-center justify-center">
+                           <FinalIcon 
+                             onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); }}
+                             className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
+                           />
+                           {openIconMenuId === activeTab && (
+                             <div className="absolute top-full left-0 mt-2 bg-[#1c1c1c] border border-white/10 shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+                               {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
+                                 const OptionIcon = (LucideIcons as any)[iconName];
+                                 return OptionIcon ? (
+                                   <OptionIcon 
+                                     key={iconName} 
+                                     className="w-4 h-4 cursor-pointer text-white/50 hover:text-white transition-colors" 
+                                     onClick={(e: any) => { e.stopPropagation(); updateBlockIcon(activeTab, iconName); setOpenIconMenuId(null); }}
+                                   />
+                                 ) : null;
+                               })}
+                             </div>
+                           )}
                          </div>
                        );
                      })()}
@@ -647,7 +669,7 @@ export default function EditPage() {
                          value={data.blocks[activeTab]?.title || ''}
                          onClick={e => e.stopPropagation()}
                          onChange={e => updateBlockTitle(activeTab, e.target.value)}
-                         className="text-sm tracking-widest uppercase truncate bg-transparent outline-none border-b border-bg/20 focus:border-bg w-full text-bg font-medium pb-0.5 min-w-0"
+                         className="text-sm tracking-widest uppercase truncate bg-transparent outline-none border-b border-white/20 focus:border-white w-full text-white font-medium pb-0.5 min-w-0"
                          placeholder="Section Name"
                        />
                      )}
@@ -730,7 +752,7 @@ export default function EditPage() {
                   data-active={activeTab === 'info'}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 ${
                     activeTab === 'info' 
-                      ? 'bg-[#eceae4] text-[#1c1c1c] font-medium ' 
+                      ? 'bg-[#1c1c1c] text-white font-medium ' 
                       : 'text-text-secondary hover:text-accent hover:bg-white/5'
                   }`}
                 >
@@ -765,7 +787,7 @@ export default function EditPage() {
                                 data-active={isActive}
                                 className={`relative flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} ${
                                   isActive 
-                                    ? 'bg-[#eceae4] text-[#1c1c1c] font-medium ' 
+                                    ? 'bg-[#1c1c1c] text-white font-medium ' 
                                     : 'text-text-secondary hover:text-accent hover:bg-white/5'
                                 }`}
                               >
@@ -779,20 +801,29 @@ export default function EditPage() {
                                   {isActive ? (
                                     <div className="relative flex items-center gap-2" onClick={e => e.stopPropagation()}>
                                       <div className="relative shrink-0 flex items-center justify-center">
-                                        <select 
-                                          value={block.icon || 'Briefcase'} 
-                                          onChange={e => updateBlockIcon(blockId, e.target.value)}
-                                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        >
-                                          <option disabled value="">Icon</option>
-                                          {AVAILABLE_BLOCK_ICONS.map(i => <option key={i} value={i}>{i}</option>)}
-                                        </select>
-                                        <FinalIcon className="w-4 h-4 text-bg/70 hover:text-bg transition-colors" />
+                                        <FinalIcon 
+                                          onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === blockId ? null : blockId); }}
+                                          className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
+                                        />
+                                        {openIconMenuId === blockId && (
+                                          <div className="absolute top-full left-0 mt-2 bg-[#1c1c1c] border border-white/10 shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+                                            {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
+                                              const OptionIcon = (LucideIcons as any)[iconName];
+                                              return OptionIcon ? (
+                                                <OptionIcon 
+                                                  key={iconName} 
+                                                  className="w-4 h-4 cursor-pointer text-white/50 hover:text-white transition-colors" 
+                                                  onClick={(e: any) => { e.stopPropagation(); updateBlockIcon(blockId, iconName); setOpenIconMenuId(null); }}
+                                                />
+                                              ) : null;
+                                            })}
+                                          </div>
+                                        )}
                                       </div>
                                       <input 
                                         value={block.title}
                                         onChange={e => updateBlockTitle(blockId, e.target.value)}
-                                        className="text-sm tracking-widest uppercase bg-transparent outline-none border-b border-bg/20 focus:border-bg w-24 sm:w-32 text-center pb-0.5 text-bg font-medium"
+                                        className="text-sm tracking-widest uppercase bg-transparent outline-none border-b border-white/20 focus:border-white w-24 sm:w-32 text-center pb-0.5 text-white font-medium"
                                         placeholder="Name"
                                       />
                                     </div>
@@ -804,11 +835,8 @@ export default function EditPage() {
                                   )}
                                 </div>
                                 <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setBlockToDelete(blockId);
-                                  }}
-                                  className="w-6 h-6 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 bg-black/10 hover:bg-black/20 text-bg"
+                                  onClick={(e) => { e.stopPropagation(); setBlockToDelete(blockId); }}
+                                  className="w-6 h-6 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 text-white"
                                   title="Delete Section"
                                 >
                                   <LucideIcons.X className="w-3 h-3" />
@@ -858,7 +886,7 @@ export default function EditPage() {
               onClick={() => setIsImportModalOpen(true)}
               className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
             >
-              <LucideIcons.Upload className="w-4 h-4 text-accent" /> Import Resume
+              <LucideIcons.Upload className="w-4 h-4 text-accent" /> Upload Resume
             </button>
             <Link
               to="/view"

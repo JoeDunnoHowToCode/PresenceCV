@@ -112,7 +112,7 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
         onChange={textInput.onChange}
         onBlur={textInput.onBlur}
         placeholder="Category/skills"
-        className="flex-1 bg-transparent border-b border-[#eceae4] hover:border-[#1c1c1c]/20 focus:border-accent outline-none text-base tracking-wide text-[#1c1c1c] transition-colors pb-1 font-['Georgia']"
+        className="flex-1 bg-transparent border-b border-[#eceae4] hover:border-[#1c1c1c]/20 focus:border-accent outline-none text-base tracking-wide text-[#1c1c1c] transition-colors pb-1"
       />
       <button 
         onClick={() => removeTagItem(blockId, item.id)} 

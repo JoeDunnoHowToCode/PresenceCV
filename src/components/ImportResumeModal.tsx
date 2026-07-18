@@ -124,9 +124,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
       onImport(parsedData);
       onClose();
     } catch (err: any) {
-      console.error("Import Error:", err);
+      console.error("Upload Error:", err);
       // Show friendly error from server or default fallback
-      setError(err.message || "An unexpected error occurred during import.");
+      setError(err.message || "An unexpected error occurred during upload.");
     } finally {
       setIsUploading(false);
       // Reset input
@@ -156,7 +156,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
             <div className="p-6 border-b border-[#eceae4] flex items-center justify-between">
               <h2 className="text-xl font-semibold text-[#1c1c1c] flex items-center gap-2">
                 <FileText className="w-5 h-5 text-accent" />
-                Import Your Resume
+                Upload Your Resume
               </h2>
               <button 
                 onClick={onClose}
@@ -214,7 +214,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
               <div className="mt-6 p-4 bg-accent/10 rounded-lg border border-accent/20 flex gap-2 w-full items-start">
                   <AlertCircle className="w-4 h-4 text-accent mt-0.5 shrink-0" />
                   <p className="text-xs text-[#5f5f5d] leading-relaxed">
-                    <strong className="text-[#1c1c1c]">Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after import to ensure AI accuracy.
+                    <strong className="text-[#1c1c1c]">Privacy Notice:</strong> Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after upload to ensure AI accuracy.
                   </p>
               </div>
             </div>

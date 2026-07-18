@@ -118,7 +118,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none font-serif text-2xl pb-1 text-[#1c1c1c] transition-colors "
+          className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-2xl pb-1 text-[#1c1c1c] transition-colors "
           placeholder="Role / Degree"
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
