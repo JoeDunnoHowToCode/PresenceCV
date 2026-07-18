@@ -100,7 +100,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
       countStatus = 'A bit short';
     } else if (charCount <= 400) {
       countColor = 'text-green-400';
-      countStatus = 'Optimal length!';
+      countStatus = 'Optimal length';
     } else if (charCount <= 500) {
       countColor = 'text-yellow-400';
       countStatus = 'A bit long';
@@ -167,13 +167,13 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           }
         }}
       >
-        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-6 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all glass px-6 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
           <div className={`flex items-center gap-2 text-xs font-medium tracking-wider ${countColor}`}>
              <LucideIcons.PenTool className="w-4 h-4" />
              <span className="uppercase font-semibold opacity-70">Recommended Length: 250-400</span>
-             <span className="font-mono ml-2 border-l border-current pl-2">{charCount} chars</span>
+             <span className="font-mono ml-2 pl-2">{charCount} chars</span>
              {charCount > 0 && (
-               <span className="ml-1 opacity-90">({countStatus})</span>
+               <span className="ml-1 opacity-90">{countStatus}</span>
              )}
           </div>
         </div>
