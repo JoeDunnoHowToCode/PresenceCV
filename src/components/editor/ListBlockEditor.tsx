@@ -94,6 +94,14 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
   const periodInput = useDebouncedInput(item.period, (val) => updateListItem(blockId, item.id, 'period', val));
   const descInput = useDebouncedInput(item.description || '', (val) => updateListItem(blockId, item.id, 'description', val));
 
+  React.useEffect(() => {
+    const target = descInput.ref.current as HTMLTextAreaElement | null;
+    if (target) {
+      target.style.height = 'auto';
+      target.style.height = `${target.scrollHeight}px`;
+    }
+  }, []);
+
   return (
     <div 
       ref={provided.innerRef}
@@ -142,9 +150,14 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
         <textarea
           ref={descInput.ref as React.Ref<HTMLTextAreaElement>}
           defaultValue={descInput.defaultValue}
-          onChange={descInput.onChange}
+          onChange={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = `${target.scrollHeight}px`;
+            descInput.onChange(e);
+          }}
           onBlur={descInput.onBlur}
-          className="w-full mt-4 bg-[#f9f8f5] border border-[#eceae4] text-[#1c1c1c] rounded-xl p-4 text-sm focus:border-accent/50 outline-none resize-none transition-colors "
+          className="w-full mt-4 bg-[#f9f8f5] border border-[#eceae4] text-[#1c1c1c] rounded-xl p-4 text-sm focus:border-accent/50 outline-none resize-none transition-colors overflow-hidden"
           rows={3}
           placeholder="Description..."
         />
