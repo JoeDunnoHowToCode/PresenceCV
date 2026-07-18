@@ -8,7 +8,17 @@ export function getFirebaseAdmin() {
       if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
         if (serviceAccount.private_key) {
-          serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+          let pk = serviceAccount.private_key.replace(/\\n/g, '\n').replace(/\r/g, '');
+          if (!pk.includes('\n') || pk.split('\n').length < 3) {
+            pk = pk.replace(/-----BEGIN PRIVATE KEY-----/g, '').replace(/-----END PRIVATE KEY-----/g, '').replace(/\s/g, '');
+            let formattedBody = '';
+            for (let i = 0; i < pk.length; i += 64) {
+              formattedBody += pk.substring(i, i + 64) + '\n';
+            }
+            serviceAccount.private_key = '-----BEGIN PRIVATE KEY-----\n' + formattedBody + '-----END PRIVATE KEY-----\n';
+          } else {
+            serviceAccount.private_key = pk.trim() + '\n';
+          }
         }
         initializeApp({
           credential: cert(serviceAccount)
