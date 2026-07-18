@@ -94,7 +94,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   if (charCount > 0) {
     if (charCount < 100) {
       countColor = 'text-red-400';
-      countStatus = 'Too short (optimal: 250-400)';
+      countStatus = 'Too short';
     } else if (charCount < 250) {
       countColor = 'text-yellow-400';
       countStatus = 'A bit short';
@@ -170,8 +170,11 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-all glass px-6 py-2 rounded-full z-20 pointer-events-none group-hover:pointer-events-auto shadow-xl before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
           <div className={`flex items-center gap-2 text-xs font-medium tracking-wider ${countColor}`}>
              <LucideIcons.PenTool className="w-4 h-4" />
-             <span className="uppercase font-semibold opacity-70">Recommended Length:</span>
-             <span className="font-mono">{charCount} / 400</span>
+             <span className="uppercase font-semibold opacity-70">Recommended Length: 250-400</span>
+             <span className="font-mono ml-2 border-l border-current pl-2">{charCount} chars</span>
+             {charCount > 0 && (
+               <span className="ml-1 opacity-90">({countStatus})</span>
+             )}
           </div>
         </div>
 
