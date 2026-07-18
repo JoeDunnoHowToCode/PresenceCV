@@ -196,18 +196,18 @@ export function useResume() {
     
     if (profileCount >= MAX_FREE_PROFILES) {
       if (!currentUid) {
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles. (Auth not ready)`);
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
         return false;
       }
       try {
         const adminDoc = await getDoc(doc(db, 'admins', currentUid));
         if (!adminDoc.exists()) {
-           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles. (User ${currentUid} is not admin)`);
+           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
            return false;
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to verify admin status:", err);
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles. (Error: ${err?.message || 'Unknown'})`);
+        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
         return false;
       }
     }
