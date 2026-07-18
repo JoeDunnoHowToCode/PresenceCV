@@ -44,7 +44,7 @@ async function deployRules() {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = tempKeyPath;
     
     // Execute Firebase CLI to deploy rules
-    execSync(`npx -y firebase-tools deploy --only firestore:rules --project ${projectId} --non-interactive`, { 
+    execSync(`./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --non-interactive --force`, { 
       stdio: 'inherit',
       env: process.env 
     });
