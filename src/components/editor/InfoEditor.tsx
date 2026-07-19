@@ -214,18 +214,28 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
       <div className="relative shrink-0">
         <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
         {isIconMenuOpen && (
-          <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
-            {AVAILABLE_ICONS.map((iconName: string) => {
-              const OptionIcon = (LucideIcons as any)[iconName];
-              return OptionIcon ? (
-                <OptionIcon 
-                  key={iconName} 
-                  className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
-                  onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
-                />
-              ) : null;
-            })}
-          </div>
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setIsIconMenuOpen(false)} />
+            <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+              <div 
+                className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors"
+                onClick={() => { updateContactItem(item.id, 'icon', ''); setIsIconMenuOpen(false); }}
+                title="No Icon"
+              >
+                🚫
+              </div>
+              {AVAILABLE_ICONS.map((iconName: string) => {
+                const OptionIcon = (LucideIcons as any)[iconName];
+                return OptionIcon ? (
+                  <OptionIcon 
+                    key={iconName} 
+                    className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                    onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
+                  />
+                ) : null;
+              })}
+            </div>
+          </>
         )}
       </div>
       <input
