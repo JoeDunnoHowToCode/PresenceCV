@@ -1,4 +1,5 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
@@ -27,6 +28,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
     addListItem, updateListItem, removeListItem, addTagItem, updateTagItem, removeTagItem,
     addBlock, isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, setActiveTab
   } = props;
+  const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
   const activeBlock = data.blocks[activeTab];
 
@@ -352,9 +354,9 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
           <div className="max-w-5xl mx-auto w-full flex flex-col gap-6 lg:gap-8 mb-16 p-4 lg:p-6 pt-6 lg:pt-10 shrink-0">
           
           {/* Row 1: Main Tabs & Add Block */}
-          <div 
-            className="flex items-center justify-between gap-2 bg-white/60 p-2 rounded-3xl backdrop-blur-md border border-[#eceae4] w-full relative z-[55] shadow-sm"
-          >
+          <div className="relative w-full z-[55]">
+            <div className="absolute inset-0 bg-white/60 rounded-3xl backdrop-blur-md border border-[#eceae4] shadow-sm pointer-events-none" />
+            <div className="flex items-center justify-between gap-2 p-2 w-full relative">
             {isMobile ? (
               <div className="relative flex-1 min-w-0">
                  <div 
@@ -364,26 +366,45 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                    <div className="flex items-center gap-2 flex-1 min-w-0">
                      {activeTab === 'info' ? <LucideIcons.User className="w-4 h-4 shrink-0" /> : (() => {
                        const block = data.blocks[activeTab];
-                       const FinalIcon = block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase;
+                       const FinalIcon = !block?.icon ? null : (block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase);
                        return (
                          <div className="relative shrink-0 flex items-center justify-center">
                            <FinalIcon 
-                             onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); }}
+                             onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
                              className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
                            />
-                           {openIconMenuId === activeTab && (
-                             <div className="absolute top-full left-0 mt-2 bg-[#1c1c1c] border border-white/10 shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
-                               {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
-                                 const OptionIcon = (LucideIcons as any)[iconName];
-                                 return OptionIcon ? (
-                                   <OptionIcon 
-                                     key={iconName} 
-                                     className="w-4 h-4 cursor-pointer text-white/50 hover:text-white transition-colors" 
-                                     onClick={(e: any) => { e.stopPropagation(); updateBlockIcon(activeTab, iconName); setOpenIconMenuId(null); }}
-                                   />
-                                 ) : null;
-                               })}
-                             </div>
+                           {openIconMenuId === activeTab && typeof document !== 'undefined' && createPortal(
+                             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 99999 }}>
+                               <div className="fixed inset-0 z-[99998]" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
+                               <div 
+                                 className="fixed bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-5 gap-3 z-[99999] w-max" 
+                                 style={{ 
+                                   top: iconMenuRect ? iconMenuRect.bottom + 8 : '50%', 
+                                   left: iconMenuRect ? iconMenuRect.left : '50%',
+                                   transform: iconMenuRect ? 'none' : 'translate(-50%, -50%)'
+                                 }}
+                                 onClick={e => e.stopPropagation()}
+                               >
+                                 <div 
+                                   className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors text-base"
+                                   onClick={() => { updateBlockIcon(activeTab, ''); setOpenIconMenuId(null); }}
+                                   title="No Icon"
+                                 >
+                                   🚫
+                                 </div>
+                                 {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
+                                   const OptionIcon = (LucideIcons as any)[iconName];
+                                   return OptionIcon ? (
+                                     <OptionIcon 
+                                       key={iconName} 
+                                       className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                                       onClick={() => { updateBlockIcon(activeTab, iconName); setOpenIconMenuId(null); }}
+                                     />
+                                   ) : null;
+                                 })}
+                               </div>
+                             </div>,
+                             document.body
                            )}
                          </div>
                        );
@@ -494,13 +515,13 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                         provided.innerRef(el);
                         tabsContainerRef.current = el;
                       }}
-                      className="flex items-center overflow-x-auto glass-scrollbar flex-1 px-2 overscroll-x-contain"
+                      className="flex items-center gap-2 overflow-x-auto glass-scrollbar flex-1 px-2 overscroll-x-contain"
                     >
                       {data.blockOrder.map((blockId, index) => {
                         const block = data.blocks[blockId];
                         if (!block) return null;
                         
-                        const FinalIcon = block.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase;
+                        const FinalIcon = !block.icon ? null : (block.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase);
                         const isActive = activeTab === blockId;
 
                         return (
@@ -511,7 +532,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 data-active={isActive}
-                                className={`mr-2 relative flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} ${
+                                className={`relative flex items-center gap-2 px-6 py-2.5 rounded-full transition-all whitespace-nowrap  shrink-0 group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''} ${
                                   isActive 
                                     ? 'bg-[#1c1c1c] text-white font-medium ' 
                                     : 'text-text-secondary hover:text-accent hover:bg-white/5'
@@ -529,19 +550,27 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                       <div className="relative shrink-0 flex items-center justify-center">
                                         {FinalIcon ? (
                                           <FinalIcon 
-                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); }}
+                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
                                             className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
                                           />
                                         ) : (
                                           <div 
-                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); }}
+                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
                                             className="w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer"
                                           />
                                         )}
-                                        {openIconMenuId === blockId && (
-                                          <>
-                                            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
-                                            <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-5 gap-3 z-50 w-max" onClick={e => e.stopPropagation()}>
+                                        {openIconMenuId === blockId && typeof document !== 'undefined' && createPortal(
+                                          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 99999 }}>
+                                            <div className="fixed inset-0 z-[99998]" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
+                                            <div 
+                                              className="fixed bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-5 gap-3 z-[99999] w-max" 
+                                              style={{ 
+                                                top: iconMenuRect ? iconMenuRect.bottom + 8 : '50%', 
+                                                left: iconMenuRect ? iconMenuRect.left : '50%',
+                                                transform: iconMenuRect ? 'none' : 'translate(-50%, -50%)'
+                                              }}
+                                              onClick={e => e.stopPropagation()}
+                                            >
                                               <div 
                                                 className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors text-base"
                                                 onClick={() => { updateBlockIcon(blockId, ''); setOpenIconMenuId(null); }}
@@ -560,7 +589,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                                 ) : null;
                                               })}
                                             </div>
-                                          </>
+                                          </div>,
+                                          document.body
                                         )}
                                       </div>
                                       <input 
@@ -572,7 +602,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                     </div>
                                   ) : (
                                     <>
-                                      <FinalIcon className="w-4 h-4" />
+                                      {FinalIcon && <FinalIcon className="w-4 h-4" />}
                                       <span className="text-sm tracking-widest uppercase">{block.title}</span>
                                     </>
                                   )}
@@ -618,6 +648,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                 <LucideIcons.Plus className="w-3 h-3" /> Tag View
               </button>
             </div>
+          </div>
           </div>
 
           {/* Row 2: Actions */}

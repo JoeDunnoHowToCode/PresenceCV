@@ -133,7 +133,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
 
       <div className="flex flex-col items-center justify-center gap-4 w-full max-w-2xl">
         {data.profile.contactItems?.map((item) => {
-          const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
+          const Icon = item.icon === '' ? null : ((LucideIcons as any)[item.icon] || LucideIcons.Link);
           return (
             <ContactItemEditor
               key={item.id}
@@ -212,7 +212,14 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
   return (
     <div className="flex items-center gap-3 w-full group relative">
       <div className="relative shrink-0">
-        <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+        {Icon ? (
+          <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+        ) : (
+          <div 
+            onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} 
+            className="w-5 h-5 rounded-full border border-dashed border-[#eceae4] hover:border-accent transition-colors cursor-pointer"
+          />
+        )}
         {isIconMenuOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsIconMenuOpen(false)} />

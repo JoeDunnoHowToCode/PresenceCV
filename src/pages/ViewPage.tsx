@@ -309,19 +309,19 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                   : 'justify-center'
               }`}>
                 {data.profile.contactItems?.map((item: any) => {
-                  const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
+                  const Icon = !item.icon ? null : ((LucideIcons as any)[item.icon] || LucideIcons.Link);
                   return (
                     <div key={item.id} className="flex items-center gap-2">
                       {item.url ? (
                         <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm" style={{ color: 'inherit', textDecoration: 'none' }}>
-                          <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
+                          {Icon && <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />}
                           {item.text}
                         </a>
                       ) : (
-                        <>
-                          <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />
-                          <span className="text-sm">{item.text}</span>
-                        </>
+                        <div className="flex items-center gap-2 text-sm text-[#1c1c1c]/80">
+                          {Icon && <Icon className="w-4 h-4 shrink-0" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }} />}
+                          {item.text}
+                        </div>
                       )}
                     </div>
                   );
@@ -340,9 +340,11 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         {data.blockOrder.map(blockId => {
           const block = data.blocks[blockId];
           if (!block) return null;
+          const BlockIcon = !(block as any).icon ? null : ((block as any).icon ? (LucideIcons as any)[(block as any).icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase);
           return (
             <div key={block.id} className="w-full mb-12">
-              <h2 className="text-2xl mb-8 border-b-2 pb-2 uppercase tracking-wider" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
+              <h2 className="text-2xl mb-8 border-b-2 pb-2 uppercase tracking-wider flex items-center gap-3" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
+                {BlockIcon && <BlockIcon className="w-6 h-6" />}
                 {block.title}
               </h2>
               
@@ -434,7 +436,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
             const isInfo = blockId === 'info';
             const block = isInfo ? { id: 'info', title: 'Info', type: 'info', items: [] } : data.blocks[blockId];
             if (!block) return null;
-            const Icon = (block as any).icon ? (LucideIcons as any)[(block as any).icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase;
+            const Icon = !(block as any).icon ? null : ((block as any).icon ? (LucideIcons as any)[(block as any).icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase);
             const isActive = activeTab === blockId;
 
             return (
@@ -448,7 +450,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     : 'text-[#5f5f5d] hover:text-accent hover:bg-black/5'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                {Icon && <Icon className="w-4 h-4" />}
                 <span className="text-sm tracking-widest uppercase">{block.title}</span>
               </button>
             );
@@ -517,19 +519,19 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                       : 'justify-center'
                   }`}>
                     {data.profile.contactItems?.map(item => {
-                      const Icon = (LucideIcons as any)[item.icon] || LucideIcons.Link;
+                      const Icon = !item.icon ? null : ((LucideIcons as any)[item.icon] || LucideIcons.Link);
                       return (
                         <div key={item.id} className={`flex items-center  cursor-pointer ${
                           data.profile.photo && data.profile.photoPosition === 'right' ? 'flex-row-reverse md:flex-row' : ''
                         }`}>
                           {item.url ? (
                             <a href={formatUrl(item.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-lg hover:text-accent transition-colors font-bold">
-                              <Icon className="w-5 h-5 shrink-0 text-accent" />
+                              {Icon && <Icon className="w-5 h-5 shrink-0 text-accent" />}
                               {item.text}
                             </a>
                           ) : (
                             <div className="flex items-center gap-3">
-                              <Icon className="w-5 h-5 shrink-0 text-accent" />
+                              {Icon && <Icon className="w-5 h-5 shrink-0 text-accent" />}
                               <span className="text-lg cursor-default">{item.text}</span>
                             </div>
                           )}

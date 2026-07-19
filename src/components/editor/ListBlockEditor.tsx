@@ -63,16 +63,17 @@ const ListBlockEditor = React.memo(({
               </Draggable>
             ))}
             {provided.placeholder}
-            <button
-              onClick={() => addListItem(block.id)}
-              className="w-full bg-white/50 border border-[#eceae4] py-4 rounded-2xl flex items-center justify-center gap-2 text-[#5f5f5d] hover:text-accent hover:bg-white transition-all  shadow-sm"
-            >
-              <LucideIcons.Plus className="w-4 h-4" />
-              <span className="text-xs tracking-widest uppercase">Add Item</span>
-            </button>
           </div>
         )}
       </Droppable>
+
+      <button
+        onClick={() => addListItem(block.id)}
+        className="w-full bg-white/50 border border-[#eceae4] py-4 rounded-2xl flex items-center justify-center gap-2 text-[#5f5f5d] hover:text-accent hover:bg-white transition-all shadow-sm mt-6"
+      >
+        <LucideIcons.Plus className="w-4 h-4" />
+        <span className="text-xs tracking-widest uppercase">Add Item</span>
+      </button>
     </div>
   );
 }, (prevProps, nextProps) => {

@@ -44,6 +44,9 @@ import { MAX_FREE_PROFILES } from '../constants';
 const APP_STORAGE_KEY = 'elegant_resume_app_data';
 const OLD_STORAGE_KEY = 'elegant_resume_data';
 
+// Module-level cache to prevent re-fetching stale data from Firestore during client-side navigation
+const fetchedUids = new Set<string>();
+
 export interface ProfileMeta {
   id: string;
   name: string;
@@ -75,8 +78,9 @@ export function useResume() {
     }
     return obj;
   };
-
   const [loading, setLoading] = useState(true);
+  const appStateRef = useRef<AppState | null>(null);
+
   const [appState, setAppState] = useState<AppState>(() => {
     // Initial local load to show something quickly before Firestore syncs
     const savedApp = localStorage.getItem(APP_STORAGE_KEY);
@@ -84,18 +88,21 @@ export function useResume() {
       try {
         const parsed = JSON.parse(savedApp);
         if (parsed.activeProfileId && parsed.profiles) {
+          appStateRef.current = parsed;
           return parsed;
         }
       } catch {
         // ignore
       }
     }
-    return {
+    const defaultState = {
       activeProfileId: 'main',
       profiles: {
         'main': { id: 'main', name: 'Main profile', data: DEFAULT_RESUME }
       }
     };
+    appStateRef.current = defaultState;
+    return defaultState;
   });
 
   const isInitialMount = useRef(true);
@@ -106,18 +113,22 @@ export function useResume() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
-          const docRef = doc(db, 'users', user.uid, 'userState', 'state');
-          const snap = await getDoc(docRef);
-          if (snap.exists()) {
-            const remoteData = snap.data();
-            if (remoteData.activeProfileId && remoteData.profiles) {
-              setAppState(remoteData as AppState);
-              localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(remoteData));
+        if (!fetchedUids.has(user.uid)) {
+          try {
+            const docRef = doc(db, 'users', user.uid, 'userState', 'state');
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+              const remoteData = snap.data();
+              if (remoteData.activeProfileId && remoteData.profiles) {
+                setAppState(remoteData as AppState);
+                appStateRef.current = remoteData as AppState;
+                localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(remoteData));
+              }
             }
+            fetchedUids.add(user.uid);
+          } catch (error) {
+            console.error("Failed to load user state from Firestore:", error);
           }
-        } catch (error) {
-          console.error("Failed to load user state from Firestore:", error);
         }
       }
       // Regardless of logged in or logged out, the first resolution marks remote as "ready"
@@ -168,7 +179,7 @@ export function useResume() {
     setAppState(prev => {
       const activeData = prev.profiles[prev.activeProfileId].data;
       const updatedData = sanitizeObject(updater(activeData));
-      return {
+      const next = {
         ...prev,
         profiles: {
           ...prev.profiles,
@@ -178,6 +189,8 @@ export function useResume() {
           }
         }
       };
+      appStateRef.current = next;
+      return next;
     });
   }, []);
 
@@ -187,7 +200,9 @@ export function useResume() {
   const switchProfile = useCallback( (id: string) => {
     setAppState(prev => {
       if (prev.profiles[id]) {
-        return { ...prev, activeProfileId: id };
+        const next = { ...prev, activeProfileId: id };
+        appStateRef.current = next;
+        return next;
       }
       return prev;
     });
@@ -647,7 +662,7 @@ export function useResume() {
         [id]: {
           id,
           type,
-          title: type === 'list' ? 'New Section' : 'Skills',
+          title: type === 'list' ? 'New List' : 'New Tag',
           items: []
         }
       },
@@ -712,6 +727,12 @@ export function useResume() {
     updateContactItem,
     removeContactItem,
     updateProfileData,
-    resetToDefault
+    resetToDefault,
+    getCurrentData: () => {
+      if (appStateRef.current) {
+        return appStateRef.current.profiles[appStateRef.current.activeProfileId]?.data || data;
+      }
+      return data;
+    }
   };
 }
