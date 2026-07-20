@@ -60,6 +60,45 @@ describe.skip('Firestore Security Rules', () => {
         createdAt: 1234567890
       }));
     });
+
+    it('denies creation when user has >3 profiles (quota enforcement)', async () => {
+      // Setup: user with 4 profiles
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'users/user_123'), {
+          profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+        });
+      });
+
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertFails(setDoc(doc(db, 'sharedResumes/resume_quota'), {
+        profile: {},
+        blocks: {},
+        blockOrder: [],
+        createdAt: Date.now(),
+        themeColor: '#fff',
+        enableAnimation: true
+      }));
+    });
+
+    it('allows creation when user has >3 profiles but is admin', async () => {
+      // Setup: user with 4 profiles + admin doc
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+          profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+        });
+        await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
+      });
+
+      const db = testEnv.authenticatedContext('user_admin').firestore();
+      await assertSucceeds(setDoc(doc(db, 'sharedResumes/resume_admin'), {
+        profile: {},
+        blocks: {},
+        blockOrder: [],
+        createdAt: Date.now(),
+        themeColor: '#fff',
+        enableAnimation: true
+      }));
+    });
   });
 
   describe('liveResumes', () => {
@@ -132,6 +171,41 @@ describe.skip('Firestore Security Rules', () => {
         blocks: {},
         blockOrder: [],
         ownerUid: 'user_123'
+      }));
+    });
+
+    it('denies creation when user has >3 profiles (quota enforcement)', async () => {
+      // Setup: user with 4 profiles
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'users/user_123'), {
+          profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+        });
+      });
+
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertFails(setDoc(doc(db, 'liveResumes/resume_quota'), {
+        profile: {},
+        blocks: {},
+        blockOrder: [],
+        ownerUid: 'user_123'
+      }));
+    });
+
+    it('allows creation when user has >3 profiles but is admin', async () => {
+      // Setup: user with 4 profiles + admin doc
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+          profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
+        });
+        await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
+      });
+
+      const db = testEnv.authenticatedContext('user_admin').firestore();
+      await assertSucceeds(setDoc(doc(db, 'liveResumes/resume_admin'), {
+        profile: {},
+        blocks: {},
+        blockOrder: [],
+        ownerUid: 'user_admin'
       }));
     });
   });

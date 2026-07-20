@@ -1,12 +1,12 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import handler from '../api/parse-resume';
-import { globalRateLimiter } from '../src/utils/rateLimiter';
 
 // Mock dependencies
 vi.mock('../src/utils/rateLimiter', () => ({
   globalRateLimiter: {
     isRateLimited: vi.fn().mockReturnValue(false)
-  }
+  },
+  checkRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: Date.now() + 3600000 })
 }));
 
 // Mock @google/genai
@@ -28,9 +28,6 @@ vi.mock('@google/genai', () => {
 
 // Mock Firebase Admin dynamic import
 const mockVerifyIdToken = vi.fn();
-const mockRunTransaction = vi.fn();
-const mockGet = vi.fn();
-const mockSet = vi.fn();
 
 vi.mock('../src/lib/firebase-admin', () => ({
   getFirebaseAdmin: vi.fn(() => ({
@@ -38,8 +35,7 @@ vi.mock('../src/lib/firebase-admin', () => ({
     adminDb: {
       collection: vi.fn().mockReturnValue({
         doc: vi.fn().mockReturnValue({ id: 'mock-doc' })
-      }),
-      runTransaction: mockRunTransaction
+      })
     }
   }))
 }));
@@ -77,12 +73,6 @@ describe('API Route: /api/parse-resume', () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'Method not allowed. Use POST.' });
   });
 
-  it('returns 429 if rate limited by IP', async () => {
-    vi.mocked(globalRateLimiter.isRateLimited).mockReturnValueOnce(true);
-    await handler(req, res);
-    expect(res.status).toHaveBeenCalledWith(429);
-  });
-
   it('returns 401 if missing Authorization header', async () => {
     req.headers.authorization = '';
     await handler(req, res);
@@ -102,25 +92,26 @@ describe('API Route: /api/parse-resume', () => {
     expect(res.status).toHaveBeenCalledWith(412);
   });
 
-  it('returns 429 if quota exceeded (transaction fails)', async () => {
-    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
-    mockRunTransaction.mockRejectedValueOnce(new Error('QUOTA_EXCEEDED'));
-
-    await handler(req, res);
-    expect(res.status).toHaveBeenCalledWith(429);
-  });
-
   it('returns 200 on successful parse', async () => {
     mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
-    mockRunTransaction.mockImplementationOnce(async (cb: any) => {
-      await cb({ get: mockGet, set: mockSet });
-    });
-    mockGet.mockResolvedValue({ exists: false });
 
     await handler(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       profile: expect.any(Object)
+    }));
+  });
+
+  it('returns 429 if IP rate limit exceeded', async () => {
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
+    // Override the rate limiter mock for this test
+    const { checkRateLimit } = await import('../src/utils/rateLimiter');
+    (checkRateLimit as any).mockResolvedValueOnce({ success: false, limit: 5, remaining: 0, reset: Date.now() + 3600000 });
+
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: expect.stringContaining('Too many requests')
     }));
   });
 });
