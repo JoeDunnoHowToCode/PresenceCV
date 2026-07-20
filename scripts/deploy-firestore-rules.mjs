@@ -1,4 +1,3 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { writeFileSync, existsSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -7,7 +6,7 @@ import { execSync } from 'child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, '..');
 
-async function deployRules() {
+function deployRules() {
   const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   if (!serviceAccountRaw) {
     console.log('⏭️  Skipping Firestore rules deployment: FIREBASE_SERVICE_ACCOUNT_KEY is not set.');
@@ -17,9 +16,26 @@ async function deployRules() {
   try {
     const serviceAccount = JSON.parse(serviceAccountRaw);
 
-    // Fix private key: convert literal \n to real newlines
     if (serviceAccount.private_key) {
-      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n').replace(/\r/g, '').trim() + '\n';
+      let pk = serviceAccount.private_key
+        .replace(/\\n/g, '\n')
+        .replace(/\r/g, '');
+
+      // Remove BEGIN/END markers to isolate base64 body
+      const beginMark = '-----BEGIN PRIVATE KEY-----';
+      const endMark = '-----END PRIVATE KEY-----';
+      const beginIdx = pk.indexOf(beginMark);
+      const endIdx = pk.indexOf(endMark);
+      if (beginIdx !== -1 && endIdx !== -1) {
+        const body = pk.substring(beginIdx + beginMark.length, endIdx)
+          .replace(/\s/g, ''); // strip all whitespace (newlines, spaces)
+        // Re-chunk into 64-char lines
+        let formatted = '';
+        for (let i = 0; i < body.length; i += 64) {
+          formatted += body.substring(i, i + 64) + '\n';
+        }
+        serviceAccount.private_key = beginMark + '\n' + formatted + endMark + '\n';
+      }
     }
 
     const projectId = serviceAccount.project_id;
@@ -29,26 +45,8 @@ async function deployRules() {
 
     console.log(`🚀 Deploying Firestore rules to project: ${projectId}...`);
 
-    if (getApps().length === 0) {
-      initializeApp({ credential: cert(serviceAccount) });
-    }
-
-    // Write minimal service account to temp file for firebase CLI auth
     const tempCredsPath = resolve(__dirname, '..', '.firebase-ci-creds.json');
-    const cliCreds = {
-      type: 'service_account',
-      project_id: serviceAccount.project_id,
-      private_key_id: serviceAccount.private_key_id,
-      private_key: serviceAccount.private_key,
-      client_email: serviceAccount.client_email,
-      client_id: serviceAccount.client_id,
-      auth_uri: serviceAccount.auth_uri,
-      token_uri: serviceAccount.token_uri,
-      auth_provider_x509_cert_url: serviceAccount.auth_provider_x509_cert_url,
-      client_x509_cert_url: serviceAccount.client_x509_cert_url,
-      universe_domain: serviceAccount.universe_domain || 'googleapis.com',
-    };
-    writeFileSync(tempCredsPath, JSON.stringify(cliCreds));
+    writeFileSync(tempCredsPath, JSON.stringify(serviceAccount));
 
     try {
       process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredsPath;
@@ -69,7 +67,7 @@ async function deployRules() {
     }
   } catch (error) {
     console.error('❌ Failed to deploy Firestore rules:', error.message);
-    process.exit(1); // Fail the workflow so it's visible
+    process.exit(1);
   }
 }
 
