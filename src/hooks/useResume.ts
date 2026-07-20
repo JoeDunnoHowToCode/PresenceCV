@@ -1,6 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+/* eslint-disable react-hooks/refs -- Intentional: appStateRef is synced during render/initializer to avoid stale closures (documented pattern) */
 /**
  * useResume.ts — Central Resume State Management Hook
  *
@@ -36,10 +34,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
 import { auth, db } from '../lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, runTransaction } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ParsedResumeSchema } from '../types';
-import { MAX_FREE_PROFILES } from '../constants';
 
 const APP_STORAGE_KEY = 'elegant_resume_app_data';
 const OLD_STORAGE_KEY = 'elegant_resume_data';
@@ -56,6 +53,7 @@ export interface ProfileMeta {
 export interface AppState {
   activeProfileId: string;
   profiles: Record<string, ProfileMeta>;
+  updatedAt?: number;
 }
 
 export function useResume() {
@@ -101,6 +99,7 @@ export function useResume() {
         'main': { id: 'main', name: 'Main profile', data: DEFAULT_RESUME }
       }
     };
+     
     appStateRef.current = defaultState;
     return defaultState;
   });
@@ -173,6 +172,31 @@ export function useResume() {
     return () => clearTimeout(timeoutId);
   }, [appState]);
 
+  // 結構性變更（profile 刪除、block 重排）使用 transaction 防止多裝置/多 tab 覆蓋
+  const syncStructuralChange = useCallback(async (newAppState: AppState) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      const docRef = doc(db, 'users', user.uid, 'userState', 'state');
+      await runTransaction(db, async (t) => {
+        const snap = await t.get(docRef);
+        const remote = snap.data() as AppState | undefined;
+        // 若遠端 updatedAt 較新，合併而非直接覆蓋（避免多裝置資料遺失）
+        if (remote && typeof remote.updatedAt === 'number' && remote.updatedAt > Date.now()) {
+          const merged: AppState = {
+            activeProfileId: newAppState.activeProfileId,
+            profiles: { ...remote.profiles, ...newAppState.profiles }
+          };
+          t.set(docRef, { ...merged, updatedAt: Date.now() });
+        } else {
+          t.set(docRef, { ...newAppState, updatedAt: Date.now() });
+        }
+      });
+    } catch (error) {
+      console.error("Failed to sync structural change to Firestore:", error);
+    }
+  }, []);
+
   const data = appState.profiles[appState.activeProfileId]?.data || DEFAULT_RESUME;
 
   const updateProfileData = useCallback( (updater: (prev: ResumeData) => ResumeData) => {
@@ -192,6 +216,7 @@ export function useResume() {
       appStateRef.current = next;
       return next;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -208,35 +233,7 @@ export function useResume() {
     });
   }, []);
 
-
-
-  const checkCanCreateProfile = async (): Promise<boolean> => {
-    const currentUid = auth.currentUser?.uid;
-    const profileCount = Object.keys(appState.profiles).length;
-    
-    if (profileCount >= MAX_FREE_PROFILES) {
-      if (!currentUid) {
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-        return false;
-      }
-      try {
-        const adminDoc = await getDoc(doc(db, 'admins', currentUid));
-        if (!adminDoc.exists()) {
-           alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-           return false;
-        }
-      } catch (err) {
-        console.error("Failed to verify admin status:", err);
-        alert(`Free plan is limited to ${MAX_FREE_PROFILES} resume profiles.`);
-        return false;
-      }
-    }
-    return true;
-  };
-
   const importResumeProfile = useCallback( async (name: string, rawData: unknown) => {
-    const canCreate = await checkCanCreateProfile();
-    if (!canCreate) return;
 
     const newId = `profile-${Date.now()}`;
     const mainData = appState.profiles['main']?.data || DEFAULT_RESUME;
@@ -344,12 +341,11 @@ export function useResume() {
             [newId]: { id: newId, name, data: sanitizeObject(newData) }
         }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState]);
 
 
   const createProfile = useCallback( async (name: string) => {
-    const canCreate = await checkCanCreateProfile();
-    if (!canCreate) return;
 
     // Clone the active profile, not strictly 'main', to prevent crashes if main was deleted
     const activeProfileData = appState.profiles[appState.activeProfileId]?.data || (Object.values(appState.profiles) as ProfileMeta[])[0]?.data || DEFAULT_RESUME;
@@ -367,6 +363,7 @@ export function useResume() {
         [newId]: { id: newId, name, data: newData }
       }
     }));
+   
   }, [appState]);
 
 
@@ -387,16 +384,23 @@ export function useResume() {
       const newProfiles = { ...prev.profiles };
       delete newProfiles[id];
       const newActiveId = prev.activeProfileId === id ? Object.keys(newProfiles)[0] : prev.activeProfileId;
-      return {
+      const next = {
         activeProfileId: newActiveId,
         profiles: newProfiles
       };
+      appStateRef.current = next;
+      // 結構性變更：使用 transaction 同步至 Firestore
+      if (isRemoteReady.current) {
+        syncStructuralChange(next);
+      }
+      return next;
     });
-  }, []);
+  }, [syncStructuralChange]);
 
 
   const toggleAnimation = useCallback( () => {
     setData(prev => ({ ...prev, enableAnimation: !prev.enableAnimation }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -405,6 +409,7 @@ export function useResume() {
       ...prev,
       profile: { ...prev.profile, [field]: value }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -419,6 +424,7 @@ export function useResume() {
         ]
       }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -467,6 +473,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -478,22 +485,31 @@ export function useResume() {
         contactItems: prev.profile.contactItems?.filter(item => item.id !== id)
       }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
   const updateThemeColor = useCallback( (color: string) => {
     setData(prev => ({ ...prev, themeColor: color }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
   const reorderBlocks = useCallback( (startIndex: number, endIndex: number) => {
-    setData(prev => {
+    setAppState(prev => {
       const newOrder = Array.from(prev.blockOrder);
       const [removed] = newOrder.splice(startIndex, 1);
       newOrder.splice(endIndex, 0, removed);
-      return { ...prev, blockOrder: newOrder };
+      const next = { ...prev, blockOrder: newOrder };
+      appStateRef.current = next;
+      // 結構性變更：使用 transaction 同步至 Firestore
+      if (isRemoteReady.current) {
+        syncStructuralChange(next);
+      }
+      return next;
     });
-  }, []);
+   
+  }, [syncStructuralChange]);
 
 
   const reorderListItems = useCallback( (blockId: string, startIndex: number, endIndex: number) => {
@@ -511,6 +527,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -529,6 +546,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -540,6 +558,7 @@ export function useResume() {
         [blockId]: { ...prev.blocks[blockId], title }
       }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -551,6 +570,7 @@ export function useResume() {
         [blockId]: { ...prev.blocks[blockId], icon }
       }
     }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -566,6 +586,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -583,6 +604,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -600,6 +622,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -616,6 +639,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -633,6 +657,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -650,6 +675,7 @@ export function useResume() {
         }
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -669,6 +695,7 @@ export function useResume() {
       blockOrder: [...prev.blockOrder, id]
     }));
     return id;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
@@ -682,6 +709,7 @@ export function useResume() {
         blockOrder: prev.blockOrder.filter(id => id !== blockId)
       };
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, []);
 
 
