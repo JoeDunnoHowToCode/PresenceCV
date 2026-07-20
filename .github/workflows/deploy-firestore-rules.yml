@@ -8,7 +8,8 @@ on:
       - '.github/workflows/deploy-firestore-rules.yml'
 
 jobs:
-  deploy-firestore-rules:
+  deploy-dev:
+    name: Deploy Firestore Rules (Dev)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,7 +26,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Deploy Firestore Rules
+      - name: Deploy Firestore Rules (Dev)
         env:
-          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_DEV }}
+        run: node scripts/deploy-firestore-rules.mjs
+
+  deploy-prod:
+    name: Deploy Firestore Rules (Prod)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy Firestore Rules (Prod)
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_PROD }}
         run: node scripts/deploy-firestore-rules.mjs
