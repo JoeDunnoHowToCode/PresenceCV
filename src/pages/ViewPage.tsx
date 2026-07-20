@@ -117,7 +117,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
       }
 
       if (window.opener) {
-        window.opener.postMessage({ type: 'RESUME_DATA_REQUEST' }, '*');
+        window.opener.postMessage({ type: 'RESUME_DATA_REQUEST' }, window.location.origin);
       }
     }
 

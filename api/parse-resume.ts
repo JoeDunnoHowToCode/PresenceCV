@@ -34,7 +34,7 @@ export const config = {
   },
 };
 
-import { globalRateLimiter } from "../src/utils/rateLimiter.js";
+import { checkRateLimit } from "../src/utils/rateLimiter.js";
 import { getFirebaseAdmin } from '../src/lib/firebase-admin.js';
 
 export default async function handler(req: any, res: any) {
@@ -52,8 +52,12 @@ export default async function handler(req: any, res: any) {
       ipStr = ipStr.split(',')[0].trim();
     }
 
-    if (globalRateLimiter.isRateLimited(ipStr)) {
-      return res.status(429).json({ error: "Too many requests from this IP. Please try again later." });
+    const rateLimitResult = await checkRateLimit(ipStr);
+    if (!rateLimitResult.success) {
+      return res.status(429).json({ 
+        error: "Too many requests from this IP. Please try again later.",
+        retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+      });
     }
 
     // Authenticate user via Firebase ID Token
@@ -80,14 +84,12 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: "Server Configuration Error" });
     }
 
-    let decodedToken;
     try {
-      decodedToken = await adminAuth.verifyIdToken(idToken);
+      await adminAuth.verifyIdToken(idToken);
     } catch (err) {
       console.error("Firebase ID Token verification failed:", err);
       return res.status(401).json({ error: "Unauthorized. Invalid ID token." });
     }
-    const uid = decodedToken.uid;
 
     const { fileType, base64Data } = req.body;
 
@@ -100,38 +102,6 @@ export default async function handler(req: any, res: any) {
 
     if (isPlaceholderKey) {
       return res.status(412).json({ error: "NO_SERVER_KEY" });
-    }
-
-    const userLimitsRef = adminDb.collection('user_limits').doc(uid);
-    const adminRef = adminDb.collection('admins').doc(uid);
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    try {
-      await adminDb.runTransaction(async (t: any) => {
-        const doc = await t.get(userLimitsRef);
-        const adminDoc = await t.get(adminRef);
-        const isAdmin = adminDoc.exists;
-
-        let count = 0;
-        if (doc.exists) {
-          const data = doc.data();
-          if (data?.date === todayStr) {
-            count = data.count || 0;
-          }
-        }
-        
-        if (count >= 5 && !isAdmin) {
-          throw new Error("QUOTA_EXCEEDED");
-        }
-        
-        // Reservation: increment early to prevent concurrent bypass
-        t.set(userLimitsRef, { date: todayStr, count: count + 1 }, { merge: true });
-      });
-    } catch (err: any) {
-      if (err.message === "QUOTA_EXCEEDED") {
-        return res.status(429).json({ error: "Daily limit reached (5/5). Please try again tomorrow." });
-      }
-      throw err;
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -210,21 +180,7 @@ export default async function handler(req: any, res: any) {
 
       parsedResult = JSON.parse(jsonStr);
     } catch (aiError: any) {
-      console.error("Gemini Parsing failed, releasing quota reservation...", aiError);
-      // Release reservation
-      try {
-        await adminDb.runTransaction(async (t: any) => {
-          const doc = await t.get(userLimitsRef);
-          if (doc.exists) {
-            const data = doc.data();
-            if (data?.date === todayStr && data.count > 0) {
-              t.set(userLimitsRef, { count: data.count - 1 }, { merge: true });
-            }
-          }
-        });
-      } catch (releaseErr) {
-        console.error("Failed to release quota reservation:", releaseErr);
-      }
+      console.error("Gemini Parsing failed:", aiError);
       return res.status(500).json({ error: "Failed to parse resume with AI." });
     }
 

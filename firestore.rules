@@ -7,13 +7,6 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // AI 掃描次數限制記錄 (新功能開通)
-    // 額度由 Server-side Admin SDK 處理，前端嚴禁修改
-    match /user_limits/{userId} {
-      allow get: if request.auth != null && request.auth.uid == userId;
-      allow write, delete, list: if false;
-    }
-
     // 開放讀取 admin 列表以同步前端判斷
     match /admins/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
@@ -46,7 +39,11 @@ service cloud.firestore {
     match /sharedResumes/{resumeId} {
       allow create: if request.auth != null 
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt'])
-        && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation']);
+        && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation'])
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.profiles.size() <= 3
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
       allow get: if true;
       allow list: if false;
       allow update, delete: if false;
@@ -56,7 +53,11 @@ service cloud.firestore {
     match /liveResumes/{resumeId} {
       allow create: if request.auth != null
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder'])
-        && request.resource.data.ownerUid == request.auth.uid;
+        && request.resource.data.ownerUid == request.auth.uid
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.profiles.size() <= 3
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
       allow get: if true;
       allow list: if false;
       allow update: if request.auth != null && (

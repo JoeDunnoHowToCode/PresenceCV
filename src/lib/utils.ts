@@ -28,10 +28,21 @@ export const copyTextToClipboard = async (text: string) => {
 export function formatUrl(url: string): string {
   if (!url) return '';
   url = url.trim();
-  // Already has protocol or is a mailto/tel link
-  if (/^([a-z]+:)/i.test(url)) return url;
+  if (!url) return '';
+
+  // Whitelist of allowed protocols
+  const allowedProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+
+  // Already has protocol - validate against whitelist
+  const protocolMatch = url.match(/^([a-z]+:)/i);
+  if (protocolMatch) {
+    const protocol = protocolMatch[1].toLowerCase();
+    return allowedProtocols.includes(protocol) ? url : '';
+  }
+
   // If it's an email address without mailto
   if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(url)) return `mailto:${url}`;
-  // Default to https
+
+  // Default to https for bare domains/URLs
   return `https://${url}`;
 }

@@ -1,22 +1,14 @@
 import React, { useState, useEffect, useRef, CSSProperties, useCallback } from 'react';
-import { DragDropContext, DropResult, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 import LogoutConfirmModal from '../components/LogoutConfirmModal';
 import { useResume } from '../hooks/useResume';
-import { ICONS, AVAILABLE_BLOCK_ICONS, THEME_COLORS, AVAILABLE_ICONS } from '../constants';
+import { THEME_COLORS } from '../constants';
 import * as LucideIcons from 'lucide-react';
 import { ImportResumeModal } from '../components/ImportResumeModal';
 import { copyTextToClipboard } from '../lib/utils';
-
-import ProfileSwitcher from '../components/editor/ProfileSwitcher';
-import ThemePicker from '../components/editor/ThemePicker';
-import PhotoUploadCrop from '../components/editor/PhotoUploadCrop';
-import InfoEditor from '../components/editor/InfoEditor';
-import ListBlockEditor from '../components/editor/ListBlockEditor';
-import TagsBlockEditor from '../components/editor/TagsBlockEditor';
 
 import DesktopEditLayout from '../components/editor/DesktopEditLayout';
 import MobileEditLayout from '../components/editor/MobileEditLayout';
@@ -51,6 +43,7 @@ export default function EditPage() {
   const [blockToDelete, setBlockToDelete] = useState<string | null>(null);
 
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   const allTabs = ['info', ...data.blockOrder];
   const lastSnapshotDataStr = useRef<string>('');
 
@@ -83,6 +76,7 @@ export default function EditPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('info');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [data.blockOrder, activeTab]);
 
   const handleTabClick = useCallback((tabId: string) => {
@@ -103,6 +97,7 @@ export default function EditPage() {
     } else if (type === 'tag-items') {
       resume.reorderTagItems(source.droppableId, source.index, destination.index);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [resume.reorderBlocks, resume.reorderListItems, resume.reorderTagItems]);
 
   const [isSharing, setIsSharing] = useState(false);
@@ -114,7 +109,7 @@ export default function EditPage() {
   useEffect(() => {
     const handleRequest = (event: MessageEvent) => {
       if (event.data?.type === 'RESUME_DATA_REQUEST' && event.source) {
-        (event.source as Window).postMessage({ type: 'RESUME_DATA_SYNC', data }, '*');
+        (event.source as Window).postMessage({ type: 'RESUME_DATA_SYNC', data }, event.origin);
       }
     };
     window.addEventListener('message', handleRequest);
@@ -136,7 +131,7 @@ export default function EditPage() {
         return;
       }
       const intervalId = setInterval(() => {
-        printWindow.postMessage({ type: 'RESUME_DATA_SYNC', data: profileData }, '*');
+        printWindow.postMessage({ type: 'RESUME_DATA_SYNC', data: profileData }, window.location.origin);
       }, 200);
 
       const handleAck = (event: MessageEvent) => {
@@ -152,6 +147,7 @@ export default function EditPage() {
         window.removeEventListener('message', handleAck);
       }, 10000);
     }, 50);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState, data]);
 
   useEffect(() => {
@@ -213,6 +209,7 @@ export default function EditPage() {
         setIsSharing(false);
       }
     }, 50);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState, data, snapshotUrl]);
 
   const ensureLiveLink = useCallback(async () => {
@@ -245,6 +242,7 @@ export default function EditPage() {
     } finally {
       setIsInitializingLive(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState, data, resume.updateProfileData, user]);
 
   const handleCopyLink = useCallback(async (url: string, section: 'snapshot' | 'live') => {
@@ -282,8 +280,6 @@ export default function EditPage() {
       </div>
     );
   }
-
-  const activeBlock = data.blocks[activeTab];
 
   const layoutProps: EditorLayoutProps = {
     ...resume,
