@@ -4,7 +4,6 @@ import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
 import { TagItem } from '../../types';
 import { useDebouncedInput } from './InfoEditor';
-import { useEffect } from 'react';
 
 interface TagsBlockEditorProps {
   block: any;
@@ -116,18 +115,21 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
   const initialTitle = initialParts[0] || '';
   const initialDesc = initialParts.length > 1 ? initialParts.slice(1).join(':').trim() : '';
 
-  const [title, setTitle] = useState(initialTitle);
-  const [desc, setDesc] = useState(initialDesc);
+  const titleInput = useDebouncedInput(initialTitle, (newTitle) => {
+    const currentDesc = descInput.ref.current?.value || '';
+    const combined = currentDesc.trim() ? `${newTitle.trim()}: ${currentDesc.trim()}` : newTitle.trim();
+    if (combined !== item.text) {
+      updateTagItem(blockId, item.id, combined);
+    }
+  }, 500);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const combined = desc.trim() ? `${title.trim()}: ${desc.trim()}` : title.trim();
-      if (combined !== item.text) {
-        updateTagItem(blockId, item.id, combined);
-      }
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [title, desc, blockId, item.id, item.text, updateTagItem]);
+  const descInput = useDebouncedInput(initialDesc, (newDesc) => {
+    const currentTitle = titleInput.ref.current?.value || '';
+    const combined = newDesc.trim() ? `${currentTitle.trim()}: ${newDesc.trim()}` : currentTitle.trim();
+    if (combined !== item.text) {
+      updateTagItem(blockId, item.id, combined);
+    }
+  }, 500);
 
   return (
     <div 
@@ -144,14 +146,18 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
       
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 w-full">
         <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          ref={titleInput.ref as React.Ref<HTMLInputElement>}
+          defaultValue={titleInput.defaultValue}
+          onChange={titleInput.onChange}
+          onBlur={titleInput.onBlur}
           placeholder="Category (e.g., Programming)"
           className="bg-transparent border-b border-[#eceae4] hover:border-[#1c1c1c]/20 focus:border-accent outline-none text-base font-medium tracking-wide text-[#1c1c1c] transition-colors pb-1 w-full"
         />
         <input
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
+          ref={descInput.ref as React.Ref<HTMLInputElement>}
+          defaultValue={descInput.defaultValue}
+          onChange={descInput.onChange}
+          onBlur={descInput.onBlur}
           placeholder="Skills (e.g., Python, JS, React)"
           className="bg-transparent border-b border-[#eceae4] hover:border-[#1c1c1c]/20 focus:border-accent outline-none text-base tracking-wide text-[#5f5f5d] transition-colors pb-1 w-full"
         />

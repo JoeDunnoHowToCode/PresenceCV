@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { DropResult } from '@hello-pangea/dnd';
 import { useResume } from '../../hooks/useResume';
 import { User } from 'firebase/auth';
 

@@ -1,17 +1,8 @@
-/* eslint-disable react-refresh/only-export-components */
-
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/immutability */
-
-/* eslint-disable react-hooks/refs */
- 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+/* eslint-disable react-hooks/refs, react-hooks/immutability -- Intentional: callback-ref assignments and ref access in event handlers for IME composition focus management */
+import React, { useState, useEffect, useRef } from 'react';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
-import { ContactItem, ResumeData } from '../../types';
+import { ResumeData } from '../../types';
 
 interface InfoEditorProps {
   data: ResumeData;
@@ -113,6 +104,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   return (
     <div className="flex flex-col items-center text-center space-y-12 py-12 w-full">
       <div className="w-full flex flex-col items-center">
+        { }
         <input
           ref={nameInput.ref as any}
           defaultValue={nameInput.defaultValue}
@@ -121,6 +113,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] text-center bg-transparent w-full"
           placeholder="Your Name"
         />
+        { }
         <input
           ref={titleInput.ref as any}
           defaultValue={titleInput.defaultValue}
@@ -245,6 +238,7 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
           </>
         )}
       </div>
+      { }
       <input
         ref={textInput.ref as any}
         defaultValue={textInput.defaultValue}
@@ -253,6 +247,7 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         placeholder="Display Text"
         className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-lg text-[#1c1c1c] transition-colors"
       />
+      { }
       <input
         ref={urlInput.ref as any}
         defaultValue={urlInput.defaultValue}

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import ListBlockEditor from '../src/components/editor/ListBlockEditor';
 import { Block } from '../src/types';
 import { DragDropContext } from '@hello-pangea/dnd';
 
 describe('Performance - React.memo Component Locking', () => {
   it('prevents re-rendering when parent state changes but block props stay identical in value', () => {
-    let renderCount = 0;
-
     // We can't directly spy on ListBlockEditor easily because it's a memo component,
     // so we'll mock its internal items rendering or create a wrapper that changes references.
 
