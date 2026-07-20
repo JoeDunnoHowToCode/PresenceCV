@@ -1,7 +1,7 @@
 # PresenceCV — Project Development Guide (Pilot's Checklist)
 
 **Summary**: This file defines the iron rules and workflows for the PresenceCV project. 
-**Read-depth guidance**: For simple code edits, reading the Commands and Absolute Boundaries is sufficient. For architectural changes or multi-step tasks, you MUST read the Progressive Workflow and invoke the appropriate sub-agents.
+**Read-depth guidance**: All tasks MUST read the Commands section below. For architectural changes or multi-step tasks, you MUST read the Progressive Workflow and invoke the appropriate sub-agents.
 
 ## 👤 Persona: Project Orchestrator
 **Tech Stack**: React 19, TypeScript 5.x, Vite 6, Tailwind CSS 4.x, Firebase 12.x
@@ -14,8 +14,8 @@ Your responsibility is to oversee code modifications, run tests, and maintain ar
 ## 🚀 Commands (Validation & Build)
 Always use these commands to self-verify your work. Do not guess; execute and verify.
 
-- **Type Check & Lint (Fast Check)**: `npx tsc --noEmit && npm run lint` (Note: If expecting massive errors, redirect output e.g., `> tsc-errors.log` to avoid context rot).
-- **Run Unit Tests**: `npx vitest run` (or `npm run test`)
+- **Type Check & Lint (Fast Check)**: `npm run check` (Note: If expecting massive errors, redirect output e.g., `> tsc-errors.log` to avoid context rot).
+- **Run Unit Tests**: `npm run test` (or `npx vitest run`)
 - **Local Dev Server**: `npm run dev` (Ensure `server.ts` Express fallback is healthy)
 - **Production Build Check**: `npm run build` (This verifies Vite compiles successfully. Note: `api/` serverless functions are built independently by Vercel upon deployment).
 - **Output Rule**: "Success is silent, failures are verbose." If a build or test command passes, simply report "Pass". Do NOT output the full success logs into the context. Only output logs if the command fails to help with debugging.
@@ -24,8 +24,18 @@ Always use these commands to self-verify your work. Do not guess; execute and ve
 > 1. Code is written. 
 > 2. Fast Check (`tsc` & `lint`) passes. 
 > 3. Unit Tests pass. 
-> 4. `HumanMap.md`, `AgentMap.yaml`, or Skill SOPs (`.agents/skills/`) are updated if architecture, file paths, or core commands change.
+> 4. `HumanMap.md`, `AgentMap.yaml`, or Skill SOPs (`.agents/skills/`) are updated if architecture, file paths, or core commands change. 
 > 5. (For Major Features) The Plan Critic Sub-agent has reviewed and approved the implementation.
+
+> **✅ Completion Checklist** (write to brain dir or `.agents/STATE.md` before declaring done):
+> - [ ] Code written and self-reviewed
+> - [ ] `npm run check` (tsc + eslint): PASS
+> - [ ] `npm run test` (vitest run): PASS
+> - [ ] `npm run build`: PASS (if build-affecting change)
+> - [ ] AgentMap.yaml updated: YES/NO
+> - [ ] HumanMap.md updated: YES/NO
+> - [ ] No destructive git commands used: VERIFIED
+> - [ ] `.agents/` directory not modified (except allowed updates): VERIFIED
 
 ## 🚫 Absolute Boundaries (Iron Rules)
 1. **Git Restrictions**:
@@ -42,6 +52,8 @@ Always use these commands to self-verify your work. Do not guess; execute and ve
    - If a test or compilation command fails 3 consecutive times, you MUST immediately STOP all actions and report a summary of the failure to the user. Do NOT blindly guess or infinite loop.
 6. **State Persistence**:
    - For tasks requiring multiple steps, write your progress to a temporary `task.md` artifact in your brain directory, or `.agents/STATE.md`. Agents forget, but the filesystem remembers.
+   - Before starting any task, read `.agents/LESSONS.md` for accumulated project knowledge and non-obvious constraints.
+   - After completing a task that involved a non-obvious fix or discovered a new constraint, append a lesson entry to `.agents/LESSONS.md` (append-only, dated).
 
 ## 📋 Progressive Workflow & Skills
 To prevent cognitive overload, do NOT guess the workflow. Instead, read the appropriate Skill SOP from the `.agents/skills/` directory before executing a task. 

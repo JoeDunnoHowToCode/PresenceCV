@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "node scripts/deploy-rules.mjs && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint",
     "start": "node --experimental-strip-types server.ts",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --project demo-test \"vitest run tests/firestore.rules.test.ts\"",
     "prepare": "husky"
   },
@@ -18,6 +21,8 @@
     "@google/genai": "^1.50.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@tailwindcss/vite": "^4.1.14",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
     "express": "^4.22.1",
@@ -64,7 +69,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "bash -c 'npm run lint'"
+      "bash -c 'npm run typecheck'"
     ]
   }
 }
