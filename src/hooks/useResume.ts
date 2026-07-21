@@ -41,8 +41,7 @@ import { ParsedResumeSchema } from '../types';
 const APP_STORAGE_KEY = 'elegant_resume_app_data';
 const OLD_STORAGE_KEY = 'elegant_resume_data';
 
-// Module-level cache to prevent re-fetching stale data from Firestore during client-side navigation
-const fetchedUids = new Set<string>();
+// Removed fetchedUids cache to fix React StrictMode skipping fetches on mount
 
 export interface ProfileMeta {
   id: string;
@@ -112,22 +111,25 @@ export function useResume() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        if (!fetchedUids.has(user.uid)) {
-          try {
-            const docRef = doc(db, 'users', user.uid, 'userState', 'state');
-            const snap = await getDoc(docRef);
-            if (snap.exists()) {
-              const remoteData = snap.data();
-              if (remoteData.activeProfileId && remoteData.profiles) {
-                setAppState(remoteData as AppState);
-                appStateRef.current = remoteData as AppState;
+        try {
+          const docRef = doc(db, 'users', user.uid, 'userState', 'state');
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            const remoteData = snap.data() as AppState;
+            if (remoteData.activeProfileId && remoteData.profiles) {
+              const localData = appStateRef.current;
+              // Check if remote data is newer than local data to prevent overwriting unsaved local edits
+              const isRemoteNewer = !localData?.updatedAt || !remoteData.updatedAt || remoteData.updatedAt >= localData.updatedAt;
+              
+              if (isRemoteNewer) {
+                setAppState(remoteData);
+                appStateRef.current = remoteData;
                 localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(remoteData));
               }
             }
-            fetchedUids.add(user.uid);
-          } catch (error) {
-            console.error("Failed to load user state from Firestore:", error);
           }
+        } catch (error) {
+          console.error("Failed to load user state from Firestore:", error);
         }
       }
       // Regardless of logged in or logged out, the first resolution marks remote as "ready"
