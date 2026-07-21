@@ -90,6 +90,10 @@ export default function EditPage() {
     if (!result.destination) return;
     const { source, destination, type } = result;
 
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
     if (type === 'tabs') {
       resume.reorderBlocks(source.index, destination.index);
     } else if (type === 'list-items') {

@@ -89,7 +89,7 @@ const ProfileSwitcher = React.memo(({
                         setIsOpen(false);
                       }
                     }}
-                    className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left truncate ${
+                    className={`flex-1 flex items-center gap-3 pl-4 pr-16 py-3 rounded-xl transition-all text-left min-w-0 ${
                       activeProfileId === profile.id ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'
                     }`}
                   >
@@ -116,14 +116,14 @@ const ProfileSwitcher = React.memo(({
                           className="w-full bg-transparent border-none outline-none text-sm tracking-widest uppercase font-medium text-[#1c1c1c]"
                         />
                       ) : (
-                        <span className="text-sm tracking-widest uppercase font-medium truncate">
+                        <span className="text-sm tracking-widest uppercase font-medium truncate flex-1 min-w-0">
                           {profile.name}
                         </span>
                       )}
                   </button>
                   
-                  {activeProfileId !== profile.id && (
-                    <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-10">
+                    {activeProfileId !== profile.id && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -133,20 +133,20 @@ const ProfileSwitcher = React.memo(({
                       >
                         <LucideIcons.Edit2 className="w-3 h-3" />
                       </button>
-                      {Object.keys(profiles).length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setProfileToDelete(profile.id);
-                          }}
-                          className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="Delete Profile"
-                        >
-                          <LucideIcons.Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  )}
+                    )}
+                    {Object.keys(profiles).length > 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProfileToDelete(profile.id);
+                        }}
+                        className="p-1.5 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        title="Delete Profile"
+                      >
+                        <LucideIcons.Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

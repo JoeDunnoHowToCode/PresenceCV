@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { CSSProperties, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
@@ -31,6 +31,24 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
   const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
   const activeBlock = data.blocks[activeTab];
+
+  // Enable mouse wheel horizontal scrolling on desktop tabs
+  useEffect(() => {
+    const el = tabsContainerRef.current;
+    if (!el) return;
+    
+    const handleWheel = (e: WheelEvent) => {
+      // Only convert vertical scroll to horizontal if not already scrolling horizontally
+      if (e.deltaY !== 0 && Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+    
+    // Use passive: false so we can call preventDefault()
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [tabsContainerRef]);
 
   return (
     <>
@@ -609,7 +627,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                 </div>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setBlockToDelete(blockId); }}
-                                  className="w-6 h-6 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 text-white"
+                                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 ${isActive ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-[#5f5f5d] hover:text-red-500'}`}
                                   title="Delete Section"
                                 >
                                   <LucideIcons.X className="w-3 h-3" />
