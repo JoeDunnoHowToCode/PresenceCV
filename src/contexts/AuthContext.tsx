@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         alert('Too many sign-in attempts. Please try again later.');
       } else {
         console.error('Sign-in error:', error);
-        alert('Failed to sign in. Please try again.');
+        alert(`Failed to sign in. Please try again.\n\nError: ${error.code || 'unknown'}\n${error.message || ''}`);
       }
       throw error;
     }
