@@ -29,6 +29,7 @@ jobs:
       - name: Deploy Firestore Rules (Dev)
         env:
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_DEV }}
+          FIREBASE_DATABASE_ID: ${{ secrets.FIREBASE_DATABASE_ID_DEV }}
         run: node scripts/deploy-firestore-rules.mjs
 
   deploy-prod:

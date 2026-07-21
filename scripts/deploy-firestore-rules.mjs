@@ -45,6 +45,7 @@ function deployRules() {
 
     console.log(`🚀 Deploying Firestore rules to project: ${projectId}...`);
 
+    const databaseId = process.env.FIREBASE_DATABASE_ID || '(default)';
     const tempCredsPath = resolve(__dirname, '..', '.firebase-ci-creds.json');
     writeFileSync(tempCredsPath, JSON.stringify(serviceAccount));
 
@@ -52,7 +53,7 @@ function deployRules() {
       process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredsPath;
 
       execSync(
-        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --non-interactive --force`,
+        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --database ${databaseId} --non-interactive --force`,
         {
           stdio: 'inherit',
           env: process.env,
