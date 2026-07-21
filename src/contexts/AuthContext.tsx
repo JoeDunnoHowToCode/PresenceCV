@@ -104,7 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         alert('Too many sign-in attempts. Please try again later.');
       } else {
         console.error('Sign-in error:', error);
-        alert(`Failed to sign in. Please try again.\n\nError: ${error.code || 'unknown'}\n${error.message || ''}`);
+        const cfg = {
+          apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '(missing)',
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '(missing)',
+        };
+        alert(`Failed to sign in.\n\nError: ${error.code || 'unknown'}\n${error.message || ''}\n\nConfig: authDomain=${cfg.authDomain}, projectId=${cfg.projectId}, apiKey=${cfg.apiKey ? 'set' : 'MISSING'}`);
       }
       throw error;
     }
