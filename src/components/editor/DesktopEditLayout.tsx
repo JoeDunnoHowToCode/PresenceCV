@@ -386,11 +386,18 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                        const block = data.blocks[activeTab];
                        const FinalIcon = !block?.icon ? null : (block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase);
                        return (
-                         <div className="relative shrink-0 flex items-center justify-center">
-                           <FinalIcon 
-                             onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
-                             className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
-                           />
+                          <div className="relative shrink-0 flex items-center justify-center">
+                            {FinalIcon ? (
+                              <FinalIcon 
+                                onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
+                                className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
+                              />
+                            ) : (
+                              <div 
+                                onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
+                                className="w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer"
+                              />
+                            )}
                            {openIconMenuId === activeTab && typeof document !== 'undefined' && createPortal(
                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 99999 }}>
                                <div className="fixed inset-0 z-[99998]" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
