@@ -201,6 +201,14 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
   const textInput = useDebouncedInput(item.text, (val) => updateContactItem(item.id, 'text', val));
   const urlInput = useDebouncedInput(item.url || '', (val) => updateContactItem(item.id, 'url', val));
   const [isIconMenuOpen, setIsIconMenuOpen] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  useEffect(() => {
+    if (isConfirmingDelete) {
+      const timer = setTimeout(() => setIsConfirmingDelete(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmingDelete]);
 
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full max-w-full group relative p-3 sm:p-0 rounded-xl sm:rounded-none bg-black/5 sm:bg-transparent border sm:border-none border-[#eceae4]">
@@ -256,13 +264,25 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
         placeholder="URL (optional)"
         className="flex-1 min-w-0 w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs sm:text-sm text-[#5f5f5d] transition-colors"
       />
-      <button 
-        onClick={() => removeContactItem(item.id)}
-        className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-[#5f5f5d] hover:text-red-400 transition-all self-end sm:self-center p-1"
-        title="Remove Link"
-      >
-        <LucideIcons.X className="w-4 h-4" />
-      </button>
+      {isConfirmingDelete ? (
+        <button
+          onClick={() => {
+            removeContactItem(item.id);
+            setIsConfirmingDelete(false);
+          }}
+          className="px-2.5 py-1 bg-red-500 text-white text-xs rounded-lg font-medium hover:bg-red-600 transition-all self-end sm:self-center shrink-0 shadow-sm"
+        >
+          Confirm?
+        </button>
+      ) : (
+        <button 
+          onClick={() => setIsConfirmingDelete(true)}
+          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-[#5f5f5d] hover:text-red-400 transition-all self-end sm:self-center p-1"
+          title="Remove Link"
+        >
+          <LucideIcons.X className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }, (prevProps, nextProps) => {

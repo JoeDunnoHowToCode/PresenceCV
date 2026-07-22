@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useState } from 'react';
+import React, { KeyboardEvent, useState, useEffect } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
@@ -143,6 +143,15 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, index, to
     }
   }, 500);
 
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  useEffect(() => {
+    if (isConfirmingDelete) {
+      const timer = setTimeout(() => setIsConfirmingDelete(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmingDelete]);
+
   return (
     <div 
       ref={provided.innerRef}
@@ -198,12 +207,25 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, index, to
         />
       </div>
 
-      <button 
-        onClick={() => removeTagItem(blockId, item.id)} 
-        className="text-[#5f5f5d] hover:text-red-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all mt-1 md:mt-0"
-      >
-        <LucideIcons.X className="w-4 h-4" />
-      </button>
+      {isConfirmingDelete ? (
+        <button
+          onClick={() => {
+            removeTagItem(blockId, item.id);
+            setIsConfirmingDelete(false);
+          }}
+          className="px-2.5 py-1 bg-red-500 text-white text-xs rounded-lg font-medium hover:bg-red-600 transition-all self-end md:self-center shrink-0 shadow-sm mt-1 md:mt-0"
+        >
+          Confirm?
+        </button>
+      ) : (
+        <button 
+          onClick={() => setIsConfirmingDelete(true)} 
+          className="text-[#5f5f5d] hover:text-red-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all mt-1 md:mt-0"
+          title="Delete Tag"
+        >
+          <LucideIcons.X className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }, (prevProps, nextProps) => {

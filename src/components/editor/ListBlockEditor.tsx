@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
@@ -115,6 +115,15 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
     }
   }, []);
 
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  useEffect(() => {
+    if (isConfirmingDelete) {
+      const timer = setTimeout(() => setIsConfirmingDelete(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmingDelete]);
+
   return (
     <div 
       ref={provided.innerRef}
@@ -151,12 +160,25 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
         </div>
       )}
 
-      <button 
-        onClick={() => removeListItem(blockId, item.id)} 
-        className="absolute top-4 right-4 text-[#5f5f5d] hover:text-red-400 transition-colors z-10"
-      >
-        <LucideIcons.X className="w-4 h-4" />
-      </button>
+      {isConfirmingDelete ? (
+        <button 
+          onClick={() => {
+            removeListItem(blockId, item.id);
+            setIsConfirmingDelete(false);
+          }}
+          className="absolute top-4 right-4 px-2.5 py-1 bg-red-500 text-white text-xs rounded-lg font-medium hover:bg-red-600 transition-all z-10 shadow-sm"
+        >
+          Confirm?
+        </button>
+      ) : (
+        <button 
+          onClick={() => setIsConfirmingDelete(true)} 
+          className="absolute top-4 right-4 text-[#5f5f5d] hover:text-red-400 transition-colors z-10"
+          title="Delete Item"
+        >
+          <LucideIcons.X className="w-4 h-4" />
+        </button>
+      )}
       <div className="pl-8">
         <input
           ref={titleInput.ref as React.Ref<HTMLInputElement>}

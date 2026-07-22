@@ -15,6 +15,14 @@ const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: Pho
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isConfirmingPhotoDelete, setIsConfirmingPhotoDelete] = useState(false);
+
+  React.useEffect(() => {
+    if (isConfirmingPhotoDelete) {
+      const timer = setTimeout(() => setIsConfirmingPhotoDelete(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmingPhotoDelete]);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.match(/^image\/(jpeg|jpg|png|heif|heic)$/i) && !file.name.match(/\.(jpg|jpeg|png|heif|heic)$/i)) {
@@ -76,12 +84,29 @@ const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: Pho
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                 <LucideIcons.Upload className="w-6 h-6 text-white" />
               </div>
-              <button 
-                onClick={(e) => { e.stopPropagation(); updateProfile('photo', ''); }} 
-                className="absolute top-2 right-2 p-1.5 bg-red-500/80 rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-500 z-10"
-              >
+              {isConfirmingPhotoDelete ? (
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    updateProfile('photo', ''); 
+                    setIsConfirmingPhotoDelete(false); 
+                  }} 
+                  className="absolute top-2 right-2 px-2.5 py-1 bg-red-600 rounded-full text-white text-[10px] font-medium tracking-wide shadow-md z-10 transition-all"
+                >
+                  Confirm?
+                </button>
+              ) : (
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setIsConfirmingPhotoDelete(true); 
+                  }} 
+                  className="absolute top-2 right-2 p-1.5 bg-red-500/80 rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-500 z-10"
+                  title="Remove Photo"
+                >
                   <LucideIcons.X className="w-3 h-3 text-white" />
-              </button>
+                </button>
+              )}
             </>
           ) : (
             <div className="flex flex-col items-center gap-3 text-[#5f5f5d]">
