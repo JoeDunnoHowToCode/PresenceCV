@@ -499,10 +499,25 @@ export function useResume() {
 
   const reorderBlocks = useCallback( (startIndex: number, endIndex: number) => {
     setAppState(prev => {
-      const newOrder = Array.from(prev.blockOrder);
+      const activeData = prev.profiles[prev.activeProfileId].data;
+      const newOrder = Array.from(activeData.blockOrder);
       const [removed] = newOrder.splice(startIndex, 1);
       newOrder.splice(endIndex, 0, removed);
-      const next = { ...prev, blockOrder: newOrder };
+      
+      const next = {
+        ...prev,
+        profiles: {
+          ...prev.profiles,
+          [prev.activeProfileId]: {
+            ...prev.profiles[prev.activeProfileId],
+            data: {
+              ...activeData,
+              blockOrder: newOrder
+            }
+          }
+        }
+      };
+      
       appStateRef.current = next;
       // 結構性變更：使用 transaction 同步至 Firestore
       if (isRemoteReady.current) {
