@@ -11,6 +11,8 @@ interface ListBlockEditorProps {
   updateListItem: (blockId: string, itemId: string, field: keyof ListItem, value: string) => void;
   removeListItem: (blockId: string, itemId: string) => void;
   addListItem: (blockId: string) => void;
+  isMobile?: boolean;
+  reorderListItems?: (blockId: string, startIndex: number, endIndex: number) => void;
 }
 
 const ListBlockEditor = React.memo(({
@@ -18,7 +20,9 @@ const ListBlockEditor = React.memo(({
   updateBlockTitle,
   updateListItem,
   removeListItem,
-  addListItem
+  addListItem,
+  isMobile,
+  reorderListItems
 }: ListBlockEditorProps) => {
 
   const titleInput = useDebouncedInput(block.title, (val) => updateBlockTitle(block.id, val));
@@ -49,15 +53,19 @@ const ListBlockEditor = React.memo(({
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-6">
             {block.items.map((item: ListItem, index: number) => (
               // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
-              <Draggable key={item.id} draggableId={item.id} index={index}>
+              <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={!!isMobile}>
                 {(provided, snapshot) => (
                   <ListItemEditor
                     provided={provided}
                     snapshot={snapshot}
                     blockId={block.id}
                     item={item}
+                    index={index}
+                    totalItems={block.items.length}
                     updateListItem={updateListItem}
                     removeListItem={removeListItem}
+                    isMobile={isMobile}
+                    reorderListItems={reorderListItems}
                   />
                 )}
               </Draggable>
@@ -77,7 +85,7 @@ const ListBlockEditor = React.memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  return isEqual(prevProps.block, nextProps.block);
+  return isEqual(prevProps.block, nextProps.block) && prevProps.isMobile === nextProps.isMobile;
 });
 
 interface ListItemEditorProps {
@@ -85,11 +93,15 @@ interface ListItemEditorProps {
   snapshot: any;
   blockId: string;
   item: ListItem;
+  index: number;
+  totalItems: number;
   updateListItem: (blockId: string, itemId: string, field: keyof ListItem, value: string) => void;
   removeListItem: (blockId: string, itemId: string) => void;
+  isMobile?: boolean;
+  reorderListItems?: (blockId: string, startIndex: number, endIndex: number) => void;
 }
 
-const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateListItem, removeListItem }: ListItemEditorProps) => {
+const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, totalItems, updateListItem, removeListItem, isMobile, reorderListItems }: ListItemEditorProps) => {
   const titleInput = useDebouncedInput(item.title, (val) => updateListItem(blockId, item.id, 'title', val));
   const subtitleInput = useDebouncedInput(item.subtitle, (val) => updateListItem(blockId, item.id, 'subtitle', val));
   const periodInput = useDebouncedInput(item.period, (val) => updateListItem(blockId, item.id, 'period', val));
@@ -109,15 +121,39 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
       {...provided.draggableProps}
       className={`bg-white border border-[#eceae4] shadow-sm p-6 rounded-2xl space-y-4 relative group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}`}
     >
-      <div 
-        {...provided.dragHandleProps}
-        className="absolute left-4 top-4 text-[#eceae4] hover:text-accent cursor-grab active:cursor-grabbing transition-colors"
-      >
-        <LucideIcons.GripVertical className="w-5 h-5" />
-      </div>
+      {isMobile ? (
+        <div className="absolute left-2 top-4 flex flex-col gap-1 z-10">
+          <button
+            type="button"
+            disabled={index === 0}
+            onClick={() => reorderListItems?.(blockId, index, index - 1)}
+            className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+            title="Move Up"
+          >
+            <LucideIcons.ChevronUp className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            disabled={index === totalItems - 1}
+            onClick={() => reorderListItems?.(blockId, index, index + 1)}
+            className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+            title="Move Down"
+          >
+            <LucideIcons.ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div 
+          {...provided.dragHandleProps}
+          className="absolute left-4 top-4 text-[#eceae4] hover:text-accent cursor-grab active:cursor-grabbing transition-colors"
+        >
+          <LucideIcons.GripVertical className="w-5 h-5" />
+        </div>
+      )}
+
       <button 
         onClick={() => removeListItem(blockId, item.id)} 
-        className="absolute top-4 right-4 text-[#5f5f5d] hover:text-red-400 transition-colors"
+        className="absolute top-4 right-4 text-[#5f5f5d] hover:text-red-400 transition-colors z-10"
       >
         <LucideIcons.X className="w-4 h-4" />
       </button>
@@ -167,6 +203,9 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, updateLi
   );
 }, (prevProps, nextProps) => {
   return isEqual(prevProps.item, nextProps.item) &&
+         prevProps.index === nextProps.index &&
+         prevProps.totalItems === nextProps.totalItems &&
+         prevProps.isMobile === nextProps.isMobile &&
          prevProps.snapshot.isDragging === nextProps.snapshot.isDragging;
 });
 

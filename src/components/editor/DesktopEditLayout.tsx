@@ -726,6 +726,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                     updateListItem={updateListItem}
                     removeListItem={removeListItem}
                     addListItem={addListItem}
+                    reorderListItems={props.reorderListItems}
+                    isMobile={false}
                   />
                 )}
 
@@ -736,6 +738,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                     updateTagItem={updateTagItem}
                     removeTagItem={removeTagItem}
                     addTagItem={addTagItem}
+                    reorderTagItems={props.reorderTagItems}
+                    isMobile={false}
                   />
                 )}
               </div>

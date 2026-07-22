@@ -122,7 +122,7 @@ const ProfileSwitcher = React.memo(({
                       )}
                   </button>
                   
-                  <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-10">
+                  <div className="absolute right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center gap-1 z-10">
                     {activeProfileId !== profile.id && (
                       <button
                         onClick={(e) => {

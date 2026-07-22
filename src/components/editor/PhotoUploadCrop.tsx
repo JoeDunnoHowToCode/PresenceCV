@@ -78,7 +78,7 @@ const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: Pho
               </div>
               <button 
                 onClick={(e) => { e.stopPropagation(); updateProfile('photo', ''); }} 
-                className="absolute top-2 right-2 p-1.5 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                className="absolute top-2 right-2 p-1.5 bg-red-500/80 rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-500 z-10"
               >
                   <LucideIcons.X className="w-3 h-3 text-white" />
               </button>

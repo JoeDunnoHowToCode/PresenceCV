@@ -255,8 +255,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
           </div>
         )}
 
-        {/* --- Responsive Left Sidebar (Visible on all screens) --- */}
-        <div className={`flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen border-r border-[#eceae4] bg-white/60 backdrop-blur-md overflow-visible transition-all duration-300 relative ${isSidebarCollapsed ? 'w-20 md:w-24 lg:p-4' : 'w-20 md:w-24 lg:w-72'}`}>
+        {/* --- Responsive Left Sidebar (Visible on md+ screens) --- */}
+        <div className={`hidden md:flex flex-col gap-4 py-6 px-3 lg:p-6 shrink-0 z-[60] sticky top-0 h-screen border-r border-[#eceae4] bg-white/60 backdrop-blur-md overflow-visible transition-all duration-300 relative ${isSidebarCollapsed ? 'w-20 md:w-24 lg:p-4' : 'w-20 md:w-24 lg:w-72'}`}>
           
           {/* Collapse Toggle Button */}
           <button
@@ -351,10 +351,53 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
 
         {/* --- Main Content Area --- */}
         <div className="flex-1 flex flex-col relative z-10 h-screen overflow-y-auto min-w-0">
+          {/* Mobile Top Header (Visible only on mobile < md) */}
+          <div className="md:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#eceae4] px-4 py-3 flex items-center justify-between gap-2 shadow-sm shrink-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Link to="/" className="flex items-center gap-2 shrink-0">
+                <img src="/favicon.png" alt="PresenceCV" className="w-7 h-7 shrink-0" style={{ mixBlendMode: 'multiply' }} />
+              </Link>
+              <div className="flex-1 min-w-0 max-w-[200px]">
+                <ProfileSwitcher 
+                  profiles={appState.profiles}
+                  activeProfileId={appState.activeProfileId}
+                  switchProfile={switchProfile}
+                  createProfile={createProfile}
+                  renameProfile={renameProfile}
+                  setProfileToDelete={setProfileToDelete}
+                  isCollapsed={false}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <ThemePicker 
+                themeColor={data.themeColor}
+                updateThemeColor={updateThemeColor}
+                THEME_COLORS={THEME_COLORS}
+                isCollapsed={false}
+              />
+              <button
+                onClick={openShareModal}
+                disabled={isSharing}
+                className="p-2 rounded-xl bg-white/50 border border-[#eceae4] text-[#1c1c1c] hover:bg-white shadow-sm shrink-0"
+                title="Share Resume"
+              >
+                <LucideIcons.Share2 className="w-4 h-4 text-accent" />
+              </button>
+              <button
+                onClick={() => setIsLogoutModalOpen(true)}
+                className="p-2 rounded-xl bg-white/50 border border-[#eceae4] text-[#5f5f5d] hover:text-[#1c1c1c] hover:bg-white shadow-sm shrink-0"
+                title="Log Out"
+              >
+                <LucideIcons.LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
           <div className="max-w-5xl mx-auto w-full flex flex-col gap-6 lg:gap-8 mb-16 p-4 lg:p-6 pt-6 lg:pt-10 shrink-0">
           
           {/* Row 1: Main Tabs & Add Block */}
-          <div className="relative w-full z-[55]">
+          <div className="relative w-full z-[35]">
             <div className="absolute inset-0 bg-white/60 rounded-3xl backdrop-blur-md border border-[#eceae4] shadow-sm pointer-events-none" />
             <div className="flex items-center justify-between gap-2 p-2 w-full relative">
             {isMobile ? (
@@ -430,15 +473,6 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                    </div>
                    
                    <div className="flex items-center gap-2 pl-2 shrink-0">
-                     {activeTab !== 'info' && (
-                       <button
-                         onClick={(e) => { e.stopPropagation(); setBlockToDelete(activeTab); setIsMobileMenuOpen(false); }}
-                         className="p-1 rounded-full bg-red-500/20 text-red-600 hover:bg-red-500/30 transition-colors"
-                         title="Delete Section"
-                       >
-                         <LucideIcons.X className="w-3 h-3" />
-                       </button>
-                     )}
                      <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
                    </div>
                  </div>
@@ -452,7 +486,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                          onClick={() => { handleTabClick('info'); setIsMobileMenuOpen(false); }}
                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${activeTab === 'info' ? 'bg-[#f7f4ed] text-[#1c1c1c]' : 'text-[#5f5f5d] hover:bg-black/5 hover:text-[#1c1c1c]'}`}
                        >
-                         <LucideIcons.User className="w-4 h-4" />
+                         <LucideIcons.User className="w-4 h-4 text-accent" />
                          <span className="text-sm tracking-widest uppercase font-medium">Info</span>
                        </button>
                        {data.blockOrder.map(blockId => {
@@ -469,7 +503,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                                  e.stopPropagation();
                                  setBlockToDelete(blockId);
                                }}
-                               className="p-1 rounded-full text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                               className="p-1 rounded-full text-red-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-50"
                                title="Delete Section"
                              >
                                <LucideIcons.X className="w-3 h-3" />
@@ -478,22 +512,28 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                          )
                        })}
 
-                        {/* Mobile Controls */}
+                        {/* Add Section Actions inside Dropdown */}
                         <div className="pt-2 border-t border-[#eceae4] flex flex-col gap-2 pb-1 mt-1">
-                          <ProfileSwitcher 
-                            profiles={appState.profiles}
-                            activeProfileId={appState.activeProfileId}
-                            switchProfile={switchProfile}
-                            createProfile={createProfile}
-                            renameProfile={renameProfile}
-                            deleteProfile={deleteProfile}
-                            user={user}
-                          />
-                          <ThemePicker 
-                            themeColor={data.themeColor}
-                            updateThemeColor={updateThemeColor}
-                            THEME_COLORS={THEME_COLORS}
-                          />
+                          <button
+                            onClick={() => {
+                              const newId = addBlock('list');
+                              handleTabClick(newId);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs uppercase tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
+                          >
+                            <LucideIcons.Plus className="w-3.5 h-3.5 text-accent" /> Add List View
+                          </button>
+                          <button
+                            onClick={() => {
+                              const newId = addBlock('tags');
+                              handleTabClick(newId);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs uppercase tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
+                          >
+                            <LucideIcons.Plus className="w-3.5 h-3.5 text-accent" /> Add Tag View
+                          </button>
                         </div>
                      </motion.div>
                    )}
@@ -632,29 +672,28 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                 </Droppable>
               </>
             )}
-
-            <div className={`flex items-center gap-1 ${isMobile ? 'flex-[3] justify-end' : 'pl-2 border-l border-white/10 shrink-0'}`}>
-              <button
-                onClick={() => {
-                  const newId = addBlock('list');
-                  handleTabClick(newId);
-                  if (isMobile) setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors  whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
-              >
-                <LucideIcons.Plus className="w-3 h-3" /> List View
-              </button>
-              <button
-                onClick={() => {
-                  const newId = addBlock('tags');
-                  handleTabClick(newId);
-                  if (isMobile) setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors  whitespace-nowrap ${isMobile ? 'flex-1 border border-white/10 bg-white/5' : ''}`}
-              >
-                <LucideIcons.Plus className="w-3 h-3" /> Tag View
-              </button>
-            </div>
+            {!isMobile && (
+              <div className="flex items-center gap-1 pl-2 border-l border-white/10 shrink-0">
+                <button
+                  onClick={() => {
+                    const newId = addBlock('list');
+                    handleTabClick(newId);
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
+                >
+                  <LucideIcons.Plus className="w-3 h-3" /> List View
+                </button>
+                <button
+                  onClick={() => {
+                    const newId = addBlock('tags');
+                    handleTabClick(newId);
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
+                >
+                  <LucideIcons.Plus className="w-3 h-3" /> Tag View
+                </button>
+              </div>
+            )}
           </div>
           </div>
 
@@ -708,6 +747,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     updateListItem={updateListItem}
                     removeListItem={removeListItem}
                     addListItem={addListItem}
+                    reorderListItems={props.reorderListItems}
+                    isMobile={true}
                   />
                 )}
 
@@ -718,6 +759,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     updateTagItem={updateTagItem}
                     removeTagItem={removeTagItem}
                     addTagItem={addTagItem}
+                    reorderTagItems={props.reorderTagItems}
+                    isMobile={true}
                   />
                 )}
               </div>

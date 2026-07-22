@@ -11,6 +11,8 @@ interface TagsBlockEditorProps {
   updateTagItem: (blockId: string, itemId: string, text: string) => void;
   removeTagItem: (blockId: string, itemId: string) => void;
   addTagItem: (blockId: string, text: string) => void;
+  isMobile?: boolean;
+  reorderTagItems?: (blockId: string, startIndex: number, endIndex: number) => void;
 }
 
 const TagsBlockEditor = React.memo(({
@@ -18,7 +20,9 @@ const TagsBlockEditor = React.memo(({
   updateBlockTitle,
   updateTagItem,
   removeTagItem,
-  addTagItem
+  addTagItem,
+  isMobile,
+  reorderTagItems
 }: TagsBlockEditorProps) => {
 
   const titleInput = useDebouncedInput(block.title, (val) => updateBlockTitle(block.id, val));
@@ -58,15 +62,19 @@ const TagsBlockEditor = React.memo(({
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
             {block.items.map((item: TagItem, index: number) => (
               // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
-              <Draggable key={item.id} draggableId={item.id} index={index}>
+              <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={!!isMobile}>
                 {(provided, snapshot) => (
                   <TagItemEditor
                     provided={provided}
                     snapshot={snapshot}
                     blockId={block.id}
                     item={item}
+                    index={index}
+                    totalItems={block.items.length}
                     updateTagItem={updateTagItem}
                     removeTagItem={removeTagItem}
+                    isMobile={isMobile}
+                    reorderTagItems={reorderTagItems}
                   />
                 )}
               </Draggable>
@@ -98,7 +106,7 @@ const TagsBlockEditor = React.memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  return isEqual(prevProps.block, nextProps.block);
+  return isEqual(prevProps.block, nextProps.block) && prevProps.isMobile === nextProps.isMobile;
 });
 
 interface TagItemEditorProps {
@@ -106,11 +114,15 @@ interface TagItemEditorProps {
   snapshot: any;
   blockId: string;
   item: TagItem;
+  index: number;
+  totalItems: number;
   updateTagItem: (blockId: string, itemId: string, text: string) => void;
   removeTagItem: (blockId: string, itemId: string) => void;
+  isMobile?: boolean;
+  reorderTagItems?: (blockId: string, startIndex: number, endIndex: number) => void;
 }
 
-const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTagItem, removeTagItem }: TagItemEditorProps) => {
+const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, index, totalItems, updateTagItem, removeTagItem, isMobile, reorderTagItems }: TagItemEditorProps) => {
   const initialParts = item.text.split(':');
   const initialTitle = initialParts[0] || '';
   const initialDesc = initialParts.length > 1 ? initialParts.slice(1).join(':').trim() : '';
@@ -137,12 +149,35 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
       {...provided.draggableProps}
       className={`bg-white border border-[#eceae4] shadow-sm p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}  group`}
     >
-      <div 
-        {...provided.dragHandleProps}
-        className="cursor-grab active:cursor-grabbing text-[#eceae4] hover:text-accent transition-colors mt-1 md:mt-0"
-      >
-        <LucideIcons.GripVertical className="w-5 h-5" />
-      </div>
+      {isMobile ? (
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            disabled={index === 0}
+            onClick={() => reorderTagItems?.(blockId, index, index - 1)}
+            className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+            title="Move Up"
+          >
+            <LucideIcons.ChevronUp className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            disabled={index === totalItems - 1}
+            onClick={() => reorderTagItems?.(blockId, index, index + 1)}
+            className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+            title="Move Down"
+          >
+            <LucideIcons.ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div 
+          {...provided.dragHandleProps}
+          className="cursor-grab active:cursor-grabbing text-[#eceae4] hover:text-accent transition-colors mt-1 md:mt-0"
+        >
+          <LucideIcons.GripVertical className="w-5 h-5" />
+        </div>
+      )}
       
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 w-full">
         <input
@@ -165,7 +200,7 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
 
       <button 
         onClick={() => removeTagItem(blockId, item.id)} 
-        className="text-[#5f5f5d] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all mt-1 md:mt-0"
+        className="text-[#5f5f5d] hover:text-red-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all mt-1 md:mt-0"
       >
         <LucideIcons.X className="w-4 h-4" />
       </button>
@@ -173,6 +208,9 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, updateTag
   );
 }, (prevProps, nextProps) => {
   return isEqual(prevProps.item, nextProps.item) &&
+         prevProps.index === nextProps.index &&
+         prevProps.totalItems === nextProps.totalItems &&
+         prevProps.isMobile === nextProps.isMobile &&
          prevProps.snapshot.isDragging === nextProps.snapshot.isDragging;
 });
 
