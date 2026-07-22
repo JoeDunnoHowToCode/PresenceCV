@@ -155,32 +155,17 @@
   #root {
     margin: 0 !important;
     padding: 0 !important;
-    width: 794px !important;
-    height: 1122px !important;
-    max-height: 1122px !important;
-    overflow: hidden !important;
     background: white !important;
+    overflow: hidden !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-
-  body:has(.print-page-container) {
-    padding: 0 !important;
-    margin: 0 !important;
-    background: white !important;
-    width: 794px !important;
-    height: 1122px !important;
-    max-height: 1122px !important;
-    overflow: hidden !important;
   }
 
   .print-page-container {
     box-shadow: none !important;
     border: none !important;
     margin: 0 !important;
-    width: 794px !important;
-    height: 1122px !important;
-    max-height: 1122px !important;
+    max-height: 100vh !important;
     overflow: hidden !important;
     transform: none !important;
   }
