@@ -142,6 +142,12 @@
     print-color-adjust: exact;
   }
 
+  .print-page-container {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
   .no-print {
     display: none !important;
   }
