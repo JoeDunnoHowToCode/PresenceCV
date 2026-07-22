@@ -216,6 +216,8 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
             const testWidth = targetWidth / midScale;
             el.style.transform = 'none';
             el.style.width = `${testWidth}px`;
+            el.style.minWidth = `${testWidth}px`;
+            el.style.maxWidth = `${testWidth}px`;
             el.style.display = 'block';
             const height = el.scrollHeight;
             const scaledHeight = height * midScale;
@@ -229,6 +231,8 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           finalScale = bestScale * 0.98;
           el.style.transform = originalTransform;
           el.style.width = originalWidth;
+          el.style.minWidth = '';
+          el.style.maxWidth = '';
         }
         setPrintScale(finalScale);
         const timer = setTimeout(() => { window.print(); }, 800);
