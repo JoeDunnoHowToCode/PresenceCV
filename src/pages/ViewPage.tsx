@@ -201,7 +201,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         
         let finalScale = 1;
         const targetWidth = 650;
-        const targetHeight = 940;
+        const targetHeight = 860;
         
         if (printContentRef.current) {
           const el = printContentRef.current;

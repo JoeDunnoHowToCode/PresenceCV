@@ -167,6 +167,7 @@
     border: none !important;
     margin: 0 auto !important;
     width: 794px !important;
+    height: auto !important;
     max-height: 100vh !important;
     overflow: hidden !important;
     transform: none !important;
