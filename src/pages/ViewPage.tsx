@@ -354,7 +354,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
               
               {block.type === 'list' && (
                 <div className="space-y-8">
-                  {block.items.map((item: ListItem) => (
+                  {block.items.filter((item: ListItem) => item.title || item.subtitle || item.description).map((item: ListItem) => (
                     <div key={item.id} className="flex flex-col gap-1">
                       <div className="flex justify-between items-baseline">
                         <h3 className=" text-xl font-bold text-gray-900">{item.title}</h3>
