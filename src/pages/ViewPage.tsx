@@ -201,7 +201,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         
         let finalScale = 1;
         const targetWidth = 650;
-        const targetHeight = 978;
+        const targetHeight = 940;
         
         if (printContentRef.current) {
           const el = printContentRef.current;
@@ -228,7 +228,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
               minScale = midScale;
             }
           }
-          finalScale = bestScale * 0.98;
+          finalScale = bestScale * 0.95;
           el.style.transform = originalTransform;
           el.style.width = originalWidth;
           el.style.minWidth = '';
