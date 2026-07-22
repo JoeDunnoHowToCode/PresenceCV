@@ -102,15 +102,15 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
   }
 
   return (
-    <div className="flex flex-col items-center text-center space-y-12 py-12 w-full">
-      <div className="w-full flex flex-col items-center">
+    <div className="flex flex-col items-center text-center space-y-12 py-12 w-full max-w-full overflow-x-hidden">
+      <div className="w-full flex flex-col items-center max-w-full">
         { }
         <input
           ref={nameInput.ref as any}
           defaultValue={nameInput.defaultValue}
           onChange={nameInput.onChange}
           onBlur={nameInput.onBlur}
-          className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px] text-center bg-transparent w-full"
+          className="text-3xl sm:text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-1px] sm:tracking-[-2.5px] text-accent mb-6 outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-0 text-center bg-transparent w-full max-w-full"
           placeholder="Your Name"
         />
         { }
@@ -119,7 +119,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="text-lg md:text-xl tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-[100px]  text-center bg-transparent w-full"
+          className="text-sm sm:text-lg md:text-xl tracking-[0.2em] sm:tracking-[0.4em] uppercase text-text-secondary outline-none focus:border-b focus:border-accent/50 border-b border-transparent transition-colors min-w-0 text-center bg-transparent w-full max-w-full"
           placeholder="Professional Title"
         />
       </div>
@@ -147,7 +147,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
       </div>
 
       <div 
-        className="max-w-4xl w-full px-4 flex flex-col items-center group relative cursor-text"
+        className="max-w-4xl w-full px-4 flex flex-col items-center group relative cursor-text max-w-full"
         onClick={(e) => {
           const textarea = textareaRef.current;
           const target = e.target as HTMLElement;
@@ -173,7 +173,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         <div className="relative transition-all duration-300 w-full flex flex-col mt-4">
           
           <div 
-            className="invisible whitespace-pre-wrap italic text-2xl leading-relaxed p-4 -m-4 min-h-[100px] w-full break-words text-left"
+            className="invisible whitespace-pre-wrap italic text-xl sm:text-2xl leading-relaxed p-4 -m-4 min-h-[100px] w-full break-words text-left"
           >
             {summaryInput.localValue + ' '}
           </div>
@@ -186,7 +186,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
             defaultValue={summaryInput.defaultValue}
             onChange={summaryInput.onChange}
             onBlur={summaryInput.onBlur}
-            className="absolute inset-0 italic text-2xl leading-relaxed text-[#5f5f5d] outline-none focus:bg-black/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] bg-transparent w-full resize-none overflow-hidden text-left"
+            className="absolute inset-0 italic text-xl sm:text-2xl leading-relaxed text-[#5f5f5d] outline-none focus:bg-black/5 p-4 -m-4 rounded-xl transition-colors min-h-[100px] bg-transparent w-full resize-none overflow-hidden text-left"
             placeholder="A short summary about yourself..."
           />
         </div>
@@ -203,62 +203,63 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
   const [isIconMenuOpen, setIsIconMenuOpen] = useState(false);
 
   return (
-    <div className="flex items-center gap-3 w-full group relative">
-      <div className="relative shrink-0">
-        {Icon ? (
-          <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
-        ) : (
-          <div 
-            onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} 
-            className="w-5 h-5 rounded-full border border-dashed border-[#eceae4] hover:border-accent transition-colors cursor-pointer"
-          />
-        )}
-        {isIconMenuOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setIsIconMenuOpen(false)} />
-            <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
-              <div 
-                className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors"
-                onClick={() => { updateContactItem(item.id, 'icon', ''); setIsIconMenuOpen(false); }}
-                title="No Icon"
-              >
-                🚫
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full max-w-full group relative p-3 sm:p-0 rounded-xl sm:rounded-none bg-black/5 sm:bg-transparent border sm:border-none border-[#eceae4]">
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="relative shrink-0">
+          {Icon ? (
+            <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+          ) : (
+            <div 
+              onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} 
+              className="w-5 h-5 rounded-full border border-dashed border-[#eceae4] hover:border-accent transition-colors cursor-pointer"
+            />
+          )}
+          {isIconMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsIconMenuOpen(false)} />
+              <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+                <div 
+                  className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors"
+                  onClick={() => { updateContactItem(item.id, 'icon', ''); setIsIconMenuOpen(false); }}
+                  title="No Icon"
+                >
+                  🚫
+                </div>
+                {AVAILABLE_ICONS.map((iconName: string) => {
+                  const OptionIcon = (LucideIcons as any)[iconName];
+                  return OptionIcon ? (
+                    <OptionIcon 
+                      key={iconName} 
+                      className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                      onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
+                    />
+                  ) : null;
+                })}
               </div>
-              {AVAILABLE_ICONS.map((iconName: string) => {
-                const OptionIcon = (LucideIcons as any)[iconName];
-                return OptionIcon ? (
-                  <OptionIcon 
-                    key={iconName} 
-                    className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
-                    onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
-                  />
-                ) : null;
-              })}
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
+        <input
+          ref={textInput.ref as any}
+          defaultValue={textInput.defaultValue}
+          onChange={textInput.onChange}
+          onBlur={textInput.onBlur}
+          placeholder="Display Text"
+          className="flex-1 min-w-0 w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-base sm:text-lg text-[#1c1c1c] transition-colors"
+        />
       </div>
-      { }
-      <input
-        ref={textInput.ref as any}
-        defaultValue={textInput.defaultValue}
-        onChange={textInput.onChange}
-        onBlur={textInput.onBlur}
-        placeholder="Display Text"
-        className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-lg text-[#1c1c1c] transition-colors"
-      />
-      { }
       <input
         ref={urlInput.ref as any}
         defaultValue={urlInput.defaultValue}
         onChange={urlInput.onChange}
         onBlur={urlInput.onBlur}
         placeholder="URL (optional)"
-        className="flex-1 bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-sm text-[#5f5f5d] transition-colors"
+        className="flex-1 min-w-0 w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs sm:text-sm text-[#5f5f5d] transition-colors"
       />
       <button 
         onClick={() => removeContactItem(item.id)}
-        className="opacity-0 group-hover:opacity-100 text-text-secondary hover:text-red-400 transition-all"
+        className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-[#5f5f5d] hover:text-red-400 transition-all self-end sm:self-center p-1"
+        title="Remove Link"
       >
         <LucideIcons.X className="w-4 h-4" />
       </button>

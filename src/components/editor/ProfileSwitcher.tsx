@@ -51,13 +51,13 @@ const ProfileSwitcher = React.memo(({
     <div className="relative z-[60] w-full" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className={`p-2 rounded-2xl lg:rounded-full flex items-center justify-center lg:justify-between gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm group ${isCollapsed ? 'lg:p-2 lg:justify-center lg:rounded-2xl' : 'lg:px-5 lg:py-3'}`}
+        className={`p-2 rounded-2xl lg:rounded-full flex items-center justify-between gap-2 lg:gap-4 w-full bg-white/50 hover:bg-white transition-colors border border-[#eceae4] shadow-sm group ${isCollapsed ? 'lg:p-2 lg:justify-center lg:rounded-2xl' : 'px-3 py-1.5 lg:px-5 lg:py-3'}`}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <LucideIcons.FileText className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-          <span className={`text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'hidden lg:block'}`}>{activeProfile?.name || 'Resume'}</span>
+        <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
+          <LucideIcons.FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-accent shrink-0" />
+          <span className={`text-xs lg:text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'inline-block'}`}>{activeProfile?.name || 'Resume'}</span>
         </div>
-        <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 ${isCollapsed ? 'hidden' : 'hidden lg:block'} ${isOpen ? 'rotate-180' : ''}`} />
+        <LucideIcons.ChevronDown className={`w-3.5 h-3.5 lg:w-4 lg:h-4 text-[#5f5f5d] transition-transform shrink-0 ${isCollapsed ? 'hidden' : 'inline-block'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -123,17 +123,16 @@ const ProfileSwitcher = React.memo(({
                   </button>
                   
                   <div className="absolute right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center gap-1 z-10">
-                    {activeProfileId !== profile.id && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingProfileId(profile.id);
-                        }}
-                        className="p-1.5 rounded-lg text-[#5f5f5d] hover:text-[#1c1c1c] hover:bg-black/10 transition-colors"
-                      >
-                        <LucideIcons.Edit2 className="w-3 h-3" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingProfileId(profile.id);
+                      }}
+                      className="p-1.5 rounded-lg text-[#5f5f5d] hover:text-[#1c1c1c] hover:bg-black/10 transition-colors"
+                      title="Rename Profile"
+                    >
+                      <LucideIcons.Edit2 className="w-3.5 h-3.5" />
+                    </button>
                     {Object.keys(profiles).length > 1 && (
                       <button
                         onClick={(e) => {

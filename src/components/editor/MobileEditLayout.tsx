@@ -489,25 +489,52 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                          <LucideIcons.User className="w-4 h-4 text-accent" />
                          <span className="text-sm tracking-widest uppercase font-medium">Info</span>
                        </button>
-                       {data.blockOrder.map(blockId => {
+                       {data.blockOrder.map((blockId, index) => {
                          const block = data.blocks[blockId];
                          if (!block) return null;
+                         const BlockIcon = !block.icon ? (block.type === 'list' ? LucideIcons.List : LucideIcons.Tags) : ((LucideIcons as any)[block.icon] || (block.type === 'list' ? LucideIcons.List : LucideIcons.Tags));
                          return (
                            <div key={blockId} className="group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all cursor-pointer hover:bg-black/5 text-[#5f5f5d] hover:text-[#1c1c1c]" onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}>
                              <div className="flex-1 flex items-center gap-3 min-w-0">
-                               {block.type === 'list' ? <LucideIcons.List className="w-4 h-4 shrink-0 text-accent" /> : <LucideIcons.Tags className="w-4 h-4 shrink-0 text-accent" />}
+                               <BlockIcon className="w-4 h-4 shrink-0 text-accent" />
                                <span className="text-sm tracking-widest uppercase font-medium truncate">{block.title}</span>
                              </div>
-                             <button
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 setBlockToDelete(blockId);
-                               }}
-                               className="p-1 rounded-full text-red-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-50"
-                               title="Delete Section"
-                             >
-                               <LucideIcons.X className="w-3 h-3" />
-                             </button>
+                             <div className="flex items-center gap-1 shrink-0">
+                               <button
+                                 type="button"
+                                 disabled={index === 0}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   props.reorderBlocks(index, index - 1);
+                                 }}
+                                 className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+                                 title="Move Up"
+                               >
+                                 <LucideIcons.ChevronUp className="w-4 h-4" />
+                               </button>
+                               <button
+                                 type="button"
+                                 disabled={index === data.blockOrder.length - 1}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   props.reorderBlocks(index, index + 1);
+                                 }}
+                                 className="p-1 text-[#5f5f5d] disabled:opacity-20 hover:text-accent transition-colors"
+                                 title="Move Down"
+                               >
+                                 <LucideIcons.ChevronDown className="w-4 h-4" />
+                               </button>
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   setBlockToDelete(blockId);
+                                 }}
+                                 className="p-1 rounded-full text-red-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                 title="Delete Section"
+                               >
+                                 <LucideIcons.X className="w-3.5 h-3.5" />
+                               </button>
+                             </div>
                            </div>
                          )
                        })}
