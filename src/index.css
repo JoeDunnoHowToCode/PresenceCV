@@ -126,56 +126,60 @@
   }
 }
 
-@media print {
-  @page {
-    margin: 0;
-    size: A4 portrait;
-  }
-
-  body,
-  html,
-  #root {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .print-page-container {
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 !important;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-}
-
-body:has(.print-page-container) {
-  background-color: #525659 !important;
-  padding: 40px 0;
-  min-height: 100vh;
-}
-
 /* Force the container to exact A4 size both on screen (for accurate scale calc) and print */
 .print-page-container {
   width: 794px !important;
   height: 1122px !important;
   max-width: 794px !important;
   margin: 0 auto !important;
-  /* Centered on screen preview */
   box-sizing: border-box !important;
   display: flex;
   flex-direction: column;
   overflow: hidden !important;
-  /* Strictly clip to single page */
   position: relative;
   background-color: white;
-  /* Ensure it is white on dark screens */
   page-break-after: avoid !important;
   page-break-inside: avoid !important;
+}
+
+@media print {
+  @page {
+    margin: 0;
+    size: A4 portrait;
+  }
+
+  html,
+  body,
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 1122px !important;
+    max-height: 1122px !important;
+    overflow: hidden !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body:has(.print-page-container) {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    height: 1122px !important;
+    max-height: 1122px !important;
+    overflow: hidden !important;
+  }
+
+  .print-page-container {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
 }
 
 @media screen {
