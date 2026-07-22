@@ -48,22 +48,22 @@ const ThemePicker = React.memo(({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 bg-white p-4 rounded-2xl flex flex-col gap-3 w-64 border border-[#eceae4] shadow-xl z-50"
+            className="absolute top-full right-0 md:left-0 mt-2 bg-white p-2.5 rounded-2xl flex flex-col gap-2 border border-[#eceae4] shadow-xl z-50 w-max"
           >
-            <div className="grid grid-cols-4 gap-4 justify-items-center">
+            <div className="flex flex-col gap-2.5 items-center justify-center">
               {THEME_COLORS.map(color => (
                 <button
                   key={color}
                   onClick={() => { updateThemeColor(color); setIsOpen(false); }}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform ${themeColor === color ? 'border-[#1c1c1c] scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent hover:scale-110 shadow-sm'}`}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${themeColor === color ? 'border-[#1c1c1c] scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent hover:scale-110 shadow-sm'}`}
                   style={{ backgroundColor: color, color: color }}
                   title={color}
                 />
               ))}
               
               {/* Custom Color Picker */}
-              <div className="relative w-8 h-8 rounded-full bg-[#f7f4ed] border border-[#eceae4] flex items-center justify-center hover:bg-[#eceae4] transition-colors cursor-pointer group shadow-sm">
-                <LucideIcons.Pipette className="w-4 h-4 text-[#1c1c1c]" />
+              <div className="relative w-7 h-7 rounded-full bg-[#f7f4ed] border border-[#eceae4] flex items-center justify-center hover:bg-[#eceae4] transition-colors cursor-pointer group shadow-sm" title="Custom Color">
+                <LucideIcons.Pipette className="w-3.5 h-3.5 text-[#1c1c1c]" />
                 <input 
                   type="color" 
                   value={themeColor}
