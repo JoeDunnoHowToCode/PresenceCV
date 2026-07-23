@@ -334,9 +334,9 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
             </div>
           </div>
           
-          {data.profile.summary && (
+          {data.profile.summary && data.profile.summary.trim() && (
             <div className="mt-12 w-full text-lg leading-relaxed text-gray-700 italic text-left">
-              {data.profile.summary}
+              {data.profile.summary.trim()}
             </div>
           )}
         </div>
@@ -365,9 +365,9 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                           {item.subtitle}
                         </div>
                       )}
-                      {item.description && (
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                          {item.description}
+                      {item.description && item.description.trim() && (
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm m-0" style={{ margin: 0 }}>
+                          {item.description.trim()}
                         </p>
                       )}
                     </div>
@@ -582,9 +582,9 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                           {item.subtitle && item.period && " • "} 
                           {item.period}
                         </div>
-                        {item.description && (
-                          <p className="text-sm text-[#5f5f5d] leading-relaxed whitespace-pre-wrap  cursor-default">
-                            {item.description}
+                        {item.description && item.description.trim() && (
+                          <p className="text-sm text-[#5f5f5d] leading-relaxed whitespace-pre-wrap  cursor-default m-0" style={{ margin: 0 }}>
+                            {item.description.trim()}
                           </p>
                         )}
                       </div>
