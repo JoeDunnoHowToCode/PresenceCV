@@ -228,7 +228,9 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
          prevProps.index === nextProps.index &&
          prevProps.totalItems === nextProps.totalItems &&
          prevProps.isMobile === nextProps.isMobile &&
-         prevProps.snapshot.isDragging === nextProps.snapshot.isDragging;
+         prevProps.snapshot.isDragging === nextProps.snapshot.isDragging &&
+         prevProps.snapshot.isDropAnimating === nextProps.snapshot.isDropAnimating &&
+         isEqual(prevProps.provided.draggableProps.style, nextProps.provided.draggableProps.style);
 });
 
 export default ListBlockEditor;
