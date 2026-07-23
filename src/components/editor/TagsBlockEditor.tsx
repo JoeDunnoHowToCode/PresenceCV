@@ -59,7 +59,7 @@ const TagsBlockEditor = React.memo(({
 
       <Droppable droppableId={block.id} type="tag-items">
         {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+          <div {...provided.droppableProps} ref={provided.innerRef}>
             {block.items.map((item: TagItem, index: number) => (
               // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
               <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={!!isMobile}>
@@ -156,7 +156,7 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, index, to
     <div 
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`bg-white border border-[#eceae4] shadow-sm p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}  group`}
+      className={`bg-white border border-[#eceae4] shadow-sm p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4 mb-4 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}  group`}
     >
       {isMobile ? (
         <div className="flex items-center gap-1 shrink-0">

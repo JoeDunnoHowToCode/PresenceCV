@@ -50,7 +50,7 @@ const ListBlockEditor = React.memo(({
 
       <Droppable droppableId={block.id} type="list-items">
         {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-6">
+          <div {...provided.droppableProps} ref={provided.innerRef}>
             {block.items.map((item: ListItem, index: number) => (
               // @ts-expect-error hello-pangea/dnd types don't officially include key but React requires it
               <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={!!isMobile}>
@@ -128,7 +128,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
     <div 
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`bg-white border border-[#eceae4] shadow-sm p-6 rounded-2xl space-y-4 relative group ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}`}
+      className={`bg-white border border-[#eceae4] shadow-sm p-6 rounded-2xl space-y-4 relative group mb-6 ${snapshot.isDragging ? 'z-50 shadow-2xl' : ''}`}
     >
       {isMobile ? (
         <div className="absolute left-2 top-4 flex flex-col gap-1 z-10">
