@@ -205,28 +205,32 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         
         if (printContentRef.current) {
           const el = printContentRef.current;
+          let minScale = 0.25; 
+          let maxScale = 1.6;
+          let bestScale = 1.0;
+          const originalWidth = el.style.width;
           const originalTransform = el.style.transform;
 
-          // Set width to target width (650px) without scale transform for accurate height measurement
-          el.style.transform = 'none';
-          el.style.width = `${targetWidth}px`;
-          el.style.minWidth = `${targetWidth}px`;
-          el.style.maxWidth = `${targetWidth}px`;
-          el.style.display = 'block';
-
-          const rawHeight = el.scrollHeight;
-
-          if (rawHeight > targetHeight) {
-            // Direct height ratio scale estimation with 2% safety margin
-            const calculatedScale = (targetHeight / rawHeight) * 0.98;
-            finalScale = Math.max(0.25, Math.min(1.0, calculatedScale));
-          } else {
-            finalScale = 1.0;
+          for (let i = 0; i < 15; i++) {
+            const midScale = (minScale + maxScale) / 2;
+            const testWidth = targetWidth / midScale;
+            el.style.transform = 'none';
+            el.style.width = `${testWidth}px`;
+            el.style.minWidth = `${testWidth}px`;
+            el.style.maxWidth = `${testWidth}px`;
+            el.style.display = 'block';
+            const height = el.scrollHeight;
+            const scaledHeight = height * midScale;
+            if (scaledHeight > targetHeight) {
+              maxScale = midScale;
+            } else {
+              bestScale = midScale;
+              minScale = midScale;
+            }
           }
-
-          // Restore original styles
+          finalScale = bestScale * 0.95;
           el.style.transform = originalTransform;
-          el.style.width = '';
+          el.style.width = originalWidth;
           el.style.minWidth = '';
           el.style.maxWidth = '';
         }
