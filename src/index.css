@@ -156,7 +156,7 @@
 }
 
 .print-watermark a {
-  color: #666;
+  color: #000;
   text-decoration: none;
   transition: opacity 0.2s;
 }
