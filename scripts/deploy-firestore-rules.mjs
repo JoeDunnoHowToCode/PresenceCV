@@ -53,7 +53,7 @@ function deployRules() {
       process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredsPath;
 
       execSync(
-        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --database "${databaseId}" --non-interactive --force`,
+        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --non-interactive --force`,
         {
           stdio: 'inherit',
           env: process.env,
