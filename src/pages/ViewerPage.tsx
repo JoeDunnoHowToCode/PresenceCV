@@ -50,7 +50,7 @@ const ICONS: Record<string, any> = {
   languages: LucideIcons.Globe
 };
 
-export default function ViewPage({ testData }: { testData?: unknown }) {
+export default function ViewerPage({ testData }: { testData?: unknown }) {
   const { data: defaultData } = useResume();
   const [searchParams] = useSearchParams();
   const [remoteData, setRemoteData] = useState<ResumeData | null>(null);

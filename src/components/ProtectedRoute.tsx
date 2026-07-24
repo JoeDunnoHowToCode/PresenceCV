@@ -9,7 +9,7 @@
  *
  * Usage in App.tsx:
  *   <Route element={<ProtectedRoute />}>
- *     <Route path="/app" element={<EditPage />} />
+ *     <Route path="/editor" element={<EditorPage />} />
  *   </Route>
  *
  * Depends on: AuthContext (useAuth hook)

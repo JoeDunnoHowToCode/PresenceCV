@@ -13,8 +13,8 @@
  * 5. Footer: Brand, links to Features/Privacy/Terms
  *
  * Auth Integration:
- * - "Start Building Now" and "Log In" trigger signInWithGoogle → navigate("/app")
- * - If already logged in, buttons redirect directly to /app
+ * - "Start Building Now" and "Log In" trigger signInWithGoogle → navigate("/editor")
+ * - If already logged in, buttons redirect directly to /editor
  *
  * Depends on: AuthContext (useAuth), react-router-dom, lucide-react, motion
  */
@@ -25,7 +25,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LogoutConfirmModal from '../components/LogoutConfirmModal';
 
-export default function LandingPage() {
+export default function HomePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { user, signInWithGoogle, signOut } = useAuth();
@@ -33,11 +33,11 @@ export default function LandingPage() {
 
   const handleGetStarted = async () => {
     if (user) {
-      navigate('/app');
+      navigate('/editor');
     } else {
       try {
         await signInWithGoogle();
-        navigate('/app');
+        navigate('/editor');
       } catch (err) {
         console.error('Failed to sign in', err);
       }
@@ -46,11 +46,11 @@ export default function LandingPage() {
 
   const handleLogin = async () => {
     if (user) {
-      navigate('/app');
+      navigate('/editor');
     } else {
       try {
         await signInWithGoogle();
-        navigate('/app');
+        navigate('/editor');
       } catch (err) {
         console.error('Failed to sign in', err);
       }

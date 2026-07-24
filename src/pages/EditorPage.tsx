@@ -14,7 +14,7 @@ import DesktopEditLayout from '../components/editor/DesktopEditLayout';
 import MobileEditLayout from '../components/editor/MobileEditLayout';
 import { EditorLayoutProps } from '../components/editor/EditorLayoutProps';
 
-export default function EditPage() {
+export default function EditorPage() {
   useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();

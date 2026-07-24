@@ -16,17 +16,17 @@
  *    - "/" → LandingPage (public marketing page)
  *    - "/privacy", "/terms" → Static legal pages
  *    - "/view", "/share/:id", "/print/:id" → ViewPage (public resume viewer)
- *    - "/app" → EditPage (protected, requires Google login)
- *    - "/edit" → Redirects to "/app"
+ *    - "/editor" → EditorPage (protected, requires Google login)
+ *    - "/app", "/edit" → Redirects to "/editor"
  *
  * Consumed by: main.tsx (mounted into #root)
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import LandingPage from './pages/LandingPage';
-import EditPage from './pages/EditPage';
-import ViewPage from './pages/ViewPage';
+import HomePage from './pages/HomePage';
+import EditorPage from './pages/EditorPage';
+import ViewerPage from './pages/ViewerPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import { isConfigValid } from './lib/firebase';
@@ -56,19 +56,20 @@ export default function App() {
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <Routes>
             { /* Public Landing Page */ }
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             
             { /* Public Viewers (existing logic relies on queries like /view?id=...) */ }
-            <Route path="/view" element={<ViewPage />} />
-            <Route path="/share/:id" element={<ViewPage />} />
-            <Route path="/print/:id" element={<ViewPage />} />
+            <Route path="/view" element={<ViewerPage />} />
+            <Route path="/share/:id" element={<ViewerPage />} />
+            <Route path="/print/:id" element={<ViewerPage />} />
 
             { /* Protected Editor Routes */ }
             <Route element={<ProtectedRoute />}>
-               <Route path="/app" element={<EditPage />} />
-               <Route path="/edit" element={<Navigate to="/app" replace />} />
+               <Route path="/editor" element={<EditorPage />} />
+               <Route path="/app" element={<Navigate to="/editor" replace />} />
+               <Route path="/edit" element={<Navigate to="/editor" replace />} />
             </Route>
           </Routes>
         </ErrorBoundary>
