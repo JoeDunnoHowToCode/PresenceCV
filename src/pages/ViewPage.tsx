@@ -425,24 +425,26 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
     >
       <div className={`depth-bg ${data.enableAnimation ? 'animated' : ''}`} />
 
+      <div className="absolute top-6 left-6 md:top-12 md:left-12 lg:top-12 lg:left-16 hidden xl:flex items-center justify-start z-50">
+        {isShared ? (
+          <Link to="/" title="Make your own resume?" className="flex items-center gap-3 hover:opacity-70 transition-opacity">
+            <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
+            <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">
+            <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
+            <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
+          </div>
+        )}
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl mx-auto w-full flex flex-col xl:flex-row justify-between items-center gap-6 mb-16 relative z-10"
       >
-        <div className="flex-1 hidden xl:flex items-center justify-start">
-          {isShared ? (
-            <Link to="/" title="Make your own resume?" className="flex items-center gap-3 hover:opacity-70 transition-opacity">
-              <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
-              <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3">
-              <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
-              <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
-            </div>
-          )}
-        </div>
+        <div className="flex-1 hidden xl:block"></div>
 
         <div 
           ref={tabsContainerRef}

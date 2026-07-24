@@ -30,8 +30,8 @@
     @apply fixed inset-0 -z-10;
     background-color: #f7f4ed;
     background-image:
-      radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--theme-accent) 8%, transparent) 0%, transparent 50%);
+      radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--theme-accent) 15%, transparent) 0%, transparent 60%),
+      radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--theme-accent) 15%, transparent) 0%, transparent 60%);
     background-size: 200% 200%;
   }
 
