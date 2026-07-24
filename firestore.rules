@@ -41,11 +41,12 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt'])
         && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation', 'isPro'])
         && (
-          get(/databases/$(database)/documents/users/$(request.auth.uid)/userState/state).data.profiles.size() <= 3
-          || exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+          exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)/userState/state).data.profiles.size() <= 3
         )
         && (
           !('isPro' in request.resource.data) ||
+          request.resource.data.isPro == false ||
           (request.resource.data.isPro == true && exists(/databases/$(database)/documents/users_pro/$(request.auth.uid)))
         );
       allow get: if true;
@@ -59,11 +60,12 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder'])
         && request.resource.data.ownerUid == request.auth.uid
         && (
-          get(/databases/$(database)/documents/users/$(request.auth.uid)/userState/state).data.profiles.size() <= 3
-          || exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+          exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)/userState/state).data.profiles.size() <= 3
         )
         && (
           !('isPro' in request.resource.data) ||
+          request.resource.data.isPro == false ||
           (request.resource.data.isPro == true && exists(/databases/$(database)/documents/users_pro/$(request.auth.uid)))
         );
       allow get: if true;
