@@ -253,7 +253,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> 3 Resume Profiles</li>
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> Unlimited PDF Export</li>
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> Unlimited live & snapshot link sharing</li>
-                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c] shrink-0" /> <span>10 AI fully auto job appling per day <span className="text-xs font-semibold text-blue-500 block sm:inline">(Coming soon)</span></span></li>
+                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c] shrink-0" /> <span>10 AI fully auto job appling / day <span className="text-xs font-semibold text-blue-500 block sm:inline">(Coming soon)</span></span></li>
               </ul>
               <button 
                 onClick={handleGetStarted}
@@ -269,13 +269,13 @@ export default function LandingPage() {
               </div>
               <h3 className="text-[24px] font-semibold mb-2 text-[#fcfbf8]">Pro</h3>
               <p className="opacity-80 mb-6 text-[16px]">For power users and active job seekers.</p>
-              <div className="text-[36px] font-semibold tracking-tight mb-8 text-[#fcfbf8]">$3<span className="text-[18px] font-normal opacity-80">/mo</span></div>
+              <div className="text-[36px] font-semibold tracking-tight mb-8 text-[#fcfbf8]">$5<span className="text-[18px] font-normal opacity-80">/mo</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited Profiles</li>
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited PDF Export</li>
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited live & snapshot link sharing</li>
-                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>200 AI fully auto job appling per day <span className="text-xs font-semibold text-blue-400 block sm:inline">(Coming soon)</span></span></li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Latest AI-powered job hunting functions</li>
+                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>50 AI schedule & customized fully auto job appling / day <span className="text-xs font-semibold text-blue-400 block sm:inline">(Coming soon)</span></span></li>
+                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>Latest AI-powered job hunting functions <span className="text-xs font-semibold text-blue-400 block sm:inline">(Coming soon)</span></span></li>
               </ul>
               <button className="w-full text-center bg-white text-[#1c1c1c] rounded-md px-6 py-3 text-base font-medium opacity-50 cursor-not-allowed">
                 Get Started
