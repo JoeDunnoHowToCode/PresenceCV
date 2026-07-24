@@ -247,7 +247,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
          <div className="depth-bg animated" />
          <div className="flex flex-col items-center gap-4 relative z-10">
            <span className="w-12 h-12 rounded-full border-4 border-white/10 border-t-white animate-spin mb-4" />
-           <p className="text-xl tracking-widest uppercase font-light text-text-secondary">
+           <p className="text-xl tracking-widest font-light text-text-secondary">
              {isSyncPrintWait ? 'Preparing Document...' : 'Loading Profile...'}
            </p>
          </div>
@@ -261,9 +261,9 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
          <div className="depth-bg animated" />
          <div className="flex flex-col items-center gap-4 relative z-10 text-center max-w-md px-6">
            <LucideIcons.AlertTriangle className="w-16 h-16 text-red-500 mb-2" />
-           <p className="text-xl tracking-widest uppercase font-light text-white mb-2">Error</p>
+           <p className="text-xl tracking-widest font-light text-white mb-2">Error</p>
            <p className="text-text-secondary">{error}</p>
-           <Link to="/edit" className="mt-8 px-8 py-3 rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors uppercase tracking-widest text-sm">
+           <Link to="/edit" className="mt-8 px-8 py-3 rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors tracking-widest text-sm">
              Go to Editor
            </Link>
          </div>
@@ -396,7 +396,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
 
                     return (
                       <div key={item.id} className="p-4 border rounded-xl bg-gray-50 flex flex-col" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
-                        <h4 className="text-sm font-bold tracking-widest mb-3 text-gray-900">{category.toUpperCase()}</h4>
+                        <h4 className="text-sm font-bold tracking-widest mb-3 text-gray-900">{category}</h4>
                         <div className="flex flex-wrap gap-2">
                           {tags.map((t, i) => (
                             <span key={i} className="px-3 py-1 bg-white border rounded-lg text-xs text-gray-600 block">
@@ -465,7 +465,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           {!isShared && (
             <Link
               to="/edit"
-              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm hover:text-accent  whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm hover:text-accent  whitespace-nowrap"
             >
               <LucideIcons.Edit2 className="w-4 h-4" /> Edit Profile
             </Link>
@@ -620,7 +620,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                       >
                         <div className="flex items-center gap-3 border-b border-[#eceae4] pb-4">
                            <div className="w-1.5 h-1.5 rounded-full bg-accent " />
-                           <h4 className="text-sm xl:text-base tracking-widest text-[#1c1c1c] font-medium">{category.toUpperCase()}</h4>
+                           <h4 className="text-sm xl:text-base tracking-widest text-[#1c1c1c] font-medium">{category}</h4>
                         </div>
                         <div className="flex flex-wrap xl:flex-col gap-2 xl:gap-4 mt-2">
                           {tags.map((t, i) => (

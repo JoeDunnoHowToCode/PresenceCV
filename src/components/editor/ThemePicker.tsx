@@ -36,7 +36,7 @@ const ThemePicker = React.memo(({
       >
         <div className="flex items-center gap-3 min-w-0">
           <LucideIcons.Palette className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-          <span className={`text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'hidden lg:block'}`}>Themes</span>
+          <span className={`text-sm tracking-widest truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'hidden lg:block'}`}>Themes</span>
         </div>
         <LucideIcons.ChevronDown className={`w-4 h-4 text-[#5f5f5d] transition-transform shrink-0 ${isCollapsed ? 'hidden' : 'hidden lg:block'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>

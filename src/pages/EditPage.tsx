@@ -279,7 +279,7 @@ export default function EditPage() {
         <div className="depth-bg animated" />
         <div className="bg-white p-8 rounded-2xl flex flex-col items-center gap-4 border border-[#eceae4] shadow-xl">
           <LucideIcons.Loader2 className="w-8 h-8 animate-spin text-accent" />
-          <p className="text-[#5f5f5d] text-xs uppercase tracking-widest font-medium">Loading your profiles...</p>
+          <p className="text-[#5f5f5d] text-xs tracking-widest font-medium">Loading your profiles...</p>
         </div>
       </div>
     );

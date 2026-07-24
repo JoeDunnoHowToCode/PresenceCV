@@ -140,7 +140,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
         })}
         <button
           onClick={addContactItem}
-          className="mt-2 flex items-center gap-2 text-xs uppercase tracking-widest text-text-secondary hover:text-accent transition-colors"
+          className="mt-2 flex items-center gap-2 text-xs tracking-widest text-text-secondary hover:text-accent transition-colors"
         >
           <LucideIcons.Plus className="w-3 h-3" /> Add Link
         </button>
@@ -162,7 +162,7 @@ const InfoEditor = React.memo(({ data, updateProfile, updateContactItem, removeC
       >
         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all z-20 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto before:absolute before:-top-16 before:-left-10 before:-right-10 before:h-16 before:content-['']">
           <div className={`flex items-center gap-2 text-xs font-medium tracking-wider whitespace-nowrap ${countColor}`}>
-             <span className="uppercase font-semibold opacity-70">Recommended Length: 250-400</span>
+             <span className="font-semibold opacity-70">Recommended Length: 250-400</span>
              <span className="font-mono ml-2 pl-2 border-l border-current/20">{charCount} chars</span>
              {charCount > 0 && (
                <span className="ml-1 opacity-90">{countStatus}</span>

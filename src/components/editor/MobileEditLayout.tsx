@@ -103,7 +103,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     <LucideIcons.Radio className="w-4 h-4 text-accent" />
                     Live Link
                     {data.liveId && (
-                      <span className="ml-auto text-[10px] uppercase tracking-widest text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span className="ml-auto text-[10px] tracking-widest text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
                         Active
                       </span>
                     )}
@@ -344,7 +344,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
           >
             <div className="flex items-center gap-3">
               <LucideIcons.Share2 className="w-4 h-4 text-accent shrink-0 lg:w-4 lg:h-4" />
-              <span className={`text-sm tracking-widest uppercase font-medium ${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}>Share</span>
+              <span className={`text-sm tracking-widest font-medium ${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}>Share</span>
             </div>
           </button>
         </div>
@@ -706,7 +706,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     const newId = addBlock('list');
                     handleTabClick(newId);
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
                 >
                   <LucideIcons.Plus className="w-3 h-3" /> List View
                 </button>
@@ -715,7 +715,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     const newId = addBlock('tags');
                     handleTabClick(newId);
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[10px] sm:text-xs tracking-widest text-text-secondary hover:text-accent hover:bg-white/5 transition-colors whitespace-nowrap"
                 >
                   <LucideIcons.Plus className="w-3 h-3" /> Tag View
                 </button>
@@ -730,13 +730,13 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
           >
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
             >
               <LucideIcons.Upload className="w-4 h-4 text-accent" /> Upload Resume
             </button>
             <Link
               to="/view"
-              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm uppercase tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-xs md:text-sm tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm whitespace-nowrap"
             >
               <LucideIcons.Eye className="w-4 h-4 text-accent" /> Profile Preview
             </Link>

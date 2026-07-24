@@ -74,7 +74,7 @@ const ProfileSwitcher = React.memo(({
               className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 transition-colors text-[#5f5f5d] hover:text-[#1c1c1c] group"
             >
               <LucideIcons.Copy className="w-4 h-4 group-hover:text-accent transition-colors" />
-              <span className="text-sm tracking-widest uppercase font-medium">Copy Current Profile</span>
+              <span className="text-sm tracking-widest font-medium">Copy Current Profile</span>
             </button>
             
             <div className="w-full h-px bg-[#eceae4] my-1" />

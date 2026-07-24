@@ -111,23 +111,23 @@ const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: Pho
           ) : (
             <div className="flex flex-col items-center gap-3 text-[#5f5f5d]">
                 <LucideIcons.ImagePlus className={`w-8 h-8 transition-colors ${isPhotoDragging ? 'text-accent' : 'opacity-50 group-hover:text-accent group-hover:opacity-100'}`} />
-                <span className="text-[10px] tracking-widest text-center px-4 uppercase opacity-70">Drop photo or Click</span>
+                <span className="text-[10px] tracking-widest text-center px-4 opacity-70">Drop photo or Click</span>
             </div>
           )}
         </div>
 
         {photo && (
           <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-[#eceae4] shadow-sm">
-            <span className="text-xs uppercase tracking-widest text-[#5f5f5d] mr-2">Position in Layout:</span>
+            <span className="text-xs tracking-widest text-[#5f5f5d] mr-2">Position in Layout:</span>
             <button 
               onClick={() => updateProfile('photoPosition', 'left')} 
-              className={`px-4 py-1.5 rounded-full text-xs uppercase tracking-widest transition-all ${(!photoPosition || photoPosition === 'left') ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'}`}
+              className={`px-4 py-1.5 rounded-full text-xs tracking-widest transition-all ${(!photoPosition || photoPosition === 'left') ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'}`}
             >
               Left
             </button>
             <button 
               onClick={() => updateProfile('photoPosition', 'right')} 
-              className={`px-4 py-1.5 rounded-full text-xs uppercase tracking-widest transition-all ${photoPosition === 'right' ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'}`}
+              className={`px-4 py-1.5 rounded-full text-xs tracking-widest transition-all ${photoPosition === 'right' ? 'bg-[#f7f4ed] text-[#1c1c1c] border border-[#eceae4]' : 'text-[#5f5f5d] hover:text-[#1c1c1c] border border-transparent'}`}
             >
               Right
             </button>
