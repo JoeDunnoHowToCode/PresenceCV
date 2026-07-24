@@ -293,7 +293,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
             <img 
               src="/favicon.png" 
               alt="PresenceCV Logo" 
-              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300 min-w-[32px] lg:min-w-[36px]" 
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300 min-w-[32px] lg:min-w-[36px]" 
               style={{ mixBlendMode: 'multiply' }}
             />
             <span className={`text-[#1c1c1c] font-semibold tracking-widest text-lg lg:text-xl transition-all whitespace-nowrap lg:relative z-50 lg:pointer-events-auto ${isSidebarCollapsed ? 'hidden' : 'hidden lg:inline-block'}`}>

@@ -275,7 +275,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
             <img 
               src="/favicon.png" 
               alt="PresenceCV Logo" 
-              className="w-8 h-8 lg:w-9 lg:h-9 shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300 min-w-[32px] lg:min-w-[36px]" 
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300 min-w-[32px] lg:min-w-[36px]" 
               style={{ mixBlendMode: 'multiply' }}
             />
             <span className={`text-[#1c1c1c] font-semibold tracking-widest text-lg lg:text-xl transition-all whitespace-nowrap lg:relative z-50 lg:pointer-events-auto ${isSidebarCollapsed ? 'hidden' : 'hidden lg:inline-block'}`}>
@@ -355,7 +355,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
           <div className="md:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#eceae4] px-4 py-3 flex items-center justify-between gap-2 shadow-sm shrink-0">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Link to="/" className="flex items-center gap-2 shrink-0">
-                <img src="/favicon.png" alt="PresenceCV" className="w-7 h-7 shrink-0" style={{ mixBlendMode: 'multiply' }} />
+                <img src="/favicon.png" alt="PresenceCV" className="w-7 h-7 rounded-full shrink-0" style={{ mixBlendMode: 'multiply' }} />
               </Link>
               <div className="flex-1 min-w-0 max-w-[200px]">
                 <ProfileSwitcher 
