@@ -66,6 +66,7 @@ export interface ResumeData {
   blocks: Record<string, Block>;
   liveId?: string;
   updateToken?: string;
+  isPro?: boolean;
 }
 
 export const ParsedResumeSchema = z.object({

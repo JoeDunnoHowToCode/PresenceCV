@@ -7,8 +7,8 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // 開放讀取 admin 列表以同步前端判斷
-    match /admins/{userId} {
+    // 開放讀取 users_pro 列表以同步前端判斷
+    match /users_pro/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
     }
 
@@ -30,7 +30,7 @@ service cloud.firestore {
             !("profiles" in request.resource.data) ||
             request.resource.data.profiles.size() <= 3 ||
             (resource != null && "profiles" in resource.data && request.resource.data.profiles.size() <= resource.data.profiles.size()) ||
-            exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+            exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
           );
       }
     }
@@ -39,10 +39,14 @@ service cloud.firestore {
     match /sharedResumes/{resumeId} {
       allow create: if request.auth != null 
         && request.resource.data.keys().hasAll(['profile', 'blocks', 'blockOrder', 'createdAt'])
-        && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation'])
+        && request.resource.data.keys().hasOnly(['profile', 'blocks', 'blockOrder', 'createdAt', 'themeColor', 'enableAnimation', 'isPro'])
         && (
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.profiles.size() <= 3
-          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          || exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+        )
+        && (
+          !('isPro' in request.resource.data) ||
+          (request.resource.data.isPro == true && exists(/databases/$(database)/documents/users_pro/$(request.auth.uid)))
         );
       allow get: if true;
       allow list: if false;
@@ -56,7 +60,11 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid
         && (
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.profiles.size() <= 3
-          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          || exists(/databases/$(database)/documents/users_pro/$(request.auth.uid))
+        )
+        && (
+          !('isPro' in request.resource.data) ||
+          (request.resource.data.isPro == true && exists(/databases/$(database)/documents/users_pro/$(request.auth.uid)))
         );
       allow get: if true;
       allow list: if false;

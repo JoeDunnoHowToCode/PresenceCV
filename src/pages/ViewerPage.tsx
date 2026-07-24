@@ -278,6 +278,13 @@ export default function ViewerPage({ testData }: { testData?: unknown }) {
         className="bg-white text-black font-sans print-page-container relative shadow-2xl" 
         style={{ '--theme-accent': data.themeColor } as CSSProperties}
       >
+        {!data.isPro && (
+          <div className="print-watermark">
+            <a href={window.location.origin} target="_blank" rel="noopener noreferrer">
+              Built with PresenceCV
+            </a>
+          </div>
+        )}
         <div className="print-page-padding">
           <div
             ref={printContentRef}

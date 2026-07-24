@@ -8,7 +8,7 @@
  *
  * Exports:
  * - AuthProvider: Context provider component (wraps the app in App.tsx)
- * - useAuth(): Hook returning { user, loading, isNewUser, signInWithGoogle, signOut }
+ * - useAuth(): Hook returning { user, loading, isNewUser, isPro, signInWithGoogle, signOut }
  *
  * Key Behaviors:
  * - On auth state change: checks if a Firestore user document exists at users/{uid}.
@@ -32,6 +32,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isNewUser: boolean; // Add this flag
+  isPro: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -63,6 +65,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             setIsNewUser(false);
           }
+          
+          // Check if user is a Pro user
+          const proRef = doc(db, 'users_pro', firebaseUser.uid);
+          const proSnap = await getDoc(proRef);
+          setIsPro(proSnap.exists());
         } catch (error: any) {
           console.error("Firebase auth check runtime error:", error);
           if (error.message && error.message.includes('offline')) {
@@ -75,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         setIsNewUser(false);
+        setIsPro(false);
       }
       
       setUser(firebaseUser);
@@ -127,9 +135,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     loading,
     isNewUser,
+    isPro,
     signInWithGoogle,
     signOut
-  }), [user, loading, isNewUser]);
+  }), [user, loading, isNewUser, isPro]);
 
   return (
     <AuthContext.Provider value={value}>

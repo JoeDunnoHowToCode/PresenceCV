@@ -144,6 +144,27 @@
   break-inside: avoid !important;
 }
 
+.print-watermark {
+  position: absolute;
+  top: 12px;
+  left: 24px;
+  z-index: 9999;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.print-watermark a {
+  color: #666;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.print-watermark a:hover {
+  opacity: 1;
+}
+
 @media print {
   @page {
     margin: 0;

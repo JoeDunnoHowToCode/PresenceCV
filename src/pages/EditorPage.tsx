@@ -17,7 +17,7 @@ import { EditorLayoutProps } from '../components/editor/EditorLayoutProps';
 export default function EditorPage() {
   useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isPro } = useAuth();
   
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -128,6 +128,7 @@ export default function EditorPage() {
 
     setTimeout(() => {
       const profileData = resume.getCurrentData();
+      profileData.isPro = isPro;
       localStorage.setItem('RESUME_PRINT_DATA', JSON.stringify(profileData));
       const printWindow = window.open('/view?print=true', '_blank');
       if (!printWindow) {
@@ -152,7 +153,7 @@ export default function EditorPage() {
       }, 10000);
     }, 50);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
-  }, [appState, data]);
+  }, [appState, data, isPro]);
 
   useEffect(() => {
     if (data.liveId && data.updateToken) {
@@ -161,6 +162,7 @@ export default function EditorPage() {
           const { doc, setDoc } = await import('firebase/firestore');
           const { db } = await import('../lib/firebase');
           const safeData = JSON.parse(JSON.stringify(data));
+          safeData.isPro = isPro;
           
           await setDoc(doc(db, 'liveResumes', data.liveId as string), {
             ...safeData,
@@ -173,7 +175,7 @@ export default function EditorPage() {
       }, 2000);
       return () => clearTimeout(timeoutId);
     }
-  }, [data, user?.uid]);
+  }, [data, user?.uid, isPro]);
 
   const openShareModal = useCallback(async () => {
     // Force flush any active debounced inputs
@@ -187,6 +189,7 @@ export default function EditorPage() {
     // Use setTimeout to ensure the blur event has flushed global state before freezing profileData
     setTimeout(async () => {
       const profileData = resume.getCurrentData();
+      profileData.isPro = isPro;
       const safeData = JSON.parse(JSON.stringify(profileData));
       delete safeData.liveId;
       delete safeData.updateToken;
@@ -214,7 +217,7 @@ export default function EditorPage() {
       }
     }, 50);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
-  }, [appState, data, snapshotUrl]);
+  }, [appState, data, snapshotUrl, isPro]);
 
   const ensureLiveLink = useCallback(async () => {
     const profileData = resume.getCurrentData();
@@ -222,6 +225,7 @@ export default function EditorPage() {
 
     setIsInitializingLive(true);
     try {
+      profileData.isPro = isPro;
       const safeData = JSON.parse(JSON.stringify(profileData));
       const updateToken = crypto.randomUUID
         ? crypto.randomUUID()
@@ -247,7 +251,7 @@ export default function EditorPage() {
       setIsInitializingLive(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
-  }, [appState, data, resume.updateProfileData, user]);
+  }, [appState, data, resume.updateProfileData, user, isPro]);
 
   const handleCopyLink = useCallback(async (url: string, section: 'snapshot' | 'live') => {
     await copyTextToClipboard(url);
