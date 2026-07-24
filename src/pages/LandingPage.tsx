@@ -176,10 +176,10 @@ export default function LandingPage() {
             className="flex flex-col items-center"
           >
             <h1 className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-[#1c1c1c] mb-8 max-w-4xl">
-              Your resume, <br className="hidden md:block" /> your presence.
+              Your Resume <br className="hidden md:block" /> Your Presence
             </h1>
             <p className="text-[20px] md:text-[24px] text-[#5f5f5d] leading-[1.38] mb-12 max-w-2xl font-normal">
-              Build stunning, shareable resumes powered by AI — in minutes.
+              Build stunning, shareable resumes powered by AI — in seconds.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <button 
@@ -205,10 +205,10 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
               <div className="p-4 bg-white rounded-2xl border border-[#eceae4] shadow-sm mb-8">
-                <LucideIcons.Sparkles className="w-7 h-7 text-[#1c1c1c]" />
+                <LucideIcons.Cloud className="w-7 h-7 text-[#1c1c1c]" />
               </div>
-              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">AI-Powered Content</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Gemini AI helps you phrase and optimize your resume effortlessly.</p>
+              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">Manage in One Account</h3>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Log in from anywhere to instantly generate, manage, and present your resume across any device. Your professional presence, always accessible.</p>
             </div>
             
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
@@ -216,23 +216,23 @@ export default function LandingPage() {
                 <LucideIcons.Share2 className="w-7 h-7 text-[#1c1c1c]" />
               </div>
               <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">Live Share Link</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Share a URL that updates instantly in real-time as you edit.</p>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Found a typo after sending the link? No problem. Edits update in real-time, ensuring recruiters always see your perfect, up-to-date professional profile.</p>
             </div>
 
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
               <div className="p-4 bg-white rounded-2xl border border-[#eceae4] shadow-sm mb-8">
                 <LucideIcons.FileText className="w-7 h-7 text-[#1c1c1c]" />
               </div>
-              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">PDF Export</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Clean, print-optimized formatting ready for job applications.</p>
+              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">ATS-Optimized PDF</h3>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Skip the confusing, overly-decorated layouts. We provide a single, clean format built to be easily read by recruiters and perfectly parsed by ATS scanners.</p>
             </div>
 
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
               <div className="p-4 bg-white rounded-2xl border border-[#eceae4] shadow-sm mb-8">
-                <LucideIcons.Layers className="w-7 h-7 text-[#1c1c1c]" />
+                <LucideIcons.Bot className="w-7 h-7 text-[#1c1c1c]" />
               </div>
-              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">Multi-Profile Setup</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">Easily duplicate and tailor resumes for different opportunities.</p>
+              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">AI Job-Hunting Sidekick</h3>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]"><span className="text-blue-500 font-semibold text-[11px] tracking-wider uppercase mr-2 border border-blue-200 bg-blue-50 px-1.5 py-0.5 rounded-sm">Coming Soon</span>AI that tailors your resume, matches JDs, writes cover letters, and fully automates applying to LinkedIn and other top job platforms.</p>
             </div>
           </div>
         </div>
@@ -251,8 +251,9 @@ export default function LandingPage() {
               <div className="text-[36px] font-semibold tracking-tight mb-8">$0<span className="text-[18px] font-normal text-[#5f5f5d]">/mo</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> 3 Resume Profiles</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> PDF Export</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> SnapShot Link</li>
+                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> Unlimited PDF Export</li>
+                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> Unlimited live & snapshot link sharing</li>
+                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c] shrink-0" /> <span>10 AI fully auto job appling per day <span className="text-xs font-semibold text-blue-500 block sm:inline">(Coming soon)</span></span></li>
               </ul>
               <button 
                 onClick={handleGetStarted}
@@ -268,12 +269,13 @@ export default function LandingPage() {
               </div>
               <h3 className="text-[24px] font-semibold mb-2 text-[#fcfbf8]">Pro</h3>
               <p className="opacity-80 mb-6 text-[16px]">For power users and active job seekers.</p>
-              <div className="text-[36px] font-semibold tracking-tight mb-8 text-[#fcfbf8]">$X<span className="text-[18px] font-normal opacity-80">/mo</span></div>
+              <div className="text-[36px] font-semibold tracking-tight mb-8 text-[#fcfbf8]">$3<span className="text-[18px] font-normal opacity-80">/mo</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited Profiles</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Advanced AI Generation</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Analytics for Shared links</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Custom Domains</li>
+                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited PDF Export</li>
+                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Unlimited live & snapshot link sharing</li>
+                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>200 AI fully auto job appling per day <span className="text-xs font-semibold text-blue-400 block sm:inline">(Coming soon)</span></span></li>
+                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> Latest AI-powered job hunting functions</li>
               </ul>
               <button className="w-full text-center bg-white text-[#1c1c1c] rounded-md px-6 py-3 text-base font-medium opacity-50 cursor-not-allowed">
                 Get Started
