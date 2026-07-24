@@ -297,7 +297,8 @@ export default function EditorPage() {
     setIsLogoutModalOpen, openShareModal, isSharing, tabsContainerRef,
     handleTabClick, snapshotUrl, setSnapshotUrl, copiedSection, setCopiedSection, isInitializingLive,
     handleCopyLink, ensureLiveLink, handleExportPDF, direction, setDirection,
-    isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, variants
+    isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, variants,
+    isPro
   };
 
   return (
@@ -312,6 +313,10 @@ export default function EditorPage() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={(parsedData) => {
+          if (!isPro && Object.keys(appState.profiles).length >= 3) {
+            alert("You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to import a new one.");
+            return;
+          }
           importResumeProfile(
             parsedData.profile?.name ? `${parsedData.profile.name}'s Imported Resume` : 'Imported Resume', 
             parsedData

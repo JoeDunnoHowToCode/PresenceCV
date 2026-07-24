@@ -26,7 +26,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
     handleCopyLink, ensureLiveLink, handleExportPDF, updateProfile,
     addContactItem, updateContactItem, removeContactItem,
     addListItem, updateListItem, removeListItem, addTagItem, updateTagItem, removeTagItem,
-    addBlock, isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, setActiveTab
+    addBlock, isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, setActiveTab,
+    isPro
   } = props;
   const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
@@ -343,6 +344,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
             createProfile={createProfile}
             renameProfile={renameProfile}
             setProfileToDelete={setProfileToDelete}
+            isPro={isPro}
             isCollapsed={isSidebarCollapsed}
           />
 
@@ -504,8 +506,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                             switchProfile={switchProfile}
                             createProfile={createProfile}
                             renameProfile={renameProfile}
-                            deleteProfile={deleteProfile}
-                            user={user}
+                            setProfileToDelete={setProfileToDelete}
+                            isPro={isPro}
                           />
                           <ThemePicker 
                             themeColor={data.themeColor}

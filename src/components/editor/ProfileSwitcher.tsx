@@ -10,6 +10,7 @@ interface ProfileSwitcherProps {
   createProfile: (name: string) => void;
   renameProfile: (id: string, name: string) => void;
   setProfileToDelete: (id: string | null) => void;
+  isPro?: boolean;
 }
 
 const ProfileSwitcher = React.memo(({
@@ -20,6 +21,7 @@ const ProfileSwitcher = React.memo(({
   renameProfile,
   setProfileToDelete,
   isCollapsed,
+  isPro,
 }: ProfileSwitcherProps) => {
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -70,7 +72,14 @@ const ProfileSwitcher = React.memo(({
             className="absolute top-full left-0 mt-2 bg-white p-2 rounded-2xl flex flex-col gap-1 w-80 border border-[#eceae4] shadow-xl z-50"
           >
             <button
-              onClick={() => { createProfile('New Resume'); setIsOpen(false); }}
+              onClick={() => {
+                if (!isPro && Object.keys(profiles).length >= 3) {
+                  alert("You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to copy.");
+                  return;
+                }
+                createProfile('New Resume');
+                setIsOpen(false);
+              }}
               className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 transition-colors text-[#5f5f5d] hover:text-[#1c1c1c] group"
             >
               <LucideIcons.Copy className="w-4 h-4 group-hover:text-accent transition-colors" />
