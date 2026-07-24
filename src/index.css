@@ -152,17 +152,15 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  opacity: 0.5;
 }
 
 .print-watermark a {
   color: #000;
   text-decoration: none;
-  transition: opacity 0.2s;
 }
 
 .print-watermark a:hover {
-  opacity: 1;
+  text-decoration: underline;
 }
 
 @media print {

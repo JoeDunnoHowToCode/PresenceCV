@@ -281,7 +281,7 @@ export default function ViewerPage({ testData }: { testData?: unknown }) {
         {!data.isPro && (
           <div className="print-watermark">
             <a href={window.location.origin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5">
-              <img src="/favicon.png" className="w-4 h-4 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
+              <img src="/favicon.png" className="w-4 h-4 rounded-full" alt="PresenceCV Logo" />
               Built with PresenceCV
             </a>
           </div>
