@@ -52,7 +52,7 @@ const TagsBlockEditor = React.memo(({
           defaultValue={titleInput.defaultValue}
           onChange={titleInput.onChange}
           onBlur={titleInput.onBlur}
-          className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
+          className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
           placeholder="Section Title"
         />
       </div>

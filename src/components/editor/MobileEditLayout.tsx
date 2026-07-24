@@ -460,13 +460,13 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                        );
                      })()}
                      {activeTab === 'info' ? (
-                       <span className="text-sm tracking-widest uppercase truncate flex-1 text-left">Info</span>
+                       <span className="text-sm tracking-widest truncate flex-1 text-left">Info</span>
                      ) : (
                        <input 
                          value={data.blocks[activeTab]?.title || ''}
                          onClick={e => e.stopPropagation()}
                          onChange={e => updateBlockTitle(activeTab, e.target.value)}
-                         className="text-sm tracking-widest uppercase truncate bg-transparent outline-none border-b border-white/20 focus:border-white w-full text-white font-medium pb-0.5 min-w-0"
+                         className="text-sm tracking-widest truncate bg-transparent outline-none border-b border-white/20 focus:border-white w-full text-white font-medium pb-0.5 min-w-0"
                          placeholder="Section Name"
                        />
                      )}
@@ -487,7 +487,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${activeTab === 'info' ? 'bg-[#f7f4ed] text-[#1c1c1c]' : 'text-[#5f5f5d] hover:bg-black/5 hover:text-[#1c1c1c]'}`}
                        >
                          <LucideIcons.User className="w-4 h-4 text-accent" />
-                         <span className="text-sm tracking-widest uppercase font-medium">Info</span>
+                         <span className="text-sm tracking-widest font-medium">Info</span>
                        </button>
                        {data.blockOrder.map((blockId, index) => {
                          const block = data.blocks[blockId];
@@ -497,7 +497,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                            <div key={blockId} className="group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all cursor-pointer hover:bg-black/5 text-[#5f5f5d] hover:text-[#1c1c1c]" onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}>
                              <div className="flex-1 flex items-center gap-3 min-w-0">
                                <BlockIcon className="w-4 h-4 shrink-0 text-accent" />
-                               <span className="text-sm tracking-widest uppercase font-medium truncate">{block.title}</span>
+                               <span className="text-sm tracking-widest font-medium truncate">{block.title}</span>
                              </div>
                              <div className="flex items-center gap-1 shrink-0">
                                <button
@@ -547,7 +547,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                               handleTabClick(newId);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs uppercase tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
                           >
                             <LucideIcons.Plus className="w-3.5 h-3.5 text-accent" /> Add List View
                           </button>
@@ -557,7 +557,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                               handleTabClick(newId);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs uppercase tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs tracking-widest text-[#5f5f5d] hover:text-accent hover:bg-black/5 transition-colors bg-[#f7f4ed] border border-[#eceae4]"
                           >
                             <LucideIcons.Plus className="w-3.5 h-3.5 text-accent" /> Add Tag View
                           </button>
@@ -578,7 +578,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                   }`}
                 >
                   <LucideIcons.User className="w-4 h-4" />
-                  <span className="text-sm tracking-widest uppercase">Info</span>
+                  <span className="text-sm tracking-widest">Info</span>
                 </button>
 
                 <Droppable droppableId="tabs" direction="horizontal" type="tabs">
@@ -670,14 +670,14 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                                       <input 
                                         value={block.title}
                                         onChange={e => updateBlockTitle(blockId, e.target.value)}
-                                        className="text-sm tracking-widest uppercase bg-transparent outline-none border-b border-white/20 focus:border-white w-24 sm:w-32 text-center pb-0.5 text-white font-medium"
+                                        className="text-sm tracking-widest bg-transparent outline-none border-b border-white/20 focus:border-white w-24 sm:w-32 text-center pb-0.5 text-white font-medium"
                                         placeholder="Name"
                                       />
                                     </div>
                                   ) : (
                                     <>
                                       {FinalIcon && <FinalIcon className="w-4 h-4" />}
-                                      <span className="text-sm tracking-widest uppercase">{block.title}</span>
+                                      <span className="text-sm tracking-widest">{block.title}</span>
                                     </>
                                   )}
                                 </div>

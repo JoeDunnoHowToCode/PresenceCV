@@ -305,7 +305,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                 : 'text-center items-center'
             }`}>
               <h1 className="text-[64px] font-semibold tracking-[-2.5px] leading-[1.05] mb-4" style={{ color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>{data.profile.name}</h1>
-              <p className="text-xl tracking-widest uppercase text-gray-500 mb-6">{data.profile.title}</p>
+              <p className="text-xl tracking-widest text-gray-500 mb-6">{data.profile.title}</p>
               
               <div className={`flex flex-wrap items-center gap-6 text-gray-600 ${
                 data.profile.photo 
@@ -347,7 +347,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
           const BlockIcon = !(block as any).icon ? null : ((block as any).icon ? (LucideIcons as any)[(block as any).icon] || LucideIcons.Briefcase : ICONS[blockId] || LucideIcons.Briefcase);
           return (
             <div key={block.id} className="w-full mb-12">
-              <h2 className="text-2xl mb-8 border-b-2 pb-2 uppercase tracking-wider flex items-center gap-3" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
+              <h2 className="text-2xl mb-8 border-b-2 pb-2 tracking-wider flex items-center gap-3" style={{ borderColor: 'color-mix(in srgb, var(--theme-accent) 60%, black)', color: 'color-mix(in srgb, var(--theme-accent) 60%, black)' }}>
                 {BlockIcon && <BlockIcon className="w-6 h-6" />}
                 {block.title}
               </h2>
@@ -358,7 +358,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                     <div key={item.id} className="flex flex-col gap-1">
                       <div className="flex justify-between items-baseline">
                         <h3 className=" text-xl font-bold text-gray-900">{item.title}</h3>
-                        <span className="text-sm tracking-widest uppercase text-gray-500 whitespace-nowrap ml-4">{item.period}</span>
+                        <span className="text-sm tracking-widest text-gray-500 whitespace-nowrap ml-4">{item.period}</span>
                       </div>
                       {item.subtitle && (
                         <div className="text-sm tracking-widest text-gray-500 mb-2">
@@ -455,7 +455,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                 }`}
               >
                 {Icon && <Icon className="w-4 h-4" />}
-                <span className="text-sm tracking-widest uppercase">{block.title}</span>
+                <span className="text-sm tracking-widest">{block.title}</span>
               </button>
             );
           })}
@@ -512,7 +512,7 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
                 }`}>
                   <div>
                     <h1 className="text-5xl md:text-[64px] lg:text-[80px] font-semibold leading-[1.05] tracking-[-2.5px] text-accent mb-6 cursor-default">{data.profile.name}</h1>
-                    <p className="text-lg md:text-xl tracking-[0.4em] uppercase text-[#5f5f5d]  cursor-default">{data.profile.title}</p>
+                    <p className="text-lg md:text-xl tracking-[0.4em] text-[#5f5f5d]  cursor-default">{data.profile.title}</p>
                   </div>
 
                   <div className={`flex flex-wrap items-center gap-6 md:gap-8 text-[#5f5f5d] ${

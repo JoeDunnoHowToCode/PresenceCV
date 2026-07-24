@@ -55,7 +55,7 @@ const ProfileSwitcher = React.memo(({
       >
         <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
           <LucideIcons.FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-accent shrink-0" />
-          <span className={`text-xs lg:text-sm tracking-widest uppercase truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'inline-block'}`}>{activeProfile?.name || 'Resume'}</span>
+          <span className={`text-xs lg:text-sm tracking-widest truncate font-medium text-[#1c1c1c] ${isCollapsed ? 'hidden' : 'inline-block'}`}>{activeProfile?.name || 'Resume'}</span>
         </div>
         <LucideIcons.ChevronDown className={`w-3.5 h-3.5 lg:w-4 lg:h-4 text-[#5f5f5d] transition-transform shrink-0 ${isCollapsed ? 'hidden' : 'inline-block'} ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -113,10 +113,10 @@ const ProfileSwitcher = React.memo(({
                               setEditingProfileId(null);
                             }
                           }}
-                          className="w-full bg-transparent border-none outline-none text-sm tracking-widest uppercase font-medium text-[#1c1c1c]"
+                          className="w-full bg-transparent border-none outline-none text-sm tracking-widest font-medium text-[#1c1c1c]"
                         />
                       ) : (
-                        <span className="text-sm tracking-widest uppercase font-medium truncate flex-1 min-w-0">
+                        <span className="text-sm tracking-widest font-medium truncate flex-1 min-w-0">
                           {profile.name}
                         </span>
                       )}

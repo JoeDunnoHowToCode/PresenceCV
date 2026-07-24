@@ -36,7 +36,7 @@ const ListBlockEditor = React.memo(({
             defaultValue={titleInput.defaultValue}
             onChange={titleInput.onChange}
             onBlur={titleInput.onBlur}
-            className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold uppercase tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
+            className="bg-transparent border-b border-transparent hover:border-[#eceae4] focus:border-accent outline-none text-sm font-bold tracking-[0.2em] text-[#5f5f5d] pb-1 transition-colors "
             placeholder="Section Title"
           />
           {block.items.length > 4 && (
@@ -194,7 +194,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
             defaultValue={subtitleInput.defaultValue}
             onChange={subtitleInput.onChange}
             onBlur={subtitleInput.onBlur}
-            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 text-[#5f5f5d] transition-colors "
+            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest pb-1 text-[#5f5f5d] transition-colors "
             placeholder="Company / Institution"
           />
           <input
@@ -202,7 +202,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
             defaultValue={periodInput.defaultValue}
             onChange={periodInput.onChange}
             onBlur={periodInput.onBlur}
-            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest uppercase pb-1 text-[#5f5f5d] transition-colors "
+            className="w-full bg-transparent border-b border-[#eceae4] focus:border-accent outline-none text-xs tracking-widest pb-1 text-[#5f5f5d] transition-colors "
             placeholder="Period (e.g. 2021 - Present)"
           />
         </div>
