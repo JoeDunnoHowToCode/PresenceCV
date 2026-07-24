@@ -430,7 +430,19 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl mx-auto w-full flex flex-col xl:flex-row justify-between items-center gap-6 mb-16 relative z-10"
       >
-        <div className="flex-1 hidden xl:block"></div>
+        <div className="flex-1 hidden xl:flex items-center justify-start">
+          {isShared ? (
+            <Link to="/" title="Make your own resume?" className="flex items-center gap-3 hover:opacity-70 transition-opacity">
+              <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
+              <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-3">
+              <img src="/favicon.png" className="w-6 h-6 rounded-full" style={{ mixBlendMode: 'multiply' }} alt="PresenceCV Logo" />
+              <span className="text-xl font-semibold tracking-tight text-[#1c1c1c]">PresenceCV</span>
+            </div>
+          )}
+        </div>
 
         <div 
           ref={tabsContainerRef}
@@ -462,7 +474,17 @@ export default function ViewPage({ testData }: { testData?: unknown }) {
         </div>
 
         <div className="flex-1 flex justify-end w-full xl:w-auto">
-          {!isShared && (
+          {isShared ? (
+            <button
+              onClick={() => {
+                localStorage.setItem('RESUME_PRINT_DATA', JSON.stringify(data));
+                window.open('/view?print=true', '_blank');
+              }}
+              className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm hover:text-accent whitespace-nowrap"
+            >
+              <LucideIcons.Download className="w-4 h-4" /> Export PDF
+            </button>
+          ) : (
             <Link
               to="/edit"
               className="bg-white px-6 py-3 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest hover:bg-[#eceae4] transition-colors text-[#1c1c1c] border border-[#eceae4] shadow-sm hover:text-accent  whitespace-nowrap"
