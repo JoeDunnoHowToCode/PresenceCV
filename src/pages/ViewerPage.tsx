@@ -10,14 +10,17 @@
  *    useResume hook with a warm glassmorphic design. Features tab navigation
  *    with animated transitions between Info, Experience, Skills, etc.
  *
- * 2. Shared View (?id=xxx or ?live=xxx): Fetches resume data from Firestore
- *    (sharedResumes or liveResumes collection) and displays it read-only.
- *    No authentication required — anyone with the link can view.
+ * 2. Shared View (?id=xxx, /share/:id or ?live=xxx): Fetches resume data from
+ *    Firestore and displays it read-only. No authentication required — anyone
+ *    with the link can view. Snapshots (sharedResumes) are read once; live
+ *    links (liveResumes) stay subscribed via onSnapshot, so the recipient sees
+ *    the owner's edits without reloading.
  *
- * 3. Print View (?print=true): Renders a white, A4-sized layout (794×1122px)
- *    optimized for PDF export via window.print(). Uses a binary search algorithm
- *    (15 iterations) to find the optimal scale factor that fits all content
- *    within one page. Receives data from the editor window via:
+ * 3. Print View (?print=true or /print/:id): Renders a white, A4-sized layout
+ *    (794×1122px) optimized for PDF export via window.print(). Uses a binary
+ *    search algorithm (15 iterations) to find the optimal scale factor that fits
+ *    all content within one page. With a snapshot id in the URL the data comes
+ *    from Firestore; otherwise it comes from the editor window via:
  *    - localStorage (RESUME_PRINT_DATA key) — primary
  *    - postMessage (RESUME_DATA_SYNC) — fallback
  *
@@ -40,7 +43,8 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import { useResume } from '../hooks/useResume';
 import { ResumeData, ListItem, TagItem } from '../types';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import type { DocumentSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { formatUrl } from '../lib/utils';
 import { sanitizeHtml, migrateLegacyTextToHtml, isSafeUrl } from '../utils/htmlSanitizer';
@@ -61,38 +65,49 @@ export default function ViewerPage({ testData }: { testData?: unknown }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const idFromUrl = searchParams.get('id');
+  // /share/:id and /print/:id carry the snapshot id in the path instead of ?id=
+  const { id: idFromPath } = useParams();
+  const { pathname } = useLocation();
+
+  const idFromUrl = searchParams.get('id') || idFromPath || null;
   const liveIdFromUrl = searchParams.get('live');
-  const isPrint = searchParams.get('print') === 'true';
+  const isPrint = searchParams.get('print') === 'true' || pathname.startsWith('/print/');
   const isShared = !!idFromUrl || !!liveIdFromUrl;
 
   useEffect(() => {
-    if (idFromUrl || liveIdFromUrl) {
-      const fetchData = async () => {
-        setLoading(true);
-        try {
-          const docRef = doc(db, idFromUrl ? 'sharedResumes' : 'liveResumes', idFromUrl || liveIdFromUrl!);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            setRemoteData(docSnap.data() as ResumeData);
-          } else {
-            setError(t('viewer.errors.notFound'));
-          }
-        } catch (err: any) {
-          console.error(err);
-          if (err && typeof err === 'object' && 'code' in err && (err as {code: string}).code === 'permission-denied') {
-            setError(t('viewer.errors.permissionDenied'));
-          } else if (err.message && err.message.includes('offline')) {
-            setError(t('viewer.errors.offline'));
-          } else {
-            setError(t('viewer.errors.invalidLink'));
-          }
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchData();
+    if (!idFromUrl && !liveIdFromUrl) return;
+
+    setLoading(true);
+
+    const applySnapshot = (docSnap: DocumentSnapshot) => {
+      if (docSnap.exists()) {
+        setRemoteData(docSnap.data() as ResumeData);
+        setError('');
+      } else {
+        setError(t('viewer.errors.notFound'));
+      }
+      setLoading(false);
+    };
+
+    const handleError = (err: any) => {
+      console.error(err);
+      if (err && typeof err === 'object' && 'code' in err && (err as {code: string}).code === 'permission-denied') {
+        setError(t('viewer.errors.permissionDenied'));
+      } else if (err.message && err.message.includes('offline')) {
+        setError(t('viewer.errors.offline'));
+      } else {
+        setError(t('viewer.errors.invalidLink'));
+      }
+      setLoading(false);
+    };
+
+    // Live links stay subscribed so recipients see edits as they happen.
+    if (!idFromUrl && liveIdFromUrl) {
+      return onSnapshot(doc(db, 'liveResumes', liveIdFromUrl), applySnapshot, handleError);
     }
+
+    // Snapshots are immutable, so a single read is enough.
+    getDoc(doc(db, 'sharedResumes', idFromUrl!)).then(applySnapshot).catch(handleError);
   }, [idFromUrl, liveIdFromUrl]);
 
   const [syncData, setSyncData] = useState<ResumeData | null>(null);
@@ -109,7 +124,7 @@ export default function ViewerPage({ testData }: { testData?: unknown }) {
   }, [isPrint, idFromUrl, liveIdFromUrl, syncData]);
 
   useEffect(() => {
-    if (isPrint) {
+    if (isPrint && !idFromUrl && !liveIdFromUrl) {
       const localPrintDataStr = localStorage.getItem('RESUME_PRINT_DATA');
       if (localPrintDataStr) {
         try {
@@ -248,7 +263,8 @@ export default function ViewerPage({ testData }: { testData?: unknown }) {
     }
   }, [isPrint, loading, error, imagesLoaded, data, syncData]);
 
-  if (loading || isSyncPrintWait) {
+  // In print mode `data` is null until the resume arrives (fetch, localStorage or postMessage).
+  if (loading || isSyncPrintWait || (isPrint && !data && !error)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white overflow-hidden">
          <div className="depth-bg animated" />

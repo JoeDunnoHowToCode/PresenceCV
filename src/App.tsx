@@ -15,7 +15,8 @@
  * 3. Client-Side Routing (react-router-dom v7):
  *    - "/" → LandingPage (public marketing page)
  *    - "/privacy", "/terms" → Static legal pages
- *    - "/view", "/share/:id", "/print/:id" → ViewPage (public resume viewer)
+ *    - "/view", "/share/:id", "/print/:id" → ViewerPage (public resume viewer;
+ *      the id can arrive as ?id=/?live= or as a path param)
  *    - "/editor" → EditorPage (protected, requires Google login)
  *    - "/app", "/edit" → Redirects to "/editor"
  *
@@ -62,7 +63,7 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             
-            { /* Public Viewers (existing logic relies on queries like /view?id=...) */ }
+            { /* Public Viewers (/view?id=..., /view?live=..., or an id in the path) */ }
             <Route path="/view" element={<ViewerPage />} />
             <Route path="/share/:id" element={<ViewerPage />} />
             <Route path="/print/:id" element={<ViewerPage />} />

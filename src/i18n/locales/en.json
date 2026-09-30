@@ -150,6 +150,12 @@
     "dailyLimitExceeded": "Daily AI parse limit reached (5/5). Please try again tomorrow.",
     "buttonImport": "Parse & Import",
     "buttonCancel": "Cancel",
+    "loading": {
+      "step0": "Uploading your file...",
+      "step1": "AI is extracting your work experience...",
+      "step2": "Analyzing your skills and education...",
+      "step3": "Finalizing the layout, please wait..."
+    },
     "errors": {
       "fileTooLarge": "File is too large. Maximum size is 3MB.",
       "invalidType": "Invalid file type. Only PDF, JPG, and PNG are supported.",
@@ -157,7 +163,9 @@
       "authFailed": "Failed to get authentication token.",
       "readFailed": "Failed to read file.",
       "serverUnavailable": "AI service unavailable. Please ensure the server is configured with a valid API key.",
-      "unexpected": "An unexpected error occurred during upload."
+      "unexpected": "An unexpected error occurred during upload.",
+      "rateLimit": "Too many resumes are being parsed right now. Please try again in a few minutes.",
+      "aiFailed": "We could not parse this format. Try a text-based PDF instead, or create your resume manually."
     },
     "privacyNotice": "Privacy Notice: Your file is processed securely in memory and deleted immediately after analysis. We do not store your original document. Please manually review the generated content after upload to ensure AI accuracy."
   },

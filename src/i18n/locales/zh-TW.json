@@ -150,6 +150,12 @@
     "dailyLimitExceeded": "今日 AI 解析次數已達上限 (5/5)，請明天再試。",
     "buttonImport": "解析並匯入",
     "buttonCancel": "取消",
+    "loading": {
+      "step0": "正在上傳文件...",
+      "step1": "AI 正在萃取工作經歷...",
+      "step2": "正在分析技能與學歷...",
+      "step3": "最後排版中，請稍候..."
+    },
     "errors": {
       "fileTooLarge": "檔案太大。最大限制為 3MB。",
       "invalidType": "檔案類型無效。僅支援 PDF、JPG 和 PNG。",
@@ -157,7 +163,9 @@
       "authFailed": "無法取得驗證權杖。",
       "readFailed": "讀取檔案失敗。",
       "serverUnavailable": "AI 服務無法使用。請確認伺服器已設定有效的 API 金鑰。",
-      "unexpected": "上傳過程中發生未預期的錯誤。"
+      "unexpected": "上傳過程中發生未預期的錯誤。",
+      "rateLimit": "目前解析人數過多，請稍後再試。",
+      "aiFailed": "無法解析此格式，建議您直接手動建立，或換一份純文字格式的 PDF 再試一次。"
     },
     "privacyNotice": "隱私權聲明：您的檔案在記憶體中安全處理，分析後立即刪除。我們不會儲存您的原始文件。上傳後請手動審閱產生的內容，以確保 AI 準確性。"
   },

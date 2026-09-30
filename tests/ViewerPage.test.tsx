@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ViewerPage from '../src/pages/ViewerPage';
 import * as useResume from '../src/hooks/useResume';
+import * as firestore from 'firebase/firestore';
 
 // Mock dependencies
 vi.mock('../src/hooks/useResume', () => ({
@@ -12,7 +13,8 @@ vi.mock('../src/hooks/useResume', () => ({
 
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(),
-  getDoc: vi.fn()
+  getDoc: vi.fn(),
+  onSnapshot: vi.fn()
 }));
 
 vi.mock('../src/lib/firebase', () => ({
@@ -330,5 +332,109 @@ describe('ViewerPage Watermark Rendering', () => {
   });
 });
 
+describe('ViewerPage Shared Link Loading', () => {
+  const resume = (name: string) => ({
+    isPro: true,
+    profile: { name },
+    contactItems: [],
+    blocks: {},
+    blockOrder: []
+  });
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+    vi.mocked(useResume.useResume).mockReturnValue({
+      data: resume('Default Sample'),
+      appState: { profiles: {}, activeProfileId: 'main' },
+      activeTab: 'info',
+      handleUpdate: vi.fn(),
+      createNewProfile: vi.fn(),
+      deleteProfile: vi.fn(),
+      setActiveProfile: vi.fn(),
+      addBlock: vi.fn(),
+      removeBlock: vi.fn(),
+      updateBlock: vi.fn(),
+      reorderBlocks: vi.fn(),
+      isSyncing: false
+    } as any);
+  });
 
+  it('loads the snapshot named by the /share/:id path param', async () => {
+    vi.mocked(firestore.getDoc).mockResolvedValue({
+      exists: () => true,
+      data: () => resume('Shared Snapshot')
+    } as any);
+
+    render(
+      <MemoryRouter initialEntries={['/share/snap123']}>
+        <Routes>
+          <Route path="/share/:id" element={<ViewerPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Shared Snapshot')).toBeInTheDocument();
+    expect(firestore.doc).toHaveBeenCalledWith(expect.anything(), 'sharedResumes', 'snap123');
+    expect(screen.queryByText('Default Sample')).not.toBeInTheDocument();
+  });
+
+  it('prints the snapshot named by the /print/:id path param, not cached print data', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(JSON.stringify(resume('Stale Cached')));
+    vi.mocked(firestore.getDoc).mockResolvedValue({
+      exists: () => true,
+      data: () => resume('Printed Snapshot')
+    } as any);
+
+    render(
+      <MemoryRouter initialEntries={['/print/snap456']}>
+        <Routes>
+          <Route path="/print/:id" element={<ViewerPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Printed Snapshot')).toBeInTheDocument();
+    expect(screen.queryByText('Stale Cached')).not.toBeInTheDocument();
+  });
+
+  it('keeps a live link subscribed so owner edits appear without a reload', async () => {
+    let emit: ((snap: unknown) => void) | undefined;
+    (firestore.onSnapshot as unknown as Mock).mockImplementation(
+      (_ref: unknown, onNext: (snap: unknown) => void) => {
+        emit = onNext;
+        return vi.fn();
+      }
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/view?live=live789']}>
+        <ViewerPage />
+      </MemoryRouter>
+    );
+
+    expect(firestore.doc).toHaveBeenCalledWith(expect.anything(), 'liveResumes', 'live789');
+    expect(firestore.getDoc).not.toHaveBeenCalled();
+
+    act(() => emit!({ exists: () => true, data: () => resume('First Draft') }));
+    expect(await screen.findByText('First Draft')).toBeInTheDocument();
+
+    act(() => emit!({ exists: () => true, data: () => resume('Edited Live') }));
+    expect(await screen.findByText('Edited Live')).toBeInTheDocument();
+  });
+
+  it('unsubscribes from the live resume on unmount', () => {
+    const unsubscribe = vi.fn();
+    (firestore.onSnapshot as unknown as Mock).mockReturnValue(unsubscribe);
+
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/view?live=live789']}>
+        <ViewerPage />
+      </MemoryRouter>
+    );
+
+    expect(unsubscribe).not.toHaveBeenCalled();
+    unmount();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+});
