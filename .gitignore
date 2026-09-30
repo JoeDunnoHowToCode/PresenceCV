@@ -11,11 +11,8 @@ coverage/
 firebase-applet-config.json
 firebase-blueprint.json
 
-# Agent development files (local only, except workflow rules)
+# Agent development files (local only — agent rules live in root CLAUDE.md / AGENTS.md)
 .agents/*
-!.agents/AGENTS.md
-!.agents/roles/
-!.agents/skills/
 
 # HumanMap archive (local only, may contain sensitive dev notes)
 UpdateLog/

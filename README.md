@@ -107,10 +107,13 @@ To run unit, integration, and security rules tests:
 
 ```bash
 # Run tests once (Vitest)
-npx vitest run
+npm run test
 
 # Run tests in watch mode
-npm run test
+npm run test:watch
+
+# Run Firestore security rules tests (requires a Java JRE for the emulator)
+npm run test:rules
 ```
 
 ---
@@ -179,7 +182,6 @@ PresenceCV/
     ├── hooks/               # Custom hooks (useResume — core state mgmt)
     ├── i18n/                # Internationalization config and translations
     ├── lib/                 # Firebase init, error handling, App Check
-    ├── middleware/          # Serverless / API middlewares
     ├── pages/               # Route-level page components (Editor, Viewer, Share)
     └── utils/               # Sanitization (DOMPurify), RateLimiter, Exporters
 ```
@@ -196,7 +198,7 @@ PresenceCV/
 - **Session Cleanup**: Sign-out clears all localStorage data to prevent cross-session leaks
 - **Shared Links**: Read-only access; cannot be updated or deleted after creation
 - **Live Links**: Updates are gated by `ownerUid` verification
-- **Admin Privileges**: To grant admin privileges (bypassing the 3 profiles and 5 AI imports limit), you must manually create a document inside the `admins` Firestore collection where the Document ID is exactly the user's Firebase UID.
+- **Admin Privileges**: To grant admin privileges (bypassing the 3 profiles limit), you must manually create a document inside the `admins` Firestore collection where the Document ID is exactly the user's Firebase UID.
 
 ---
 
