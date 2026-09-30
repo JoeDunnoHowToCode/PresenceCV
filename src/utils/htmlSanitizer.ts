@@ -6,6 +6,9 @@ import DOMPurify from 'dompurify';
  */
 export const isSafeUrl = (url: string | undefined): boolean => {
   if (!url) return false;
+  // Protocol-relative URLs (//host, and the /\host form browsers also accept)
+  // navigate off-site, so they are not same-origin relative paths.
+  if (/^\/[/\\]/.test(url)) return false;
   // Allow relative URLs or anchors
   if (url.startsWith('/') || url.startsWith('#')) return true;
   

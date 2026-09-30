@@ -107,3 +107,70 @@ describe('Editor UI limits', () => {
     expect(mockAlert).not.toHaveBeenCalled();
   });
 });
+
+describe('Editor postMessage origin check', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(AuthContext.useAuth).mockReturnValue({
+      user: { uid: '123' } as any,
+      isPro: true,
+      isAdmin: false,
+      loading: false,
+      isNewUser: false,
+      signInWithGoogle: vi.fn(),
+      signOut: vi.fn()
+    });
+
+    vi.mocked(useResume.useResume).mockReturnValue({
+      appState: { profiles: { id_0: { id: 'id_0', name: 'Profile 0' } }, activeProfileId: 'id_0' },
+      data: { blocks: {}, blockOrder: [], profile: {} },
+      activeTab: 'profile',
+      handleUpdate: vi.fn(),
+      createNewProfile: vi.fn(),
+      deleteProfile: vi.fn(),
+      setActiveProfile: vi.fn(),
+      addBlock: vi.fn(),
+      removeBlock: vi.fn(),
+      updateBlock: vi.fn(),
+      reorderBlocks: vi.fn(),
+      isSyncing: false
+    } as any);
+  });
+
+  const dispatchRequest = (origin: string, source: Window) => {
+    const event = new MessageEvent('message', { data: { type: 'RESUME_DATA_REQUEST' } });
+    Object.defineProperty(event, 'origin', { value: origin });
+    Object.defineProperty(event, 'source', { value: source });
+    window.dispatchEvent(event);
+  };
+
+  it('ignores RESUME_DATA_REQUEST from a foreign origin', () => {
+    render(
+      <MemoryRouter>
+        <EditorPage />
+      </MemoryRouter>
+    );
+
+    const attacker = { postMessage: vi.fn() } as unknown as Window;
+    dispatchRequest('https://evil.example', attacker);
+
+    expect(attacker.postMessage).not.toHaveBeenCalled();
+  });
+
+  it('replies to RESUME_DATA_REQUEST from the same origin', () => {
+    render(
+      <MemoryRouter>
+        <EditorPage />
+      </MemoryRouter>
+    );
+
+    const printWindow = { postMessage: vi.fn() } as unknown as Window;
+    dispatchRequest(window.location.origin, printWindow);
+
+    expect(printWindow.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'RESUME_DATA_SYNC' }),
+      window.location.origin
+    );
+  });
+});

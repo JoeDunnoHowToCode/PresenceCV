@@ -118,6 +118,8 @@ export default function EditorPage() {
 
   useEffect(() => {
     const handleRequest = (event: MessageEvent) => {
+      // Only reply to same-origin windows; otherwise any page could harvest resume data.
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'RESUME_DATA_REQUEST' && event.source) {
         (event.source as Window).postMessage({ type: 'RESUME_DATA_SYNC', data }, event.origin);
       }
