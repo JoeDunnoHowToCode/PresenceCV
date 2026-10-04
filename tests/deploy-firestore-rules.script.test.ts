@@ -6,6 +6,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
@@ -18,6 +19,7 @@ import { join, resolve } from 'path';
 // ./node_modules/.bin/firebase is a stub. The stub records where the real CLI
 // would deploy: the `--config` file if one is passed, else ./firebase.json, with
 // the database defaulting to "(default)" and `rules` resolved next to the config.
+// It then exits with STUB_EXIT, so a failed deploy can be simulated.
 const FIREBASE_STUB = `#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
@@ -29,6 +31,7 @@ fs.writeFileSync(process.env.STUB_RECORD, JSON.stringify({
   database: firestore.database ?? '(default)',
   rulesFile: path.resolve(path.dirname(configPath), firestore.rules),
 }));
+process.exit(Number(process.env.STUB_EXIT ?? 0));
 `;
 
 const repo = resolve(__dirname, '..');
@@ -51,6 +54,7 @@ function runDeploy(env: Record<string, string>) {
     STUB_RECORD: recordPath,
   };
   delete childEnv.FIREBASE_DATABASE_ID;
+  const filesBefore = readdirSync(dir).sort();
   const result = spawnSync(process.execPath, ['scripts/deploy-firestore-rules.mjs'], {
     cwd: dir,
     env: { ...childEnv, ...env },
@@ -59,7 +63,11 @@ function runDeploy(env: Record<string, string>) {
   if (!existsSync(recordPath)) {
     throw new Error(`firebase stub was not called:\n${result.stdout}${result.stderr}`);
   }
-  return JSON.parse(readFileSync(recordPath, 'utf8'));
+  return {
+    target: JSON.parse(readFileSync(recordPath, 'utf8')),
+    filesBefore,
+    filesAfter: readdirSync(dir).sort(),
+  };
 }
 
 describe('deploy-firestore-rules script', () => {
@@ -69,6 +77,14 @@ describe('deploy-firestore-rules script', () => {
     { label: 'set', env: { FIREBASE_DATABASE_ID: 'ai-studio-test' }, database: 'ai-studio-test' },
     { label: 'unset', env: {}, database: '(default)' },
   ])('deploys firestore.rules to $database when FIREBASE_DATABASE_ID is $label', ({ env, database }) => {
-    expect(runDeploy(env)).toEqual({ database, rulesFile: join(dir, 'firestore.rules') });
+    expect(runDeploy(env).target).toEqual({ database, rulesFile: join(dir, 'firestore.rules') });
+  });
+
+  it.each([
+    { outcome: 'succeeds', STUB_EXIT: '0' },
+    { outcome: 'fails', STUB_EXIT: '1' },
+  ])('leaves no temporary files behind when the deploy $outcome', ({ STUB_EXIT }) => {
+    const { filesBefore, filesAfter } = runDeploy({ FIREBASE_DATABASE_ID: 'ai-studio-test', STUB_EXIT });
+    expect(filesAfter).toEqual(filesBefore);
   });
 });
