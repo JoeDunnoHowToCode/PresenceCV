@@ -36,6 +36,7 @@ jobs:
 
   deploy-prod:
     name: Deploy Firestore Rules (Prod)
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
