@@ -66,8 +66,10 @@ function deployRules() {
 
       console.log('✅ Firestore rules deployed successfully!');
     } finally {
-      if (existsSync(tempCredsPath)) {
-        unlinkSync(tempCredsPath);
+      for (const tempPath of [tempCredsPath, tempConfigPath]) {
+        if (existsSync(tempPath)) {
+          unlinkSync(tempPath);
+        }
       }
     }
   } catch (error) {
