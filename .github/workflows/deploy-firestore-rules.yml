@@ -3,6 +3,8 @@ name: Deploy Firestore Rules
 on:
   workflow_dispatch:
   push:
+    branches:
+      - 'main'
     paths:
       - 'firestore.rules'
       - '.github/workflows/deploy-firestore-rules.yml'
