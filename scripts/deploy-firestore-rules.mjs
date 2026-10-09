@@ -47,13 +47,17 @@ function deployRules() {
 
     const databaseId = process.env.FIREBASE_DATABASE_ID || '(default)';
     const tempCredsPath = resolve(__dirname, '..', '.firebase-ci-creds.json');
+    // `firebase deploy` has no --database flag and firebase.json is shared by dev
+    // and prod, so pin the database in a one-off config next to firestore.rules.
+    const tempConfigPath = resolve(__dirname, '..', '.firebase-ci.json');
     writeFileSync(tempCredsPath, JSON.stringify(serviceAccount));
+    writeFileSync(tempConfigPath, JSON.stringify({ firestore: { database: databaseId, rules: 'firestore.rules' } }));
 
     try {
       process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredsPath;
 
       execSync(
-        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --non-interactive --force`,
+        `./node_modules/.bin/firebase deploy --only firestore:rules --project ${projectId} --config "${tempConfigPath}" --non-interactive --force`,
         {
           stdio: 'inherit',
           env: process.env,
@@ -62,8 +66,10 @@ function deployRules() {
 
       console.log('✅ Firestore rules deployed successfully!');
     } finally {
-      if (existsSync(tempCredsPath)) {
-        unlinkSync(tempCredsPath);
+      for (const tempPath of [tempCredsPath, tempConfigPath]) {
+        if (existsSync(tempPath)) {
+          unlinkSync(tempPath);
+        }
       }
     }
   } catch (error) {
