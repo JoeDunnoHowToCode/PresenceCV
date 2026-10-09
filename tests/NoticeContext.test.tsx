@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { NoticeProvider, useNotice } from '../src/contexts/NoticeContext';
 
 function NotifyButton({ message, tone }: { message: string; tone?: 'info' | 'error' }) {
@@ -23,5 +23,21 @@ describe('NoticeProvider', () => {
     fireEvent.click(screen.getByText('notify'));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Save failed');
+  });
+
+  it('removes a notice after 6 seconds', () => {
+    vi.useFakeTimers();
+    try {
+      render(<NoticeProvider><NotifyButton message="Link copied" /></NoticeProvider>);
+      fireEvent.click(screen.getByText('notify'));
+
+      act(() => { vi.advanceTimersByTime(5999); });
+      expect(screen.getByRole('status')).toHaveTextContent('Link copied');
+
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
