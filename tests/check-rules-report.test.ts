@@ -14,4 +14,11 @@ describe('findRulesSuiteProblems', () => {
   it('returns no problems when every rules test ran', () => {
     expect(findRulesSuiteProblems(reportWith(['passed', 'passed', 'passed']))).toEqual([]);
   });
+
+  it('flags rules tests that were skipped or marked todo', () => {
+    const problems = findRulesSuiteProblems(reportWith(['passed', 'skipped', 'todo']));
+
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('2 of 3 rules tests did not run');
+  });
 });
