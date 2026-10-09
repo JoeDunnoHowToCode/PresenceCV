@@ -13,4 +13,14 @@ describe('index.html link-preview meta', () => {
     expect(description).toBeTruthy();
     expect(description!.length).toBeLessThanOrEqual(160);
   });
+
+  it('gives link previews a title, description and absolute image, without pinning share links to the home page', () => {
+    expect(meta('property="og:type"')).toBe('website');
+    expect(meta('property="og:site_name"')).toBe('PresenceCV');
+    expect(meta('property="og:title"')).toBe(html.title);
+    expect(meta('property="og:description"')).toBe(meta('name="description"'));
+    expect(meta('property="og:image"')).toMatch(/^https:\/\//);
+    // A fixed og:url would make every shared resume link resolve to the home page.
+    expect(meta('property="og:url"')).toBeNull();
+  });
 });
