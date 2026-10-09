@@ -110,6 +110,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "okay": "Okay",
+    "dismiss": "Dismiss",
     "deleteSectionTitle": "Delete Section?",
     "deleteSectionDesc": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
     "unableToDeleteProfileTitle": "Unable to delete the profile",

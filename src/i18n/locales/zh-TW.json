@@ -110,6 +110,7 @@
     "cancel": "取消",
     "confirm": "確認",
     "okay": "確定",
+    "dismiss": "關閉",
     "deleteSectionTitle": "刪除區塊？",
     "deleteSectionDesc": "確定要刪除「{{title}}」嗎？此動作無法復原。",
     "unableToDeleteProfileTitle": "無法刪除履歷",
