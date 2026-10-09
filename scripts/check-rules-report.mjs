@@ -3,6 +3,9 @@
 
 export function findRulesSuiteProblems(report) {
   const tests = report.testResults.flatMap((file) => file.assertionResults);
+  if (tests.length === 0) {
+    return ['No rules tests ran: the report contains no tests.'];
+  }
   const notRun = tests.filter((test) => test.status !== 'passed' && test.status !== 'failed');
   if (notRun.length > 0) {
     return [`${notRun.length} of ${tests.length} rules tests did not run (skipped or todo).`];
