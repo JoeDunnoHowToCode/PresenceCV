@@ -96,6 +96,9 @@
       "limitReached": "非 Pro 用戶最多只能建立 3 份履歷。請升級為 Pro 或刪除現有履歷才能匯入新履歷。",
       "allowPopups": "請允許彈出視窗以產生 PDF。",
       "unsupportedFormat": "僅支援 JPG, PNG 和 HEIF 格式。"
+    },
+    "notices": {
+      "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。"
     }
   },
   "common": {

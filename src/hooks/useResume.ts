@@ -31,6 +31,8 @@
  * Firestore: users/{uid}/userState/state (read + write)
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNotice } from '../contexts/NoticeContext';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
 import { auth, db } from '../lib/firebase';
@@ -57,6 +59,8 @@ export interface AppState {
 }
 
 export function useResume() {
+  const { t } = useTranslation();
+  const { notify } = useNotice();
   const sanitizeHtml = (str: string, maxLength: number = 2000) => {
     if (typeof str !== 'string') return str;
     if (str.startsWith('data:image/')) return str; // Allow full data URLs
@@ -169,12 +173,14 @@ export function useResume() {
           });
         } catch (error) {
           console.error("Failed to save state to Firestore:", error);
+          notify(t('editor.notices.saveFailed'), 'error');
         }
       }
     };
 
     const timeoutId = setTimeout(syncToFirestore, 1500); // 1.5s debounce
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- notify/t are only read when a save fails; re-running on a language switch would write an unchanged state
   }, [appState]);
 
   // 結構性變更（profile 刪除、block 重排）使用 transaction 防止多裝置/多 tab 覆蓋
