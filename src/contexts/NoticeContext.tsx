@@ -34,8 +34,10 @@ export function NoticeProvider({ children }: { children: ReactNode }) {
         {notices.map((notice) => (
           <div
             key={notice.id}
-            role="status"
-            className="pointer-events-auto w-full rounded-2xl border border-[#eceae4] bg-white/90 backdrop-blur-md shadow-xl px-4 py-3 text-sm text-gray-900"
+            role={notice.tone === 'error' ? 'alert' : 'status'}
+            className={`pointer-events-auto w-full rounded-2xl border bg-white/90 backdrop-blur-md shadow-xl px-4 py-3 text-sm ${
+              notice.tone === 'error' ? 'border-red-200 text-red-700' : 'border-[#eceae4] text-gray-900'
+            }`}
           >
             {notice.message}
           </div>
