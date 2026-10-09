@@ -21,8 +21,40 @@ Out of scope: `firebase-admin` 14 (step 4, reported), Node version changes in CI
 
 ## Checklist
 
-- [ ] Baseline full suite recorded -> verify: `npm test && npm run check && npm run build`
-- [ ] Step 1 non-breaking fixes -> verify: `npm audit fix` then `npm test && npm run check && npm run build`
-- [ ] Step 2 vitest 4.1.11 -> verify: `npm test && npm run check && npm run build`, same test counts as baseline
-- [ ] Step 3 postcss-selector-parser override -> verify: `npm run build` and `cmp` of the built CSS against the step-2 build
-- [ ] Remaining advisories explained -> verify: `npm audit` summary in the PR
+- [x] Baseline full suite recorded -> verify: `npm test && npm run check && npm run build`
+  ```
+  Test Files  14 passed | 1 skipped (15)
+       Tests  87 passed | 22 skipped (109)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 4.67s
+  ```
+- [x] Step 1 non-breaking fixes -> verify: `npm audit fix` then `npm test && npm run check && npm run build`
+  ```
+  added 5 packages, removed 15 packages, changed 91 packages
+  30 vulnerabilities (14 moderate, 14 high, 2 critical)
+  Test Files  14 passed | 1 skipped (15)
+       Tests  87 passed | 22 skipped (109)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 4.67s
+  ```
+- [ ] ~~Step 2 vitest 4.1.11~~ **dropped** — needs a test edit -> verify: `npm test`
+  ```
+  FAIL  tests/api.parse-resume.test.ts > API Route: /api/parse-resume > returns 200 on successful parse
+  Vercel Secure API Parse Error: TypeError: () => ({ ... is not a constructor
+       Tests  1 failed | 86 passed | 22 skipped (109)
+  ```
+  Vitest 3+ refuses `new` on a `vi.fn()` whose implementation is an arrow function; the test mocks `GoogleGenAI` that way and `api/parse-resume.ts` calls `new GoogleGenAI(...)`. Fix needs the owner's agreement: `mockImplementation(function () { return { models: … } })`. Reverted to vitest 1.6.1.
+- [x] Step 3 postcss-selector-parser override -> verify: `npm run build` and `cmp` of the built CSS against the step-1 build
+  ```
+  `-- postcss-selector-parser@7.1.6 overridden
+  before: index-D0xY6qRQ.css    87514 bytes
+  after:  index-D0xY6qRQ.css    87514 bytes
+  CSS byte-identical ✓
+  Test Files  14 passed | 1 skipped (15)
+       Tests  87 passed | 22 skipped (109)
+  ```
+- [x] Remaining advisories explained -> verify: `npm audit` summary in the PR
+  ```
+  all:  {"moderate":12,"high":14,"critical":2,"total":28}   (was 62: 5 critical, 30 high)
+  prod: {"moderate":8,"high":6,"critical":0,"total":14}    (was 30: 2 critical, 13 high)
+  ```
