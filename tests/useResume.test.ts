@@ -227,4 +227,25 @@ describe('useResume autosave', () => {
       vi.useRealTimers();
     }
   });
+
+  it('writes a pending autosave as soon as the page is hidden, and only once', async () => {
+    vi.useFakeTimers();
+    try {
+      const { result } = renderHook(() => useResume());
+      await act(async () => {});
+      vi.mocked(firestore.setDoc).mockClear();
+
+      act(() => { result.current.updateProfile('name', 'Jane Doe'); });
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+
+      expect(firestore.setDoc).toHaveBeenCalledTimes(1);
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+      expect(firestore.setDoc).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (document as unknown as { visibilityState?: string }).visibilityState;
+      vi.useRealTimers();
+    }
+  });
 });
