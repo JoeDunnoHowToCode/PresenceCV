@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import React from 'react';
+import { renderHook, act, screen } from '@testing-library/react';
+import { NoticeProvider } from '../src/contexts/NoticeContext';
 import { ParsedResumeSchema } from '../src/types';
 import { useResume } from '../src/hooks/useResume';
 import * as firestore from 'firebase/firestore';
@@ -202,5 +204,27 @@ describe('useResume reorderProfiles Logic', () => {
 
     expect(result.current.appState.profileOrder![0]).toBe(secondId);
     expect(result.current.appState.profileOrder![1]).toBe(firstId);
+  });
+});
+
+describe('useResume autosave', () => {
+  const withNotices = ({ children }: { children: React.ReactNode }) => React.createElement(NoticeProvider, null, children);
+
+  it('shows an error notice when the autosave to Firestore fails', async () => {
+    vi.useFakeTimers();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      vi.mocked(firestore.setDoc).mockRejectedValueOnce(new Error('Document exceeds the 1 MiB limit'));
+      const { result } = renderHook(() => useResume(), { wrapper: withNotices });
+      await act(async () => {}); // let the auth check finish so autosave is allowed
+
+      act(() => { result.current.updateProfile('name', 'Jane Doe'); });
+      await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+
+      expect(screen.getByRole('alert')).toHaveTextContent("Couldn't save your changes to the cloud.");
+    } finally {
+      consoleSpy.mockRestore();
+      vi.useRealTimers();
+    }
   });
 });
