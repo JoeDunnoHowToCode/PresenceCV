@@ -27,7 +27,25 @@ Static tags in `index.html` (every route serves this file):
 
 ## Checklist
 
-- [ ] description meta -> verify: `npx vitest run tests/index-html.meta.test.ts`
-- [ ] Open Graph tags, absolute image, no og:url -> verify: `npx vitest run tests/index-html.meta.test.ts`
-- [ ] twitter:card summary -> verify: `npx vitest run tests/index-html.meta.test.ts`
-- [ ] full suite -> verify: `npm test && npm run check && npm run build`
+- [x] description meta -> verify: `npx vitest run tests/index-html.meta.test.ts`
+  ```
+  red:   AssertionError: expected null to be truthy
+  green: ✓ tests/index-html.meta.test.ts  (1 test)   (144 characters)
+  ```
+- [x] Open Graph tags, absolute image, no og:url -> verify: `npx vitest run tests/index-html.meta.test.ts`
+  ```
+  red:   AssertionError: expected null to be 'website'
+  green: ✓ tests/index-html.meta.test.ts  (2 tests)
+  ```
+- [x] twitter:card summary -> verify: `npx vitest run tests/index-html.meta.test.ts`
+  ```
+  red:   AssertionError: expected null to be 'summary'
+  green: ✓ tests/index-html.meta.test.ts  (3 tests)
+  ```
+- [x] full suite -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  15 passed | 1 skipped (16)
+        Tests  90 passed | 22 skipped (112)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built   (9 og:/twitter: tags kept in dist/index.html)
+  ```
