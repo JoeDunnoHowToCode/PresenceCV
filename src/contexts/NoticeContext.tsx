@@ -3,6 +3,8 @@ import React, { createContext, useCallback, useContext, useMemo, useRef, useStat
 
 type NoticeTone = 'info' | 'error';
 
+const NOTICE_DURATION_MS = 6000;
+
 interface Notice {
   id: number;
   message: string;
@@ -23,6 +25,9 @@ export function NoticeProvider({ children }: { children: ReactNode }) {
   const notify = useCallback((message: string, tone: NoticeTone = 'info') => {
     const id = nextId.current++;
     setNotices((current) => [...current, { id, message, tone }]);
+    setTimeout(() => {
+      setNotices((current) => current.filter((notice) => notice.id !== id));
+    }, NOTICE_DURATION_MS);
   }, []);
 
   const value = useMemo(() => ({ notify }), [notify]);
