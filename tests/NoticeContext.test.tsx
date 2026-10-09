@@ -16,4 +16,12 @@ describe('NoticeProvider', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Profile saved');
   });
+
+  it('announces error notices with role="alert"', () => {
+    render(<NoticeProvider><NotifyButton message="Save failed" tone="error" /></NoticeProvider>);
+
+    fireEvent.click(screen.getByText('notify'));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Save failed');
+  });
 });
