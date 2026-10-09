@@ -23,4 +23,8 @@ describe('index.html link-preview meta', () => {
     // A fixed og:url would make every shared resume link resolve to the home page.
     expect(meta('property="og:url"')).toBeNull();
   });
+
+  it('asks X/Twitter for a summary card', () => {
+    expect(meta('name="twitter:card"')).toBe('summary');
+  });
 });
