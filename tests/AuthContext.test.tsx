@@ -33,7 +33,7 @@ describe('AuthProvider sign-in failures', () => {
     ['auth/internal-error', 'Failed to sign in. Please try again.'],
   ])('shows an error notice instead of alert() for %s', async (code, message) => {
     const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(signInWithPopup).mockRejectedValueOnce({ code });
     render(<NoticeProvider><AuthProvider><SignInButton /></AuthProvider></NoticeProvider>);
 
@@ -41,6 +41,7 @@ describe('AuthProvider sign-in failures', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(message);
     expect(alertSpy).not.toHaveBeenCalled();
-    vi.restoreAllMocks();
+    alertSpy.mockRestore();
+    consoleSpy.mockRestore();
   });
 });
