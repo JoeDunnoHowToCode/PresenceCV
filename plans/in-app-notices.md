@@ -38,15 +38,59 @@ Track: **Everything else** (Gates 1–3). Two scan findings share one piece of U
 | A pending autosave is written when the page is hidden | `tests/useResume.test.ts` |
 | No `alert()` left in app code | `npm run lint` (`no-alert`) |
 
+Also covered: `tests/App.test.tsx` renders the whole app and checks a blocked sign-in popup reaches the screen, proving `NoticeProvider` is mounted at the root.
+
 ## Checklist
 
-- [ ] notify() shows a status notice -> verify: `npx vitest run tests/NoticeContext.test.tsx`
-- [ ] error notices use role="alert" -> verify: `npx vitest run tests/NoticeContext.test.tsx`
-- [ ] notices auto-dismiss after 6 s -> verify: `npx vitest run tests/NoticeContext.test.tsx`
-- [ ] dismiss button removes a notice -> verify: `npx vitest run tests/NoticeContext.test.tsx`
-- [ ] import over the limit shows a notice -> verify: `npx vitest run tests/EditorPage.test.tsx`
-- [ ] blocked sign-in popup shows a notice -> verify: `npx vitest run tests/AuthContext.test.tsx`
-- [ ] failed autosave shows an error notice -> verify: `npx vitest run tests/useResume.test.ts`
-- [ ] pending autosave flushed on page hide -> verify: `npx vitest run tests/useResume.test.ts`
-- [ ] no alert() in app code -> verify: `npm run lint`
-- [ ] full suite -> verify: `npm test && npm run check && npm run build`
+- [x] notify() shows a status notice -> verify: `npx vitest run tests/NoticeContext.test.tsx`
+  ```
+  red:   Element type is invalid ... got: undefined (missing export)
+  green: ✓ tests/NoticeContext.test.tsx  (4 tests)
+  ```
+- [x] error notices use role="alert" -> verify: `npx vitest run tests/NoticeContext.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "alert"
+  green: ✓ tests/NoticeContext.test.tsx  (4 tests)
+  ```
+- [x] notices auto-dismiss after 6 s -> verify: `npx vitest run tests/NoticeContext.test.tsx`
+  ```
+  red:   expected document not to contain element, found <div
+  green: ✓ tests/NoticeContext.test.tsx  (4 tests)
+  ```
+- [x] dismiss button removes a notice -> verify: `npx vitest run tests/NoticeContext.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "button" and name "Dismiss"
+  green: ✓ tests/NoticeContext.test.tsx  (4 tests)
+  ```
+- [x] import over the limit shows a notice -> verify: `npx vitest run tests/EditorPage.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "status"
+  green: ✓ tests/EditorPage.test.tsx  (5 tests)
+  ```
+- [x] blocked sign-in popup shows a notice -> verify: `npx vitest run tests/AuthContext.test.tsx`
+  ```
+  red:   4 failed (Unable to find role="alert") against 225cb2b
+  green: ✓ tests/AuthContext.test.tsx  (4 tests)   (all four sign-in error branches)
+  ```
+- [x] failed autosave shows an error notice -> verify: `npx vitest run tests/useResume.test.ts`
+  ```
+  red:   Unable to find an accessible element with the role "alert"
+  green: ✓ tests/useResume.test.ts  (7 tests)
+  ```
+- [x] pending autosave flushed on page hide -> verify: `npx vitest run tests/useResume.test.ts`
+  ```
+  red:   expected "spy" to be called 1 times, but got 0 times
+  green: ✓ tests/useResume.test.ts  (7 tests)
+  ```
+- [x] no alert() in app code -> verify: `npm run lint`
+  ```
+  red:   ✖ 99 problems (7 errors, 92 warnings)   (7 × no-alert)
+  green: ✖ 91 problems (0 errors, 91 warnings)  (same 91 warnings as main)
+  ```
+- [x] full suite -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  17 passed | 1 skipped (18)
+        Tests  98 passed | 22 skipped (120)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 4.82s
+  ```
