@@ -1,6 +1,7 @@
 import React, { CSSProperties, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useNotice } from '../../contexts/NoticeContext';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
@@ -32,6 +33,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
     isPro, isAdmin
   } = props;
   const { t } = useTranslation();
+  const { notify } = useNotice();
   const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
   const activeBlock = data.blocks[activeTab];
@@ -696,7 +698,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
             <button
               onClick={() => {
                 if (!isPro && !isAdmin && Object.keys(appState.profiles).length >= 3) {
-                  alert(t('editor.alerts.limitReached'));
+                  notify(t('editor.alerts.limitReached'));
                 } else {
                   setIsImportModalOpen(true);
                 }
