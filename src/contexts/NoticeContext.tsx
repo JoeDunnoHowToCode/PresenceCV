@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // In-app notices: replaces window.alert() with dismissable, screen-reader-announced messages.
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
