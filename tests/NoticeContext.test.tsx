@@ -40,4 +40,13 @@ describe('NoticeProvider', () => {
       vi.useRealTimers();
     }
   });
+
+  it('removes a notice when its dismiss button is pressed', () => {
+    render(<NoticeProvider><NotifyButton message="Link copied" /></NoticeProvider>);
+    fireEvent.click(screen.getByText('notify'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
 });
