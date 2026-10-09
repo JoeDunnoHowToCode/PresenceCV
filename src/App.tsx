@@ -11,7 +11,8 @@
  * Responsibilities:
  * 1. Firebase Configuration Guard: If Firebase env vars are missing, renders
  *    FirebaseSetupGuide instead of the main app (prevents runtime crashes).
- * 2. Authentication Provider: Wraps all routes in AuthProvider for global auth state.
+ * 2. Notice + Authentication Providers: NoticeProvider (in-app notices, used by AuthProvider
+ *    for sign-in errors) wraps AuthProvider, which wraps all routes for global auth state.
  * 3. Client-Side Routing (react-router-dom v7):
  *    - "/" → LandingPage (public marketing page)
  *    - "/privacy", "/terms" → Static legal pages
@@ -24,6 +25,7 @@
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { NoticeProvider } from './contexts/NoticeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import EditorPage from './pages/EditorPage';
@@ -55,6 +57,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <NoticeProvider>
       <AuthProvider>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <Routes>
@@ -77,6 +80,7 @@ export default function App() {
           </Routes>
         </ErrorBoundary>
       </AuthProvider>
+      </NoticeProvider>
     </BrowserRouter>
   );
 }
