@@ -98,7 +98,8 @@
       "unsupportedFormat": "Only JPG, PNG, and HEIF formats are supported."
     },
     "notices": {
-      "saveFailed": "Couldn't save your changes to the cloud. They're kept on this device, and we'll try again on your next edit."
+      "saveFailed": "Couldn't save your changes to the cloud. They're kept on this device, and we'll try again on your next edit.",
+      "structuralSyncFailed": "Couldn't save this change to the cloud (network error or resume limit reached), so it was undone to prevent data loss."
     }
   },
   "common": {

@@ -227,7 +227,7 @@ export function useResume() {
       });
     } catch (error) {
       console.error("Failed to sync structural change to Firestore:", error);
-      alert('Failed to save to cloud (network error or limit reached). Changes reverted to prevent data loss.');
+      notify(t('editor.notices.structuralSyncFailed'), 'error');
       // Rollback to remote state
       const docRef = doc(db, 'users', user.uid, 'userState', 'state');
       getDoc(docRef).then(snap => {
@@ -238,7 +238,7 @@ export function useResume() {
         }
       }).catch(console.error);
     }
-  }, []);
+  }, [notify, t]);
 
   const data = appState.profiles[appState.activeProfileId]?.data || DEFAULT_RESUME;
 

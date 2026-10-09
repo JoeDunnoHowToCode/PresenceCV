@@ -98,7 +98,8 @@
       "unsupportedFormat": "僅支援 JPG, PNG 和 HEIF 格式。"
     },
     "notices": {
-      "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。"
+      "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。",
+      "structuralSyncFailed": "無法將這項變更儲存到雲端（網路錯誤或已達履歷上限），已復原以避免資料遺失。"
     }
   },
   "common": {
