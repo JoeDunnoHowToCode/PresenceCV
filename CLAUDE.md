@@ -19,15 +19,15 @@ AI-powered resume builder: React 19 + TypeScript 5.8 + Vite 6 + Tailwind 4 + Fir
 | `npm run test:watch` | `vitest` in watch mode |
 | `npm run test:rules` | Firestore rules tests via `firebase emulators:exec`. **Requires a Java JRE** (CI uses Temurin 21). Skip locally if Java is unavailable. |
 
-Success is silent: if a command passes, report "Pass" — don't paste the log. Only paste output on failure. For a large error sweep, redirect (`npm run check > tsc-errors.log`) to avoid flooding context.
+Report results with evidence: paste the lines that prove the outcome (e.g. Vitest's `Test Files` / `Tests` totals, or the failing assertion) — never the whole log, and never claim a pass without output from a run in this session. For a large error sweep, redirect (`npm run check > tsc-errors.log`) to avoid flooding context.
 
 ---
 
 ## Deployment
 
-**Deploy = a human pushes to `main`.** Vercel auto-builds the SPA and `api/` serverless functions. `firestore.rules` deploys through the GitHub Action `.github/workflows/deploy-firestore-rules.yml` (runs `scripts/deploy-firestore-rules.mjs`) on any push touching that file.
+**Deploy = anything that lands on `main`** (a push or a merged PR). Vercel auto-builds the SPA and `api/` serverless functions. `firestore.rules` deploys through the GitHub Action `.github/workflows/deploy-firestore-rules.yml` (runs `scripts/deploy-firestore-rules.mjs`) on pushes to `main` that touch `firestore.rules` or that workflow; a manual run deploys Dev from any branch but Prod only from `main`. GitHub runs the workflow file from the pushed commit, so branches created before that fix (merged in `dc0abd4`) still carry the old any-branch trigger — never push to them.
 
-**Agents must never `git push`, `git merge`, or `git rebase`** — and never `git reset --hard` or force-add ignored files. Commit only when asked. Don't touch `.github/workflows/` or `vercel.json` without explicit permission.
+**`git push` and merging (`git merge`, `gh pr merge`) require the user's explicit instruction in the current conversation.** Never do either on your own initiative — not to finish a task, and not because a workflow step elsewhere (e.g. "push the branch and open the PR") says so; ask instead. An approval covers only the action named: "push" is not "merge". Never `git rebase`, `git reset --hard`, or force-add ignored files. Commit your own work as you finish each step — no need to ask (in TDD, the red test and the green fix are separate commits). Don't touch `.github/workflows/` or `vercel.json` without explicit permission.
 
 ---
 
@@ -64,8 +64,8 @@ A global `match /{document=**} { allow read, write: if false }` denies everythin
 ## Iron rules
 
 1. **`server.ts` ↔ `api/` sync.** `server.ts` imports `api/parse-resume.ts` directly, so handler logic can't drift — but the surrounding config can and does: `server.ts` sets `express.json({ limit: "50mb" })` while `api/parse-resume.ts` caps at `4mb` (Vercel's hard limit is 4.5MB). When you change either side, check the other for limits, CORS, and env-var handling.
-2. **Stop after 3 consecutive failures.** If a test, typecheck, or build command fails three times in a row, halt and report a summary. Do not keep guessing.
-3. **Never delete, skip, or weaken a test to make the suite pass.** Fix the code. If a test is genuinely wrong, say so and explain why before changing it. When you fix a bug, add a regression test — the runner is the source of truth.
+2. **Stop after 3 consecutive failures.** If a test, typecheck, or build command fails three times in a row, halt, report a summary, and name the assumption you now doubt. Do not keep guessing.
+3. **Never delete, skip, or weaken a test to make the suite pass.** Fix the code. If you think a test is wrong, stop and explain why; change it only after the user agrees, in its own commit. When you fix a bug, add a regression test that fails before the fix — the runner is the source of truth.
 4. **Use the uncontrolled debounced-input pattern in editors.** Controlled `value`/`onChange` on every keystroke breaks Mac Zhuyin/IME composition and causes lag. `useDebouncedInput` (exported from `src/components/editor/InfoEditor.tsx`) returns props to spread onto an *uncontrolled* input:
 
 ```tsx
@@ -101,7 +101,7 @@ Every user-facing string goes through i18next — no hardcoded copy in component
 
 ## Definition of done
 
-- [ ] Tests written first where practical (TDD), then made to pass
+- [ ] Bug fixes and features: failing test written and committed first (red), then the fix (green). Changes that alter no behavior (docs, comments, renames) need no new test
 - [ ] `npm run test` passes
 - [ ] `npm run check` passes
 - [ ] `npm run build` passes for build-affecting changes
