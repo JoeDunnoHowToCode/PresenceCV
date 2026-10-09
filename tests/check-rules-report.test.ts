@@ -21,4 +21,11 @@ describe('findRulesSuiteProblems', () => {
     expect(problems).toHaveLength(1);
     expect(problems[0]).toContain('2 of 3 rules tests did not run');
   });
+
+  it('flags a report that contains no rules tests', () => {
+    const problems = findRulesSuiteProblems({ testResults: [] });
+
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('No rules tests ran');
+  });
 });
