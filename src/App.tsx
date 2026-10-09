@@ -58,28 +58,28 @@ export default function App() {
   return (
     <BrowserRouter>
       <NoticeProvider>
-      <AuthProvider>
-        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
-          <Routes>
-            { /* Public Landing Page */ }
-            <Route path="/" element={<HomePage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            
-            { /* Public Viewers (/view?id=..., /view?live=..., or an id in the path) */ }
-            <Route path="/view" element={<ViewerPage />} />
-            <Route path="/share/:id" element={<ViewerPage />} />
-            <Route path="/print/:id" element={<ViewerPage />} />
+        <AuthProvider>
+          <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+            <Routes>
+              { /* Public Landing Page */ }
+              <Route path="/" element={<HomePage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              
+              { /* Public Viewers (/view?id=..., /view?live=..., or an id in the path) */ }
+              <Route path="/view" element={<ViewerPage />} />
+              <Route path="/share/:id" element={<ViewerPage />} />
+              <Route path="/print/:id" element={<ViewerPage />} />
 
-            { /* Protected Editor Routes */ }
-            <Route element={<ProtectedRoute />}>
-               <Route path="/editor" element={<EditorPage />} />
-               <Route path="/app" element={<Navigate to="/editor" replace />} />
-               <Route path="/edit" element={<Navigate to="/editor" replace />} />
-            </Route>
-          </Routes>
-        </ErrorBoundary>
-      </AuthProvider>
+              { /* Protected Editor Routes */ }
+              <Route element={<ProtectedRoute />}>
+                 <Route path="/editor" element={<EditorPage />} />
+                 <Route path="/app" element={<Navigate to="/editor" replace />} />
+                 <Route path="/edit" element={<Navigate to="/editor" replace />} />
+              </Route>
+            </Routes>
+          </ErrorBoundary>
+        </AuthProvider>
       </NoticeProvider>
     </BrowserRouter>
   );
