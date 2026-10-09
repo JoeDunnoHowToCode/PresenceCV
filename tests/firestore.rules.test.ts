@@ -6,8 +6,9 @@ import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
-// Requires Firebase Emulator (Java JRE). Run via GitHub Actions CI.
-describe.skip('Firestore Security Rules', () => {
+// Needs the Firestore emulator (Java). `npm run test:rules` starts it and sets FIRESTORE_EMULATOR_HOST;
+// plain `npm test` skips this suite, and test:rules fails if anything here is skipped.
+describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules', () => {
   beforeAll(async () => {
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-presencecv',
