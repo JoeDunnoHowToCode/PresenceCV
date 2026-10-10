@@ -40,6 +40,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
   const closeShareModal = () => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); };
   const { ref: shareDialogRef, titleId: shareTitleId } = useModalDialog(isShareModalOpen, closeShareModal);
   const { ref: deleteSectionDialogRef, titleId: deleteSectionTitleId } = useModalDialog(!!blockToDelete, () => setBlockToDelete(null));
+  const { ref: deleteProfileDialogRef, titleId: deleteProfileTitleId } = useModalDialog(!!profileToDelete, () => setProfileToDelete(null));
 
   const activeBlock = data.blocks[activeTab];
 
@@ -237,6 +238,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
         {profileToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteProfileDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteProfileTitleId}
               initial={{ opacity: 0, scale: 0.9, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
@@ -244,7 +246,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
               <LucideIcons.FileWarning className="w-12 h-12 text-red-500 mb-4" />
               {Object.keys(appState.profiles).length <= 1 ? (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.unableToDeleteProfileDesc')}
                   </p>
@@ -259,7 +261,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.deleteResumeDesc', { name: appState.profiles[profileToDelete]?.name })}
                   </p>
