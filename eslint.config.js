@@ -24,6 +24,8 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+      // Use useNotice() instead: alert() blocks the page and ignores the app's design.
+      'no-alert': 'error',
     },
   }
 );

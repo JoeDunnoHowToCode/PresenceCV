@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNotice } from '../../contexts/NoticeContext';
 import * as LucideIcons from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -32,6 +33,7 @@ const ProfileSwitcher = React.memo(({
   isAdmin,
 }: ProfileSwitcherProps) => {
   const { t } = useTranslation();
+  const { notify } = useNotice();
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -105,7 +107,7 @@ const ProfileSwitcher = React.memo(({
             <button
               onClick={() => {
                 if (!isPro && !isAdmin && Object.keys(profiles).length >= 3) {
-                  alert(t('editor.profileSwitcher.limitReached'));
+                  notify(t('editor.profileSwitcher.limitReached'));
                   return;
                 }
                 createProfile(t('editor.profileSwitcher.newProfileName'));
