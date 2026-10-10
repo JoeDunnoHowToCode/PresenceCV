@@ -52,6 +52,17 @@ describe('editor modals', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('gives keyboard focus back to the Share button when Share closes', () => {
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    const shareButton = screen.getByRole('button', { name: 'Share' });
+    shareButton.focus();
+    fireEvent.click(shareButton); // what Enter does on the focused button
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(shareButton).toHaveFocus();
+  });
+
   // Opening Share blurs a focused text field so its debounced edit is saved before the snapshot is taken.
   it('has saved the latest edit of a focused text field once Share opens', () => {
     const updateProfile = vi.fn();
