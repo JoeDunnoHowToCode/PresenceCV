@@ -106,6 +106,29 @@
       "reorderSection": "拖曳以調整「{{title}}」區塊的順序",
       "reorderItem": "拖曳以調整「{{title}}」的順序",
       "reorderUntitledItem": "拖曳以調整這個項目的順序"
+    },
+    "icons": {
+      "MapPin": "地圖標記",
+      "Mail": "電子郵件",
+      "Phone": "電話",
+      "Link": "連結",
+      "Github": "GitHub",
+      "Linkedin": "LinkedIn",
+      "Twitter": "Twitter",
+      "Globe": "地球",
+      "Briefcase": "公事包",
+      "GraduationCap": "學士帽",
+      "Code": "程式碼",
+      "User": "人像",
+      "Award": "獎章",
+      "Layout": "版面",
+      "Star": "星星",
+      "Folder": "資料夾",
+      "File": "檔案",
+      "Book": "書本",
+      "Heart": "愛心",
+      "Coffee": "咖啡",
+      "Cpu": "處理器"
     }
   },
   "common": {

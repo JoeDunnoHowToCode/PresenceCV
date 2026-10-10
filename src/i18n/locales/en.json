@@ -106,6 +106,29 @@
       "reorderSection": "Drag to reorder the {{title}} section",
       "reorderItem": "Drag to reorder {{title}}",
       "reorderUntitledItem": "Drag to reorder this item"
+    },
+    "icons": {
+      "MapPin": "Map pin",
+      "Mail": "Email",
+      "Phone": "Phone",
+      "Link": "Link",
+      "Github": "GitHub",
+      "Linkedin": "LinkedIn",
+      "Twitter": "Twitter",
+      "Globe": "Globe",
+      "Briefcase": "Briefcase",
+      "GraduationCap": "Graduation cap",
+      "Code": "Code",
+      "User": "Person",
+      "Award": "Award",
+      "Layout": "Layout",
+      "Star": "Star",
+      "Folder": "Folder",
+      "File": "File",
+      "Book": "Book",
+      "Heart": "Heart",
+      "Coffee": "Coffee",
+      "Cpu": "Processor"
     }
   },
   "common": {
