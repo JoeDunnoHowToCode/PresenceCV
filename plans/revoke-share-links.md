@@ -48,7 +48,7 @@ Track: **Everything else** (Gates 1–3). Scan finding: share links can never be
     FAIL … allows creating a snapshot together with its ownership record
     FAIL … lets the owner delete their snapshot and its ownership record
   guards passing already: someone else's live link, claiming an existing snapshot, deleting without a record
-  green: see the PR's CI after c5fd51c
+  green (CI 38036009949, after c5fd51c): Tests  25 passed (25)
   ```
 - [x] rules: snapshot + ownership in one batch -> verify: PR CI
   ```
@@ -93,4 +93,10 @@ Track: **Everything else** (Gates 1–3). Scan finding: share links can never be
   red:   Unable to find an accessible element with the role "button" and name "Stop sharing the live link"
   green: Tests  2 passed
   ```
-- [ ] full suite -> verify: `npm test && npm run check && npm run build`, plus PR CI
+- [x] full suite -> verify: `npm test && npm run check && npm run build`, plus PR CI
+  ```
+  local:  Test Files  22 passed | 1 skipped (23) / Tests  112 passed | 25 skipped (137)
+          ✖ 91 problems (0 errors, 91 warnings) / ✓ built in 5.37s
+  CI 38036009949 (0b4fbb8, rules changed): ✓ tests/firestore.rules.test.ts (25 tests) / Tests  25 passed (25)
+          Script exited successfully (code 0); unit, lint, build: success
+  ```
