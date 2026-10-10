@@ -39,6 +39,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
 
   const closeShareModal = () => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); };
   const { ref: shareDialogRef, titleId: shareTitleId } = useModalDialog(isShareModalOpen, closeShareModal);
+  const { ref: deleteSectionDialogRef, titleId: deleteSectionTitleId } = useModalDialog(!!blockToDelete, () => setBlockToDelete(null));
 
   const activeBlock = data.blocks[activeTab];
 
@@ -202,11 +203,12 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
         {blockToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteSectionDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteSectionTitleId}
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
             >
               <LucideIcons.AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-              <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
+              <h3 id={deleteSectionTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 {t('common.deleteSectionDesc', { title: data.blocks[blockToDelete]?.title })}
               </p>
