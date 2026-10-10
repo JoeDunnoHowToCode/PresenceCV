@@ -62,4 +62,23 @@ describe('editor accessibility', () => {
       expect(tabContainer).toHaveAttribute('data-active', 'true');
     }
   });
+
+  it('lets keyboard users open the mobile section menu and pick a section, with real buttons', () => {
+    const desktopWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 });
+    try {
+      render(<MemoryRouter><EditorPage /></MemoryRouter>);
+      const menuToggle = screen.getByRole('button', { name: 'Choose a section' });
+      expect(menuToggle).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(menuToggle);
+      expect(menuToggle).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Experience' }));
+      expect(screen.getByRole('button', { name: 'Choose a section' })).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getAllByDisplayValue('Experience').length).toBeGreaterThan(0); // the Experience section is open
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
+    }
+  });
 });
