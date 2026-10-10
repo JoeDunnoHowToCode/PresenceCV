@@ -100,6 +100,16 @@
     "notices": {
       "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。",
       "structuralSyncFailed": "無法將這項變更儲存到雲端（網路錯誤或已達履歷上限），已復原以避免資料遺失。"
+    },
+    "sharedLinks": {
+      "title": "管理分享連結",
+      "snapshotsTitle": "你建立的快照連結",
+      "empty": "還沒有快照連結。",
+      "revoke": "撤銷",
+      "revokeLabel": "撤銷 {{date}} 建立的「{{name}}」快照",
+      "revoked": "連結已撤銷，之後開啟的人會看到錯誤訊息。",
+      "revokeFailed": "撤銷連結失敗，請再試一次。",
+      "oldLinksNote": "這個清單推出前建立的快照連結不會顯示在這裡。"
     }
   },
   "common": {
