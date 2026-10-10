@@ -1,6 +1,6 @@
 // The signed-in user's snapshot links (from their private ownership records) and how to revoke them.
-import { useEffect, useState } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { useCallback, useEffect, useState } from 'react';
+import { collection, doc, onSnapshot, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export interface SharedLink {
@@ -20,5 +20,14 @@ export function useSharedLinks(uid: string | undefined) {
     });
   }, [uid]);
 
-  return { links };
+  // One batch, so the public snapshot never outlives its ownership record (or vice versa).
+  const revokeSnapshot = useCallback(async (snapshotId: string) => {
+    if (!uid) return;
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'sharedResumes', snapshotId));
+    batch.delete(doc(db, 'users', uid, 'sharedLinks', snapshotId));
+    await batch.commit();
+  }, [uid]);
+
+  return { links, revokeSnapshot };
 }
