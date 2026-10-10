@@ -54,8 +54,9 @@ Routes live in `src/App.tsx`. Pages are `HomePage`, `EditorPage`, `ViewerPage`, 
 | `users/{uid}/userState/{docId}` | Owner read/write; write gated at **≤ 3 profiles** unless in `users_pro` or `admins` |
 | `users_pro/{uid}` | Owner read only (Pro flag) |
 | `admins/{uid}` | Owner read only (admin flag; doc ID *is* the UID) |
-| `sharedResumes/{id}` | Authenticated create, `get: if true`, no update/delete — snapshot links |
-| `liveResumes/{id}` | Authenticated create, `get: if true`, update gated by `ownerUid` — live links |
+| `sharedResumes/{id}` | Authenticated create, `get: if true`, no update; delete only by the creator (needs the ownership record below) — snapshot links |
+| `users/{uid}/sharedLinks/{id}` | Owner read/delete; created only in the same batch as the snapshot it claims — lists and revokes a user's snapshots |
+| `liveResumes/{id}` | Authenticated create, `get: if true`, update gated by `ownerUid`, delete by `ownerUid` — live links |
 
 A global `match /{document=**} { allow read, write: if false }` denies everything not listed. `allow get: if true` on the two share collections is **intentional** (anyone with the link can read), not a vulnerability.
 
