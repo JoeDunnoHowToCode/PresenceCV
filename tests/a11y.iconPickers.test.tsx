@@ -6,6 +6,8 @@ import EditorPage from '../src/pages/EditorPage';
 import * as AuthContext from '../src/contexts/AuthContext';
 import * as useResume from '../src/hooks/useResume';
 import { DEFAULT_RESUME } from '../src/data/defaultResume';
+import InfoEditor from '../src/components/editor/InfoEditor';
+import { AVAILABLE_ICONS } from '../src/constants';
 
 vi.mock('../src/hooks/useResume', () => ({ useResume: vi.fn() }));
 vi.mock('../src/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
@@ -94,5 +96,44 @@ describe('icon pickers, from the keyboard', () => {
     } finally {
       Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
     }
+  });
+
+  it('contact icon: a named button per contact opens a picker that takes focus, Escape closes it and refocuses the button, and a named option picks', () => {
+    const updateContactItem = vi.fn();
+    const data = {
+      ...DEFAULT_RESUME,
+      profile: {
+        ...DEFAULT_RESUME.profile,
+        contactItems: [
+          { id: 'c1', icon: 'MapPin', text: 'Taipei', url: '' },
+          { id: 'c2', icon: '', text: '', url: '' },
+        ],
+      },
+    };
+    render(
+      <InfoEditor data={data} updateProfile={vi.fn()} updateContactItem={updateContactItem}
+        removeContactItem={vi.fn()} addContactItem={vi.fn()} AVAILABLE_ICONS={AVAILABLE_ICONS} />,
+    );
+
+    const [trigger, untitledTrigger] = screen.getAllByRole('button', { name: /^Choose an icon for/ });
+    expect(untitledTrigger).toHaveAccessibleName('Choose an icon for this contact');
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    const picker = screen.getByRole('dialog', { name: /^Choose an icon for/ });
+    expect(picker).toContainElement(document.activeElement as HTMLElement);
+    expect(within(picker).getByRole('button', { name: 'No icon' })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+
+    fireEvent.click(trigger);
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Email' }));
+    expect(updateContactItem).toHaveBeenCalledWith('c1', 'icon', 'Mail');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
