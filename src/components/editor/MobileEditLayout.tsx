@@ -16,6 +16,7 @@ import InfoEditor from './InfoEditor';
 import ListBlockEditor from './ListBlockEditor';
 import TagsBlockEditor from './TagsBlockEditor';
 import { EditorLayoutProps } from './EditorLayoutProps';
+import { useModalDialog } from '../../hooks/useModalDialog';
 
 export default function MobileEditLayout(props: EditorLayoutProps) {
   const {
@@ -36,6 +37,11 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
   const { notify } = useNotice();
   const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
+  const closeShareModal = () => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); };
+  const { ref: shareDialogRef, titleId: shareTitleId } = useModalDialog(isShareModalOpen, closeShareModal);
+  const { ref: deleteSectionDialogRef, titleId: deleteSectionTitleId } = useModalDialog(!!blockToDelete, () => setBlockToDelete(null));
+  const { ref: deleteProfileDialogRef, titleId: deleteProfileTitleId } = useModalDialog(!!profileToDelete, () => setProfileToDelete(null));
+
   const activeBlock = data.blocks[activeTab];
 
   return (
@@ -49,16 +55,17 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
 
         {isShareModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-            <div className="bg-white p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl relative">
+            <div ref={shareDialogRef} role="dialog" aria-modal="true" aria-labelledby={shareTitleId} className="bg-white p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl relative">
               <button
-                onClick={() => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); }}
+                onClick={closeShareModal}
+                aria-label={t('common.close')}
                 className="absolute top-4 right-4 text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2"
               >
                 <LucideIcons.X className="w-5 h-5" />
               </button>
 
               <LucideIcons.Share2 className="w-10 h-10 text-accent mb-4" />
-              <h3 className="text-2xl text-[#1c1c1c] mb-2">{t('common.shareResume')}</h3>
+              <h3 id={shareTitleId} className="text-2xl text-[#1c1c1c] mb-2">{t('common.shareResume')}</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 {t('common.shareResumeDesc')}
               </p>
@@ -179,11 +186,12 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
         {blockToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteSectionDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteSectionTitleId}
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
             >
               <LucideIcons.AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-              <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
+              <h3 id={deleteSectionTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 {t('common.deleteSectionDesc', { title: data.blocks[blockToDelete]?.title })}
               </p>
@@ -212,6 +220,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
         {profileToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteProfileDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteProfileTitleId}
               initial={{ opacity: 0, scale: 0.9, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
@@ -219,7 +228,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
               <LucideIcons.FileWarning className="w-12 h-12 text-red-500 mb-4" />
               {Object.keys(appState.profiles).length <= 1 ? (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.unableToDeleteProfileDesc')}
                   </p>
@@ -234,7 +243,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.deleteResumeDesc', { name: appState.profiles[profileToDelete]?.name })}
                   </p>
