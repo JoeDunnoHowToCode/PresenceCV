@@ -19,11 +19,12 @@ describe('tooling ignores .claude/', () => {
       const result = spawnSync(process.execPath, ['--input-type=module', '-e', `
         import { createVitest } from 'vitest/node';
         const ctx = await createVitest('test', { watch: false });
-        const specs = await ctx.globTestFiles();
-        // Vitest 1 returns [project, file] tuples; Vitest 2+ returns TestSpecification objects.
+        // Vitest 1: globTestFiles() -> [project, file] tuples. Vitest 4: globTestSpecifications() -> { moduleId }.
+        const specs = await (ctx.globTestSpecifications ? ctx.globTestSpecifications() : ctx.globTestFiles());
         console.log(JSON.stringify(specs.map((spec) => spec.moduleId ?? spec[1] ?? spec)));
         await ctx.close();
       `], { cwd: root, encoding: 'utf8' });
+      expect(result.status, result.stderr).toBe(0);
       const files: string[] = JSON.parse(result.stdout.trim().split('\n').pop() ?? '[]');
 
       expect(files.length).toBeGreaterThan(0);
