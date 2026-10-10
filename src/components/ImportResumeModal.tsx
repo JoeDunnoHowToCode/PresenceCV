@@ -49,6 +49,15 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
   const { user } = useAuth();
 
   useEffect(() => {
+    if (!isOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isUploading) {
       interval = setInterval(() => {
