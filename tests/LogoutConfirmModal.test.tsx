@@ -21,4 +21,10 @@ describe('LogoutConfirmModal', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('moves keyboard focus into the dialog when it opens', () => {
+    render(<LogoutConfirmModal isOpen onClose={vi.fn()} onConfirm={vi.fn()} />);
+
+    expect(screen.getByRole('dialog')).toContainElement(document.activeElement as HTMLElement);
+  });
 });
