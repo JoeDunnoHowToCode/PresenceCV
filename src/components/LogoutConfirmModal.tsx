@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { LogOut, X } from 'lucide-react';
@@ -17,6 +17,7 @@ export default function LogoutConfirmModal({
   theme = 'dark'
 }: LogoutConfirmModalProps) {
   const { t } = useTranslation();
+  const titleId = useId();
   if (!isOpen) return null;
 
   const isDark = theme === 'dark';
@@ -37,6 +38,9 @@ export default function LogoutConfirmModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className={`relative w-full max-w-sm rounded-2xl shadow-xl overflow-hidden border ${
           isDark 
             ? 'bg-white border-[#eceae4]' 
@@ -44,7 +48,7 @@ export default function LogoutConfirmModal({
         }`}
       >
         <div className={`p-5 border-b flex items-center justify-between ${isDark ? 'border-[#eceae4]' : 'border-gray-100'}`}>
-          <h2 className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-gray-900' : 'text-gray-900'}`}>
+          <h2 id={titleId} className={`text-lg font-semibold flex items-center gap-2 ${isDark ? 'text-gray-900' : 'text-gray-900'}`}>
             <LogOut className={`w-5 h-5 ${isDark ? 'text-accent' : 'text-gray-900'}`} />
             {t('common.logoutModal.title')}
           </h2>
