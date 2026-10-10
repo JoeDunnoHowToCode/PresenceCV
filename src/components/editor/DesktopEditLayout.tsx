@@ -644,7 +644,8 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                   ) : (
                                     <>
                                       {FinalIcon && <FinalIcon className="w-4 h-4" />}
-                                      <span className="text-sm tracking-widest">{block.title}</span>
+                                      {/* A real button so keyboard users can reach the tab; its click bubbles to the handler above. */}
+                                      <button type="button" className="text-sm tracking-widest">{block.title}</button>
                                     </>
                                   )}
                                 </div>
