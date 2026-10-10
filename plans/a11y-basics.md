@@ -14,27 +14,59 @@ Rendering the editor (every section tab) and the home page with Testing Library,
 - Drag handles get `aria-label`s that say what moves: `editor.a11y.reorderSection` ("Drag to reorder the {{title}} section"), `editor.a11y.reorderItem` ("Drag to reorder {{title}}"), and `editor.a11y.reorderUntitledItem` for items with no title yet. en + zh-TW.
 - Home menu toggle: `aria-label` = open/close menu (by state) and `aria-expanded`.
 - `LogoutConfirmModal` and `ImportResumeModal`: the panel gets `role="dialog"`, `aria-modal="true"` and `aria-labelledby` pointing at its `<h2>`; Escape calls `onClose`. The import modal ignores Escape while uploading, matching its backdrop.
-- Out of scope (reported as follow-ups): the section tabs themselves are clickable `<div>`s, so they can't be reached with the keyboard; the block icon picker uses clickable `<div>`/`<svg>`; there is no keyboard alternative to drag-and-drop on desktop; focus is not trapped inside modals. Fixing the tabs means restructuring both 700-line layouts, which are deliberately duplicated for now.
+- **Mobile editor needs no change** (found while writing its test, 2026-10-10): at 375 px every reachable view — info, each section via the section dropdown, and the open dropdown — has 0 unnamed buttons (15–36 buttons each), because mobile icon buttons carry `title`s and list/tag items use Move Up/Down buttons instead of grips. A test would pass before any change, so none was added. The drag-handle tab strip inside `MobileEditLayout` (the `isMobile ? … : …` else-branch) is **unreachable**: `EditorPage` renders `MobileEditLayout` only when `isMobile` is true. Reported as dead code, not deleted.
+- Out of scope (reported as follow-ups): the mobile section dropdown toggle is also a clickable `<div>`; the section tabs themselves are clickable `<div>`s, so they can't be reached with the keyboard; the block icon picker uses clickable `<div>`/`<svg>`; there is no keyboard alternative to drag-and-drop on desktop; focus is not trapped inside modals. Fixing the tabs means restructuring both 700-line layouts, which are deliberately duplicated for now.
 
 ## Tests
 
 | Behavior | Test file |
 |---|---|
 | Every button in the desktop editor has an accessible name, in every section | `tests/a11y.editor.test.tsx` |
-| Every button in the mobile editor has an accessible name | `tests/a11y.editor.test.tsx` |
 | Every home page button has a name; the menu toggle reports open/closed | `tests/HomePage.a11y.test.tsx` |
 | The logout confirmation is a labelled modal dialog | `tests/LogoutConfirmModal.test.tsx` |
 | Escape closes the logout confirmation | `tests/LogoutConfirmModal.test.tsx` |
-| The import modal is a labelled modal dialog | `tests/ImportResumeModal.test.tsx` |
-| Escape closes the import modal, but not while uploading | `tests/ImportResumeModal.test.tsx` |
+| The import modal is a labelled modal dialog | `tests/ImportResumeModal.a11y.test.tsx` |
+| Escape closes the import modal, but not while uploading | `tests/ImportResumeModal.a11y.test.tsx` |
 
 ## Checklist
 
-- [ ] desktop editor buttons named -> verify: `npx vitest run tests/a11y.editor.test.tsx`
-- [ ] mobile editor buttons named -> verify: `npx vitest run tests/a11y.editor.test.tsx`
-- [ ] home page buttons named, menu toggle state -> verify: `npx vitest run tests/HomePage.a11y.test.tsx`
-- [ ] logout modal is a labelled dialog -> verify: `npx vitest run tests/LogoutConfirmModal.test.tsx`
-- [ ] Escape closes logout modal -> verify: `npx vitest run tests/LogoutConfirmModal.test.tsx`
-- [ ] import modal is a labelled dialog -> verify: `npx vitest run tests/ImportResumeModal.test.tsx`
-- [ ] Escape closes import modal, not while uploading -> verify: `npx vitest run tests/ImportResumeModal.test.tsx`
-- [ ] full suite -> verify: `npm test && npm run check && npm run build`
+- [x] desktop editor buttons named -> verify: `npx vitest run tests/a11y.editor.test.tsx`
+  ```
+  red:   AssertionError: expected [ …(27) ] to deeply equal []
+  green: ✓ tests/a11y.editor.test.tsx  (1 test)
+  ```
+- [x] ~~mobile editor buttons named~~ — already true, no change and no test (see design sketch); exploration printed `unnamed=0` for every mobile view
+- [x] home page buttons named, menu toggle state -> verify: `npx vitest run tests/HomePage.a11y.test.tsx`
+  ```
+  red:   expected [ Array(1) ] to deeply equal []   (<button class="md:hidden p-2 …">)
+  red:   expect(element).toHaveAttribute("aria-expanded", "false")
+  green: ✓ tests/HomePage.a11y.test.tsx  (2 tests)
+  ```
+- [x] logout modal is a labelled dialog -> verify: `npx vitest run tests/LogoutConfirmModal.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Confirm Logout"
+  green: ✓ tests/LogoutConfirmModal.test.tsx  (1 test)
+  ```
+- [x] Escape closes logout modal -> verify: `npx vitest run tests/LogoutConfirmModal.test.tsx`
+  ```
+  red:   expected "spy" to be called 1 times, but got 0 times
+  green: ✓ tests/LogoutConfirmModal.test.tsx  (2 tests)
+  ```
+- [x] import modal is a labelled dialog -> verify: `npx vitest run tests/ImportResumeModal.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Import Resume with AI"
+  green: ✓ tests/ImportResumeModal.a11y.test.tsx  (1 test)
+  ```
+- [x] Escape closes import modal, not while uploading -> verify: `npx vitest run tests/ImportResumeModal.test.tsx`
+  ```
+  red:   expected "spy" to be called 1 times, but got 0 times
+  red:   expected "spy" to not be called at all, but actually been called 1 times   (mid-upload)
+  green: ✓ tests/ImportResumeModal.a11y.test.tsx  (3 tests)
+  ```
+- [x] full suite -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  23 passed | 1 skipped (24)
+        Tests  113 passed | 19 skipped (132)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 4.86s
+  ```
