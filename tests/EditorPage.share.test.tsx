@@ -61,4 +61,18 @@ describe('EditorPage sharing', () => {
     expect(writes.map(([path]) => path)).toEqual(['sharedResumes/snap_new', 'users/u1/sharedLinks/snap_new']);
     expect(writes[1][1]).toEqual({ createdAt: expect.any(Number), profileName: 'Main' });
   });
+
+  it('stops the live link: clears it from the profile, then deletes the public document', async () => {
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({ ...DEFAULT_RESUME, liveId: 'live_1', updateToken: 'token_1' }) as never);
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /^share$/i }));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Stop sharing the live link' }));
+
+    await waitFor(() => expect(firestore.deleteDoc).toHaveBeenCalledWith(expect.objectContaining({ path: 'liveResumes/live_1' })));
+    const clearLiveLink = updateProfileData.mock.calls[0][0];
+    expect(clearLiveLink({ name: 'Ada', liveId: 'live_1', updateToken: 'token_1' })).toEqual({ name: 'Ada' });
+    // Cleared first: that cancels the pending auto-sync, which could otherwise re-create the document.
+    expect(updateProfileData.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(firestore.deleteDoc).mock.invocationCallOrder[0]);
+  });
 });
