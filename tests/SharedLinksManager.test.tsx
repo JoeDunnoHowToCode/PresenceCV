@@ -30,4 +30,15 @@ describe('SharedLinksManager', () => {
     expect(revokeSnapshot).toHaveBeenCalledWith('new');
     expect(await screen.findByRole('status')).toHaveTextContent('Link revoked.');
   });
+
+  it('offers to stop the live link only when there is one', () => {
+    const onStopLive = vi.fn();
+    const { rerender } = render(<NoticeProvider><SharedLinksManager uid="u1" hasLiveLink={false} onStopLive={onStopLive} /></NoticeProvider>);
+    expect(screen.queryByRole('button', { name: 'Stop sharing the live link' })).not.toBeInTheDocument();
+
+    rerender(<NoticeProvider><SharedLinksManager uid="u1" hasLiveLink onStopLive={onStopLive} /></NoticeProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Stop sharing the live link' }));
+
+    expect(onStopLive).toHaveBeenCalledTimes(1);
+  });
 });
