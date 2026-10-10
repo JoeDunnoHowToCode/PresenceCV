@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useEffect, useId } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { LogOut, X } from 'lucide-react';
@@ -18,6 +18,16 @@ export default function LogoutConfirmModal({
 }: LogoutConfirmModalProps) {
   const { t } = useTranslation();
   const titleId = useId();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const isDark = theme === 'dark';
