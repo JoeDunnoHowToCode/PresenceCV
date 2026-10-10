@@ -75,4 +75,19 @@ describe('EditorPage sharing', () => {
     // Cleared first: that cancels the pending auto-sync, which could otherwise re-create the document.
     expect(updateProfileData.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(firestore.deleteDoc).mock.invocationCallOrder[0]);
   });
+
+  it('puts the live link back in the profile if deleting it fails, so the owner can retry', async () => {
+    vi.mocked(firestore.deleteDoc).mockRejectedValueOnce(new Error('offline'));
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({ ...DEFAULT_RESUME, liveId: 'live_1', updateToken: 'token_1' }) as never);
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /^share$/i }));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Stop sharing the live link' }));
+
+    await waitFor(() => expect(updateProfileData).toHaveBeenCalledTimes(2));
+    const restoreLiveLink = updateProfileData.mock.calls[1][0];
+    expect(restoreLiveLink({ name: 'Ada' })).toEqual({ name: 'Ada', liveId: 'live_1', updateToken: 'token_1' });
+    consoleSpy.mockRestore();
+  });
 });
