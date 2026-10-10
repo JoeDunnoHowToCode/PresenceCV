@@ -219,3 +219,14 @@ The real `EditorPage` in Chromium (Vite harness in a scratch worktree, `useResum
   ✖ 88 problems (0 errors, 88 warnings)
   ✓ built in 5.70s
   ```
+- [x] combined run: `main` + #10 + #11 + #12 + #13 (vitest 4), merged in a scratch worktree with `git merge-tree` (no branch touched) -> verify: `npm test && npm run check && npm run build`
+  ```
+  first run:  Tests  4 failed | 141 passed | 25 skipped (170)
+              FirebaseError: Expected first argument to collection() ...   (#13's Share dialog subscribes to Firestore; these tests mock db as {})
+  fix:        811836b stubs collection() / onSnapshot() in tests/a11y.dialogs.test.tsx (assertions unchanged)
+  re-run:     Test Files  33 passed | 1 skipped (34)
+              Tests  145 passed | 25 skipped (170)
+              ✖ 88 problems (0 errors, 88 warnings)
+              ✓ built in 4.95s
+  merge order: clean both ways (#10→#13 and #13→#10), same tree
+  ```
