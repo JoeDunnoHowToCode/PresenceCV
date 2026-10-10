@@ -41,6 +41,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
   const { ref: shareDialogRef, titleId: shareTitleId } = useModalDialog(isShareModalOpen, closeShareModal);
   const { ref: deleteSectionDialogRef, titleId: deleteSectionTitleId } = useModalDialog(!!blockToDelete, () => setBlockToDelete(null));
   const { ref: deleteProfileDialogRef, titleId: deleteProfileTitleId } = useModalDialog(!!profileToDelete, () => setProfileToDelete(null));
+  const { ref: iconPickerRef } = useModalDialog(openIconMenuId !== null, () => setOpenIconMenuId(null));
 
   const activeBlock = data.blocks[activeTab];
 
@@ -598,21 +599,28 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                   {isActive ? (
                                     <div className="relative flex items-center gap-2" onClick={e => e.stopPropagation()}>
                                       <div className="relative shrink-0 flex items-center justify-center">
-                                        {FinalIcon ? (
-                                          <FinalIcon 
-                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
-                                            className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
-                                          />
-                                        ) : (
-                                          <div 
-                                            onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(blockId); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
-                                            className="w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer"
-                                          />
-                                        )}
+                                        <button
+                                          type="button"
+                                          aria-label={t('editor.a11y.chooseSectionIcon', { title: block.title })}
+                                          aria-haspopup="dialog"
+                                          aria-expanded={openIconMenuId === blockId}
+                                          onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(blockId); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
+                                          className="flex items-center justify-center"
+                                        >
+                                          {FinalIcon ? (
+                                            <FinalIcon className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                                          ) : (
+                                            <span className="block w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer" />
+                                          )}
+                                        </button>
                                         {openIconMenuId === blockId && typeof document !== 'undefined' && createPortal(
                                           <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 99999 }}>
                                             <div className="fixed inset-0 z-[99998]" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
                                             <div 
+                                              ref={iconPickerRef}
+                                              role="dialog"
+                                              aria-modal="true"
+                                              aria-label={t('editor.a11y.chooseSectionIcon', { title: block.title })}
                                               className="fixed bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-5 gap-3 z-[99999] w-max" 
                                               style={{ 
                                                 top: iconMenuRect ? iconMenuRect.bottom + 8 : '50%', 
@@ -621,21 +629,27 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                                               }}
                                               onClick={e => e.stopPropagation()}
                                             >
-                                              <div 
+                                              <button
+                                                type="button"
                                                 className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors text-base"
                                                 onClick={() => { updateBlockIcon(blockId, ''); setOpenIconMenuId(null); }}
-                                                title="No Icon"
+                                                aria-label={t('editor.a11y.noIcon')}
+                                                title={t('editor.a11y.noIcon')}
                                               >
                                                 🚫
-                                              </div>
+                                              </button>
                                               {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
                                                 const OptionIcon = (LucideIcons as any)[iconName];
                                                 return OptionIcon ? (
-                                                  <OptionIcon 
-                                                    key={iconName} 
-                                                    className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                                                  <button
+                                                    type="button"
+                                                    key={iconName}
+                                                    aria-label={t(`editor.icons.${iconName}`)}
+                                                    className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors"
                                                     onClick={() => { updateBlockIcon(blockId, iconName); setOpenIconMenuId(null); }}
-                                                  />
+                                                  >
+                                                    <OptionIcon className="w-4 h-4" />
+                                                  </button>
                                                 ) : null;
                                               })}
                                             </div>

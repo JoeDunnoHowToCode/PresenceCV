@@ -105,7 +105,9 @@
     "a11y": {
       "reorderSection": "Drag to reorder the {{title}} section",
       "reorderItem": "Drag to reorder {{title}}",
-      "reorderUntitledItem": "Drag to reorder this item"
+      "reorderUntitledItem": "Drag to reorder this item",
+      "chooseSectionIcon": "Choose an icon for the {{title}} section",
+      "noIcon": "No icon"
     },
     "icons": {
       "MapPin": "Map pin",
