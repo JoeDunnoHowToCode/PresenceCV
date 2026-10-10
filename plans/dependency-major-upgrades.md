@@ -1,6 +1,6 @@
 # Plan: the two remaining major dependency upgrades
 
-Track: **Refactor-style maintenance** (Gates 1 and 3, no Gate 2). Behavior must not change: the full suite is pasted before the first step and after the last. The only test edit is the one the owner agreed to on 2026-10-10 (step 1). Follows #7, which left these two as owner decisions; the owner asked for both ("把這些都做完").
+Track: **Refactor-style maintenance** (Gates 1 and 3, no Gate 2). Behavior must not change: the full suite is pasted before the first step and after the last. Test edits: the owner-agreed `GoogleGenAI` mock change, extended to the two identical `GoogleAuthProvider` mocks in `tests/App.test.tsx` and `tests/AuthContext.test.tsx` (same cause, found on the first Vitest 4 run); plus one new test that pins `src/lib/firebase-admin.ts` with the real SDK before upgrading it (the refactor rule for untested code). Follows #7, which left these two as owner decisions; the owner asked for both ("把這些都做完").
 
 ## Starting point (`00104d8`)
 
@@ -19,8 +19,35 @@ Out of scope: `firebase` 12 → 9 and `firebase-tools` downgrades that npm sugge
 
 ## Checklist
 
-- [ ] Baseline recorded -> verify: `npm test && npm run check && npm run build`
-- [ ] vitest 4.1.11 + agreed mock change -> verify: `npm test && npm run check && npm run build`
-- [ ] firebase-admin 14 + Node 22 -> verify: `npm test && npm run check && npm run build` and the smoke check
+- [x] Baseline recorded -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  19 passed | 1 skipped (20)
+        Tests  105 passed | 19 skipped (124)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 4.81s
+  ```
+- [x] vitest 4.1.11 + agreed mock change -> verify: `npm test && npm run check && npm run build`
+  ```
+  first Vitest 4 run: 4 failed (App + 3 AuthContext cases: arrow-function GoogleAuthProvider mock called with new)
+  after the mock changes (made and verified on 1.6 first):
+   Test Files  19 passed | 1 skipped (20)
+        Tests  105 passed | 19 skipped (124)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 5.01s
+  local test:rules pieces: report written; check-rules-report: 19 of 19 rules tests did not run (expected without the emulator)
+  ```
+- [x] firebase-admin 14 + Node 22 -> verify: `npm test && npm run check && npm run build` and the smoke check
+  ```
+  pin test (real SDK): 1 passed on 12.7.0 and on 14.5.0
+   Test Files  20 passed | 1 skipped (21)
+        Tests  106 passed | 19 skipped (125)
+  ✖ 91 problems (0 errors, 91 warnings)
+  ✓ built in 5.37s
+  ```
 - [ ] Rules suite still runs and is checked on Vitest 4 -> verify: PR CI, step "Run Emulator Rules Tests"
-- [ ] Advisories after -> verify: `npm audit` and `npm audit --omit=dev`
+- [x] Advisories after -> verify: `npm audit` and `npm audit --omit=dev`
+  ```
+  all:  {"low":1,"moderate":5,"high":11,"critical":0,"total":17}   (was 28, 2 critical)
+  prod: {"moderate":1,"high":4,"critical":0,"total":5}            (was 14)
+  prod left: @firebase/firestore, @firebase/firestore-compat, @grpc/grpc-js, firebase (grpc-js pinned by firebase 12; server-side advisories), qs (express dev server)
+  ```
