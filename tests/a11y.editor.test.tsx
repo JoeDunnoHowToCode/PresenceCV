@@ -48,4 +48,18 @@ describe('editor accessibility', () => {
 
     expect(unnamed).toEqual([]);
   });
+
+  it('makes every section tab a real button (reachable with Tab, activated with Enter) that opens its section', () => {
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+
+    for (const id of DEFAULT_RESUME.blockOrder) {
+      const title = DEFAULT_RESUME.blocks[id].title;
+      const tab = screen.getByRole('button', { name: title });
+      const tabContainer = tab.closest('[data-active]')!;
+
+      fireEvent.click(tab);
+
+      expect(tabContainer).toHaveAttribute('data-active', 'true');
+    }
+  });
 });
