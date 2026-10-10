@@ -61,4 +61,38 @@ describe('icon pickers, from the keyboard', () => {
     expect(updateBlockIcon).toHaveBeenCalledWith('experience', 'Star');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  it('mobile section icon: the same, from the section header', () => {
+    const updateBlockIcon = vi.fn();
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({ updateBlockIcon }) as never);
+    const desktopWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 });
+    try {
+      render(<MemoryRouter><EditorPage /></MemoryRouter>);
+      fireEvent.click(screen.getByRole('button', { name: 'Choose a section' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Experience' }));
+
+      const trigger = screen.getByRole('button', { name: CHOOSE_SECTION_ICON });
+      expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      trigger.focus();
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      const picker = screen.getByRole('dialog', { name: CHOOSE_SECTION_ICON });
+      expect(picker).toContainElement(document.activeElement as HTMLElement);
+      expect(within(picker).getByRole('button', { name: 'No icon' })).toBeInTheDocument();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+
+      fireEvent.click(trigger);
+      fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Star' }));
+      expect(updateBlockIcon).toHaveBeenCalledWith('experience', 'Star');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
+    }
+  });
 });
