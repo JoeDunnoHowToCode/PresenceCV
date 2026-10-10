@@ -84,7 +84,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('allows creation when user has >3 profiles but is admin', async () => {
       // Setup: user with 4 profiles + admin doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+        await setDoc(doc(context.firestore(), 'users/user_admin/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
@@ -104,7 +104,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('allows creation when user has >3 profiles but is users_pro', async () => {
       // Setup: user with 4 profiles + users_pro doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_pro'), {
+        await setDoc(doc(context.firestore(), 'users/user_pro/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'users_pro/user_pro'), { status: 'active' });
@@ -216,7 +216,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('allows creation when user has >3 profiles but is admin', async () => {
       // Setup: user with 4 profiles + admin doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+        await setDoc(doc(context.firestore(), 'users/user_admin/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
@@ -234,7 +234,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('allows creation when user has >3 profiles but is users_pro', async () => {
       // Setup: user with 4 profiles + users_pro doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_pro'), {
+        await setDoc(doc(context.firestore(), 'users/user_pro/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'users_pro/user_pro'), { status: 'active' });
