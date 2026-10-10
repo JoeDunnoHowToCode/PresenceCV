@@ -41,4 +41,15 @@ describe('useFocusTrap', () => {
     fireEvent.keyDown(screen.getByText('first'), { key: 'Tab', shiftKey: true });
     expect(screen.getByText('last')).toHaveFocus();
   });
+
+  it('gives focus back to the control that had it when it deactivates', () => {
+    render(<Popup />);
+    const opener = screen.getByText('open');
+    opener.focus();
+    fireEvent.click(opener);
+
+    fireEvent.click(screen.getByText('last')); // closes the popup
+
+    expect(opener).toHaveFocus();
+  });
 });
