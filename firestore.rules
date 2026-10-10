@@ -38,6 +38,18 @@ service cloud.firestore {
             (exists(/databases/$(database)/documents/users_pro/$(request.auth.uid)) || exists(/databases/$(database)/documents/admins/$(request.auth.uid)))
           );
       }
+
+      // Private record of which snapshots this user created (used to list and revoke them).
+      // It can only be written in the same batch that creates the snapshot, so nobody can
+      // claim a snapshot they merely know the id of.
+      match /sharedLinks/{resumeId} {
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId
+          && !exists(/databases/$(database)/documents/sharedResumes/$(resumeId))
+          && existsAfter(/databases/$(database)/documents/sharedResumes/$(resumeId))
+          && request.resource.data.keys().hasOnly(['createdAt', 'profileName']);
+        allow update: if false;
+      }
     }
 
     // 快照分享連結 (需要登入建立，任何人憑 ID 可讀，不可修改)
@@ -58,7 +70,10 @@ service cloud.firestore {
         );
       allow get: if true;
       allow list: if false;
-      allow update, delete: if false;
+      allow update: if false;
+      // Only the creator (who has the ownership record) can revoke a snapshot.
+      allow delete: if request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/sharedLinks/$(resumeId));
     }
 
     // Live 即時同步連結 (權限與擁有者綁定)
@@ -86,7 +101,8 @@ service cloud.firestore {
           (!("ownerUid" in resource.data) && request.resource.data.updateToken == resource.data.updateToken)
         )
       );
-      allow delete: if false;
+      // The owner can revoke their live link.
+      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
     }
   }
 }
