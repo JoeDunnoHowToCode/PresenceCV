@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
+import { ESLint } from 'eslint';
 
 // The Claude desktop app keeps git worktrees (full copies of the repo on other branches) in .claude/worktrees/.
 // Test and lint runs in the main checkout must not pick them up.
@@ -29,5 +30,12 @@ describe('tooling ignores .claude/', () => {
     } finally {
       rmSync(probeDir, { recursive: true, force: true });
     }
+  });
+
+  it('eslint ignores files under .claude/', async () => {
+    // Uses this project's eslint.config.js; the path does not need to exist.
+    const eslint = new ESLint({ cwd: root });
+
+    expect(await eslint.isPathIgnored(join(root, '.claude', 'worktrees', 'some-branch', 'src', 'App.tsx'))).toBe(true);
   });
 });
