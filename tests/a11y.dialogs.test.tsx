@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -89,41 +89,56 @@ describe('editor modals', () => {
     expect(deleteProfile).not.toHaveBeenCalled();
   });
 
-  it('on mobile, Share and both delete confirms are labelled modal dialogs that take focus and close on Escape', () => {
-    vi.mocked(useResume.useResume).mockReturnValue(mockResume({
-      appState: {
-        activeProfileId: 'main',
-        profiles: {
-          main: { id: 'main', name: 'Main', data: DEFAULT_RESUME },
-          design: { id: 'design', name: 'Design CV', data: DEFAULT_RESUME },
-        },
-      },
-    }) as never);
-    const desktopWidth = window.innerWidth;
-    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 });
-    try {
+  describe('on mobile', () => {
+    let desktopWidth: number;
+    beforeEach(() => {
+      desktopWidth = window.innerWidth;
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 });
+    });
+    afterEach(() => {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
+    });
+
+    it('opens Share as a labelled modal dialog that takes focus, names its close button, and closes on Escape', () => {
       render(<MemoryRouter><EditorPage /></MemoryRouter>);
-
       fireEvent.click(screen.getByRole('button', { name: 'Share Resume' }));
-      const share = expectFocusedModalDialog('Share Your Resume');
-      expect(within(share).getByRole('button', { name: 'Close' })).toBeInTheDocument();
+
+      const dialog = expectFocusedModalDialog('Share Your Resume');
+      expect(within(dialog).getByRole('button', { name: 'Close' })).toBeInTheDocument();
+
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Choose a section' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Experience' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Delete Section' }));
+    it('asks before deleting a section in a labelled modal dialog that takes focus; Escape cancels', () => {
+      render(<MemoryRouter><EditorPage /></MemoryRouter>);
+      fireEvent.click(screen.getByRole('button', { name: 'Choose a section' })); // mobile's delete buttons live in the section menu
+      fireEvent.click(screen.getAllByRole('button', { name: 'Delete Section' })[0]);
+
       expectFocusedModalDialog('Delete Section?');
+
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
 
+    it('asks before deleting a resume in a labelled modal dialog that takes focus; Escape cancels', () => {
+      vi.mocked(useResume.useResume).mockReturnValue(mockResume({
+        appState: {
+          activeProfileId: 'main',
+          profiles: {
+            main: { id: 'main', name: 'Main', data: DEFAULT_RESUME },
+            design: { id: 'design', name: 'Design CV', data: DEFAULT_RESUME },
+          },
+        },
+      }) as never);
+      render(<MemoryRouter><EditorPage /></MemoryRouter>);
       fireEvent.click(screen.getAllByRole('button', { name: 'Main' })[0]); // open a profile switcher
       fireEvent.click(screen.getAllByRole('button', { name: 'Delete Profile' })[0]);
+
       expectFocusedModalDialog('Delete Resume?');
+
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    } finally {
-      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
-    }
+    });
   });
 });
