@@ -1,7 +1,8 @@
-import React, { useEffect, useId } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { LogOut, X } from 'lucide-react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export default function LogoutConfirmModal({
 }: LogoutConfirmModalProps) {
   const { t } = useTranslation();
   const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, isOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -48,6 +51,7 @@ export default function LogoutConfirmModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
