@@ -10,6 +10,13 @@ import { DEFAULT_RESUME } from '../src/data/defaultResume';
 vi.mock('../src/hooks/useResume', () => ({ useResume: vi.fn() }));
 vi.mock('../src/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
 vi.mock('../src/lib/firebase', () => ({ auth: {}, db: {} }));
+// These tests have no Firestore: stub the calls the Share dialog can make while it renders
+// (subscribing to the owner's shared-links list), so opening it doesn't throw.
+vi.mock('firebase/firestore', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('firebase/firestore')>()),
+  collection: vi.fn(),
+  onSnapshot: vi.fn(() => () => {}),
+}));
 
 // useResume returns ~40 members; these tests need its data, every other member can be a no-op function.
 const mockResume = (overrides: Record<string, unknown> = {}) => new Proxy(
