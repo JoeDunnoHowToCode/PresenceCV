@@ -184,7 +184,9 @@
       "features": "特色",
       "pricing": "定價",
       "login": "登入",
-      "resumeEditor": "履歷編輯器"
+      "resumeEditor": "履歷編輯器",
+      "openMenu": "開啟選單",
+      "closeMenu": "關閉選單"
     },
     "hero": {
       "badge": "100% 免費開放履歷建立工具",

@@ -112,6 +112,7 @@ export default function HomePage() {
           <button 
             className="md:hidden p-2 text-[#1c1c1c]"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? t('home.nav.closeMenu') : t('home.nav.openMenu')}
           >
             {isMobileMenuOpen ? <LucideIcons.X className="w-5 h-5" /> : <LucideIcons.Menu className="w-5 h-5" />}
           </button>

@@ -184,7 +184,9 @@
       "features": "Features",
       "pricing": "Pricing",
       "login": "Log In",
-      "resumeEditor": "Resume Editor"
+      "resumeEditor": "Resume Editor",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "hero": {
       "badge": "100% Free & Open Creator",
