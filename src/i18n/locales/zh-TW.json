@@ -107,6 +107,8 @@
       "reorderItem": "拖曳以調整「{{title}}」的順序",
       "reorderUntitledItem": "拖曳以調整這個項目的順序",
       "chooseSectionIcon": "選擇「{{title}}」區塊的圖示",
+      "chooseContactIcon": "選擇「{{text}}」的圖示",
+      "chooseUntitledContactIcon": "選擇這個聯絡方式的圖示",
       "noIcon": "不使用圖示"
     },
     "icons": {

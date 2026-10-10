@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
 import { ResumeData } from '../../types';
+import { useModalDialog } from '../../hooks/useModalDialog';
 
 interface InfoEditorProps {
   data: ResumeData;
@@ -205,6 +206,10 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
   const urlInput = useDebouncedInput(item.url || '', (val) => updateContactItem(item.id, 'url', val));
   const [isIconMenuOpen, setIsIconMenuOpen] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const { ref: iconPickerRef } = useModalDialog(isIconMenuOpen, () => setIsIconMenuOpen(false));
+  const chooseIconLabel = item.text
+    ? t('editor.a11y.chooseContactIcon', { text: item.text })
+    : t('editor.a11y.chooseUntitledContactIcon');
 
   useEffect(() => {
     if (isConfirmingDelete) {
@@ -217,33 +222,45 @@ const ContactItemEditor = React.memo(({ item, Icon, updateContactItem, removeCon
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full max-w-full group relative p-3 sm:p-0 rounded-xl sm:rounded-none bg-black/5 sm:bg-transparent border sm:border-none border-[#eceae4]">
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="relative shrink-0">
-          {Icon ? (
-            <Icon onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
-          ) : (
-            <div 
-              onClick={() => setIsIconMenuOpen(!isIconMenuOpen)} 
-              className="w-5 h-5 rounded-full border border-dashed border-[#eceae4] hover:border-accent transition-colors cursor-pointer"
-            />
-          )}
+          <button
+            type="button"
+            aria-label={chooseIconLabel}
+            aria-haspopup="dialog"
+            aria-expanded={isIconMenuOpen}
+            onClick={() => setIsIconMenuOpen(!isIconMenuOpen)}
+            className="flex items-center justify-center"
+          >
+            {Icon ? (
+              <Icon className="w-5 h-5 text-accent hover:text-[#1c1c1c] transition-colors cursor-pointer" />
+            ) : (
+              <span className="block w-5 h-5 rounded-full border border-dashed border-[#eceae4] hover:border-accent transition-colors cursor-pointer" />
+            )}
+          </button>
           {isIconMenuOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsIconMenuOpen(false)} />
-              <div className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
-                <div 
+              <div ref={iconPickerRef} role="dialog" aria-modal="true" aria-label={chooseIconLabel} className="absolute top-full left-0 mt-2 bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-4 gap-3 z-50 w-max">
+                <button
+                  type="button"
                   className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors"
                   onClick={() => { updateContactItem(item.id, 'icon', ''); setIsIconMenuOpen(false); }}
-                  title="No Icon"
+                  aria-label={t('editor.a11y.noIcon')}
+                  title={t('editor.a11y.noIcon')}
                 >
                   🚫
-                </div>
+                </button>
                 {AVAILABLE_ICONS.map((iconName: string) => {
                   const OptionIcon = (LucideIcons as any)[iconName];
                   return OptionIcon ? (
-                    <OptionIcon 
-                      key={iconName} 
-                      className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                    <button
+                      type="button"
+                      key={iconName}
+                      aria-label={t(`editor.icons.${iconName}`)}
+                      className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors"
                       onClick={() => { updateContactItem(item.id, 'icon', iconName); setIsIconMenuOpen(false); }}
-                    />
+                    >
+                      <OptionIcon className="w-4 h-4" />
+                    </button>
                   ) : null;
                 })}
               </div>

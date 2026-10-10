@@ -107,6 +107,8 @@
       "reorderItem": "Drag to reorder {{title}}",
       "reorderUntitledItem": "Drag to reorder this item",
       "chooseSectionIcon": "Choose an icon for the {{title}} section",
+      "chooseContactIcon": "Choose an icon for {{text}}",
+      "chooseUntitledContactIcon": "Choose an icon for this contact",
       "noIcon": "No icon"
     },
     "icons": {
