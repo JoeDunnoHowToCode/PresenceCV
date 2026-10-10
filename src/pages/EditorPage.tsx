@@ -212,12 +212,20 @@ export default function EditorPage() {
       setSnapshotUrl(null);
       setIsSharing(true);
       try {
-        const { collection, addDoc } = await import('firebase/firestore');
+        if (!user) throw new Error('Not signed in');
+        const { collection, doc, writeBatch } = await import('firebase/firestore');
         const { db } = await import('../lib/firebase');
-        const docRef = await addDoc(collection(db, 'sharedResumes'), {
-          ...safeData,
-          createdAt: Date.now()
+        const createdAt = Date.now();
+        const docRef = doc(collection(db, 'sharedResumes'));
+        // The private ownership record must be written in the same batch (the rules check it), so only
+        // the snapshot's creator can later list and revoke it.
+        const batch = writeBatch(db);
+        batch.set(docRef, { ...safeData, createdAt });
+        batch.set(doc(db, 'users', user.uid, 'sharedLinks', docRef.id), {
+          createdAt,
+          profileName: appState.profiles[appState.activeProfileId]?.name ?? ''
         });
+        await batch.commit();
         setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
         lastSnapshotDataStr.current = currentDataStr;
       } catch (err) {
