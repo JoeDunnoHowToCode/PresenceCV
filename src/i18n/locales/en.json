@@ -104,6 +104,8 @@
     "sharedLinks": {
       "title": "Manage shared links",
       "stopLive": "Stop sharing the live link",
+      "liveStopped": "The live link has stopped working. Opening Share again creates a new one.",
+      "stopLiveFailed": "Couldn't stop the live link. Please try again.",
       "snapshotsTitle": "Snapshot links you created",
       "empty": "No snapshot links yet.",
       "revoke": "Revoke",

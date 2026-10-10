@@ -2,6 +2,7 @@ import React, { CSSProperties, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNotice } from '../../contexts/NoticeContext';
+import SharedLinksManager from './SharedLinksManager';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Link } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
@@ -26,7 +27,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
     handleTabClick, switchProfile, createProfile, renameProfile, deleteProfile,
     updateThemeColor, updateBlockTitle, updateBlockIcon, removeBlock, snapshotUrl,
     setSnapshotUrl, copiedSection, setCopiedSection, isInitializingLive,
-    handleCopyLink, ensureLiveLink, handleExportPDF, updateProfile,
+    handleCopyLink, ensureLiveLink, revokeLiveLink, handleExportPDF, updateProfile,
     addContactItem, updateContactItem, removeContactItem,
     addListItem, updateListItem, removeListItem, addTagItem, updateTagItem, removeTagItem,
     addBlock, isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, setActiveTab,
@@ -151,6 +152,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                     )}
                   </div>
                 </div>
+
+                <SharedLinksManager uid={user?.uid} hasLiveLink={!!data.liveId} onStopLive={revokeLiveLink} />
 
                 <div className="flex flex-col gap-2 w-full text-left p-4 rounded-xl border border-[#eceae4] bg-[#f9f8f5]">
                   <div className="flex items-center gap-2 text-[#1c1c1c] font-medium">

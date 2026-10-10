@@ -104,6 +104,8 @@
     "sharedLinks": {
       "title": "管理分享連結",
       "stopLive": "停止分享即時連結",
+      "liveStopped": "即時連結已失效。再次開啟分享時會建立新的連結。",
+      "stopLiveFailed": "無法停止即時連結，請再試一次。",
       "snapshotsTitle": "你建立的快照連結",
       "empty": "還沒有快照連結。",
       "revoke": "撤銷",

@@ -271,6 +271,28 @@ export default function EditorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState, data, resume.updateProfileData, user, isPro]);
 
+  const revokeLiveLink = useCallback(async () => {
+    const { liveId } = resume.getCurrentData();
+    if (!liveId) return;
+    // Clear it from the profile first: that cancels the pending 2 s auto-sync, which would
+    // otherwise re-create the public document right after we delete it.
+    resume.updateProfileData(prev => {
+      const next = { ...prev };
+      delete next.liveId;
+      delete next.updateToken;
+      return next;
+    });
+    try {
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      await deleteDoc(doc(db, 'liveResumes', liveId));
+      notify(t('editor.sharedLinks.liveStopped'));
+    } catch (err) {
+      console.error('Failed to stop the live link:', err);
+      notify(t('editor.sharedLinks.stopLiveFailed'), 'error');
+    }
+  }, [resume, notify, t]);
+
   const handleCopyLink = useCallback(async (url: string, section: 'snapshot' | 'live') => {
     await copyTextToClipboard(url);
     setCopiedSection(section);
@@ -314,7 +336,7 @@ export default function EditorPage() {
     setIsSidebarCollapsed, setProfileToDelete, setBlockToDelete,
     setIsLogoutModalOpen, openShareModal, isSharing, tabsContainerRef,
     handleTabClick, snapshotUrl, setSnapshotUrl, copiedSection, setCopiedSection, isInitializingLive,
-    handleCopyLink, ensureLiveLink, handleExportPDF, direction, setDirection,
+    handleCopyLink, ensureLiveLink, revokeLiveLink, handleExportPDF, direction, setDirection,
     isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, variants,
     isPro,
     isAdmin
