@@ -272,7 +272,7 @@ export default function EditorPage() {
   }, [appState, data, resume.updateProfileData, user, isPro]);
 
   const revokeLiveLink = useCallback(async () => {
-    const { liveId } = resume.getCurrentData();
+    const { liveId, updateToken } = resume.getCurrentData();
     if (!liveId) return;
     // Clear it from the profile first: that cancels the pending 2 s auto-sync, which would
     // otherwise re-create the public document right after we delete it.
@@ -289,6 +289,8 @@ export default function EditorPage() {
       notify(t('editor.sharedLinks.liveStopped'));
     } catch (err) {
       console.error('Failed to stop the live link:', err);
+      // Put it back so the owner can see the link is still live and retry.
+      resume.updateProfileData(prev => ({ ...prev, liveId, updateToken }));
       notify(t('editor.sharedLinks.stopLiveFailed'), 'error');
     }
   }, [resume, notify, t]);
