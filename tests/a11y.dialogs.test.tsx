@@ -52,6 +52,21 @@ describe('editor modals', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  // Opening Share blurs a focused text field so its debounced edit is saved before the snapshot is taken.
+  it('has saved the latest edit of a focused text field once Share opens', () => {
+    const updateProfile = vi.fn();
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({ updateProfile }) as never);
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    const nameField = screen.getByDisplayValue(DEFAULT_RESUME.profile.name);
+    nameField.focus();
+    fireEvent.change(nameField, { target: { value: 'Alex R.' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(nameField).not.toHaveFocus();
+    expect(updateProfile).toHaveBeenLastCalledWith('name', 'Alex R.');
+  });
+
   it('asks before deleting a section in a labelled modal dialog that takes focus; Escape cancels', () => {
     const removeBlock = vi.fn();
     vi.mocked(useResume.useResume).mockReturnValue(mockResume({ removeBlock }) as never);
