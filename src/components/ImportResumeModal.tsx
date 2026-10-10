@@ -49,13 +49,13 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isUploading) return; // same rule as the backdrop
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, isUploading, onClose]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
