@@ -92,6 +92,19 @@
       "info": "Info"
     },
     "loadingProfiles": "Loading your profiles...",
+    "sharedLinks": {
+      "title": "Manage shared links",
+      "stopLive": "Stop sharing the live link",
+      "liveStopped": "The live link has stopped working. Opening Share again creates a new one.",
+      "stopLiveFailed": "Couldn't stop the live link. Please try again.",
+      "snapshotsTitle": "Snapshot links you created",
+      "empty": "No snapshot links yet.",
+      "revoke": "Revoke",
+      "revokeLabel": "Revoke the {{name}} snapshot from {{date}}",
+      "revoked": "Link revoked. Anyone who opens it now sees an error.",
+      "revokeFailed": "Couldn't revoke the link. Please try again.",
+      "oldLinksNote": "Snapshot links created before this list existed aren't shown here."
+    },
     "alerts": {
       "limitReached": "You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to import a new one.",
       "allowPopups": "Please allow popups to generate the PDF.",

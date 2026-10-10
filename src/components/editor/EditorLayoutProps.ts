@@ -32,6 +32,7 @@ export interface EditorLayoutProps extends UseResumeReturn {
   isInitializingLive: boolean;
   handleCopyLink: (url: string, section: 'snapshot' | 'live') => void;
   ensureLiveLink: () => void;
+  revokeLiveLink: () => void;
 
   isShareModalOpen: boolean;
   setIsShareModalOpen: React.Dispatch<React.SetStateAction<boolean>>;

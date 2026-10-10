@@ -212,12 +212,20 @@ export default function EditorPage() {
       setSnapshotUrl(null);
       setIsSharing(true);
       try {
-        const { collection, addDoc } = await import('firebase/firestore');
+        if (!user) throw new Error('Not signed in');
+        const { collection, doc, writeBatch } = await import('firebase/firestore');
         const { db } = await import('../lib/firebase');
-        const docRef = await addDoc(collection(db, 'sharedResumes'), {
-          ...safeData,
-          createdAt: Date.now()
+        const createdAt = Date.now();
+        const docRef = doc(collection(db, 'sharedResumes'));
+        // The private ownership record must be written in the same batch (the rules check it), so only
+        // the snapshot's creator can later list and revoke it.
+        const batch = writeBatch(db);
+        batch.set(docRef, { ...safeData, createdAt });
+        batch.set(doc(db, 'users', user.uid, 'sharedLinks', docRef.id), {
+          createdAt,
+          profileName: appState.profiles[appState.activeProfileId]?.name ?? ''
         });
+        await batch.commit();
         setSnapshotUrl(`${window.location.origin}/view?id=${docRef.id}`);
         lastSnapshotDataStr.current = currentDataStr;
       } catch (err) {
@@ -263,6 +271,30 @@ export default function EditorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected behavior to avoid stale closures and infinite loops
   }, [appState, data, resume.updateProfileData, user, isPro]);
 
+  const revokeLiveLink = useCallback(async () => {
+    const { liveId, updateToken } = resume.getCurrentData();
+    if (!liveId) return;
+    // Clear it from the profile first: that cancels the pending 2 s auto-sync, which would
+    // otherwise re-create the public document right after we delete it.
+    resume.updateProfileData(prev => {
+      const next = { ...prev };
+      delete next.liveId;
+      delete next.updateToken;
+      return next;
+    });
+    try {
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      await deleteDoc(doc(db, 'liveResumes', liveId));
+      notify(t('editor.sharedLinks.liveStopped'));
+    } catch (err) {
+      console.error('Failed to stop the live link:', err);
+      // Put it back so the owner can see the link is still live and retry.
+      resume.updateProfileData(prev => ({ ...prev, liveId, updateToken }));
+      notify(t('editor.sharedLinks.stopLiveFailed'), 'error');
+    }
+  }, [resume, notify, t]);
+
   const handleCopyLink = useCallback(async (url: string, section: 'snapshot' | 'live') => {
     await copyTextToClipboard(url);
     setCopiedSection(section);
@@ -306,7 +338,7 @@ export default function EditorPage() {
     setIsSidebarCollapsed, setProfileToDelete, setBlockToDelete,
     setIsLogoutModalOpen, openShareModal, isSharing, tabsContainerRef,
     handleTabClick, snapshotUrl, setSnapshotUrl, copiedSection, setCopiedSection, isInitializingLive,
-    handleCopyLink, ensureLiveLink, handleExportPDF, direction, setDirection,
+    handleCopyLink, ensureLiveLink, revokeLiveLink, handleExportPDF, direction, setDirection,
     isShareModalOpen, setIsShareModalOpen, blockToDelete, profileToDelete, setIsImportModalOpen, variants,
     isPro,
     isAdmin
