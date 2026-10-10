@@ -10,7 +10,7 @@ interface SharedLinksManagerProps {
   onStopLive: () => void;
 }
 
-export default function SharedLinksManager({ uid }: SharedLinksManagerProps) {
+export default function SharedLinksManager({ uid, hasLiveLink, onStopLive }: SharedLinksManagerProps) {
   const { t, i18n } = useTranslation();
   const { notify } = useNotice();
   const { links, revokeSnapshot } = useSharedLinks(uid);
@@ -27,6 +27,15 @@ export default function SharedLinksManager({ uid }: SharedLinksManagerProps) {
 
   return (
     <section aria-label={t('editor.sharedLinks.title')} className="flex flex-col gap-3 w-full text-left p-4 rounded-xl border border-[#eceae4] bg-[#f9f8f5]">
+      {hasLiveLink && (
+        <button
+          type="button"
+          onClick={onStopLive}
+          className="self-start px-3 py-1.5 rounded-full text-xs border border-red-200 text-red-700 hover:bg-red-50 transition-colors"
+        >
+          {t('editor.sharedLinks.stopLive')}
+        </button>
+      )}
       <h4 className="text-sm font-medium text-[#1c1c1c]">{t('editor.sharedLinks.snapshotsTitle')}</h4>
       {links.length === 0 ? (
         <p className="text-xs text-[#5f5f5d]">{t('editor.sharedLinks.empty')}</p>

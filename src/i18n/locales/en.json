@@ -103,6 +103,7 @@
     },
     "sharedLinks": {
       "title": "Manage shared links",
+      "stopLive": "Stop sharing the live link",
       "snapshotsTitle": "Snapshot links you created",
       "empty": "No snapshot links yet.",
       "revoke": "Revoke",

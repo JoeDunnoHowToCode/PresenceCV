@@ -103,6 +103,7 @@
     },
     "sharedLinks": {
       "title": "管理分享連結",
+      "stopLive": "停止分享即時連結",
       "snapshotsTitle": "你建立的快照連結",
       "empty": "還沒有快照連結。",
       "revoke": "撤銷",
