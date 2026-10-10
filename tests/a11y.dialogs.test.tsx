@@ -12,8 +12,9 @@ vi.mock('../src/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
 vi.mock('../src/lib/firebase', () => ({ auth: {}, db: {} }));
 
 // useResume returns ~40 members; these tests need its data, every other member can be a no-op function.
-const mockResume = () => new Proxy(
+const mockResume = (overrides: Record<string, unknown> = {}) => new Proxy(
   {
+    ...overrides,
     data: DEFAULT_RESUME,
     appState: { activeProfileId: 'main', profiles: { main: { id: 'main', name: 'Main', data: DEFAULT_RESUME } } },
     loading: false,
@@ -49,5 +50,19 @@ describe('editor modals', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('asks before deleting a section in a labelled modal dialog that takes focus; Escape cancels', () => {
+    const removeBlock = vi.fn();
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({ removeBlock }) as never);
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    const experienceTab = screen.getByRole('button', { name: 'Experience' }).closest('[data-active]') as HTMLElement;
+    fireEvent.click(within(experienceTab).getByRole('button', { name: 'Delete Section' }));
+
+    expectFocusedModalDialog('Delete Section?');
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(removeBlock).not.toHaveBeenCalled();
   });
 });
