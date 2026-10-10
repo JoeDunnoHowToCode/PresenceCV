@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 
 interface ImportResumeModalProps {
@@ -42,6 +43,8 @@ interface ImportResumeModalProps {
 export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, onClose, onImport }) => {
   const { t } = useTranslation();
   const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, isOpen);
   const [isUploading, setIsUploading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -180,6 +183,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
