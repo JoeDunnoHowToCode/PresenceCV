@@ -12,16 +12,19 @@ vi.mock('../src/utils/rateLimiter', () => ({
 // Mock @google/genai
 vi.mock('@google/genai', () => {
   return {
-    GoogleGenAI: vi.fn().mockImplementation(() => ({
-      models: {
-        generateContent: vi.fn().mockResolvedValue({
-          text: JSON.stringify({
-            profile: { name: 'AI Gen User', title: '', location: '', email: '', summary: '' },
-            contactItems: [], experience: [], education: [], skills: []
+    // A function, not an arrow: the code under test calls it with `new` (Vitest 3+ enforces this).
+    GoogleGenAI: vi.fn().mockImplementation(function () {
+      return {
+        models: {
+          generateContent: vi.fn().mockResolvedValue({
+            text: JSON.stringify({
+              profile: { name: 'AI Gen User', title: '', location: '', email: '', summary: '' },
+              contactItems: [], experience: [], education: [], skills: []
+            })
           })
-        })
-      }
-    })),
+        }
+      };
+    }),
     Type: { OBJECT: 'OBJECT', STRING: 'STRING', ARRAY: 'ARRAY' }
   };
 });
