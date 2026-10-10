@@ -100,6 +100,11 @@
     "notices": {
       "saveFailed": "Couldn't save your changes to the cloud. They're kept on this device, and we'll try again on your next edit.",
       "structuralSyncFailed": "Couldn't save this change to the cloud (network error or resume limit reached), so it was undone to prevent data loss."
+    },
+    "a11y": {
+      "reorderSection": "Drag to reorder the {{title}} section",
+      "reorderItem": "Drag to reorder {{title}}",
+      "reorderUntitledItem": "Drag to reorder this item"
     }
   },
   "common": {

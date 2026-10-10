@@ -580,6 +580,7 @@ export default function DesktopEditLayout(props: EditorLayoutProps) {
                               >
                                 <div 
                                   {...provided.dragHandleProps}
+                                  aria-label={t('editor.a11y.reorderSection', { title: block.title })}
                                   className="cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100"
                                 >
                                   <LucideIcons.GripVertical className="w-4 h-4" />

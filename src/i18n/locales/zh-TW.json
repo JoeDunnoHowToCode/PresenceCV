@@ -100,6 +100,11 @@
     "notices": {
       "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。",
       "structuralSyncFailed": "無法將這項變更儲存到雲端（網路錯誤或已達履歷上限），已復原以避免資料遺失。"
+    },
+    "a11y": {
+      "reorderSection": "拖曳以調整「{{title}}」區塊的順序",
+      "reorderItem": "拖曳以調整「{{title}}」的順序",
+      "reorderUntitledItem": "拖曳以調整這個項目的順序"
     }
   },
   "common": {
