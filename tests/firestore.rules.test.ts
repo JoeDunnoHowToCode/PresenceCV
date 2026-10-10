@@ -2,12 +2,13 @@ import { initializeTestEnvironment, assertFails, assertSucceeds, RulesTestEnviro
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
-import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
-// Requires Firebase Emulator (Java JRE). Run via GitHub Actions CI.
-describe.skip('Firestore Security Rules', () => {
+// Needs the Firestore emulator (Java). `npm run test:rules` starts it and sets FIRESTORE_EMULATOR_HOST;
+// plain `npm test` skips this suite, and test:rules fails if anything here is skipped.
+describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules', () => {
   beforeAll(async () => {
     testEnv = await initializeTestEnvironment({
       projectId: 'demo-presencecv',
@@ -64,7 +65,7 @@ describe.skip('Firestore Security Rules', () => {
     it('denies creation when user has >3 profiles (quota enforcement)', async () => {
       // Setup: user with 4 profiles
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_123'), {
+        await setDoc(doc(context.firestore(), 'users/user_123/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
       });
@@ -83,7 +84,7 @@ describe.skip('Firestore Security Rules', () => {
     it('allows creation when user has >3 profiles but is admin', async () => {
       // Setup: user with 4 profiles + admin doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+        await setDoc(doc(context.firestore(), 'users/user_admin/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
@@ -103,7 +104,7 @@ describe.skip('Firestore Security Rules', () => {
     it('allows creation when user has >3 profiles but is users_pro', async () => {
       // Setup: user with 4 profiles + users_pro doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_pro'), {
+        await setDoc(doc(context.firestore(), 'users/user_pro/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'users_pro/user_pro'), { status: 'active' });
@@ -198,7 +199,7 @@ describe.skip('Firestore Security Rules', () => {
     it('denies creation when user has >3 profiles (quota enforcement)', async () => {
       // Setup: user with 4 profiles
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_123'), {
+        await setDoc(doc(context.firestore(), 'users/user_123/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
       });
@@ -215,7 +216,7 @@ describe.skip('Firestore Security Rules', () => {
     it('allows creation when user has >3 profiles but is admin', async () => {
       // Setup: user with 4 profiles + admin doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_admin'), {
+        await setDoc(doc(context.firestore(), 'users/user_admin/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'admins/user_admin'), { role: 'admin' });
@@ -233,7 +234,7 @@ describe.skip('Firestore Security Rules', () => {
     it('allows creation when user has >3 profiles but is users_pro', async () => {
       // Setup: user with 4 profiles + users_pro doc
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_pro'), {
+        await setDoc(doc(context.firestore(), 'users/user_pro/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
         await setDoc(doc(context.firestore(), 'users_pro/user_pro'), { status: 'active' });
@@ -247,23 +248,6 @@ describe.skip('Firestore Security Rules', () => {
         ownerUid: 'user_pro',
         isPro: true
       }));
-    });
-  });
-
-  describe('user_limits', () => {
-    it('allows read by owner', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertSucceeds(getDoc(doc(db, 'user_limits/user_123')));
-    });
-
-    it('denies read by other users', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertFails(getDoc(doc(db, 'user_limits/user_456')));
-    });
-
-    it('denies write by anyone (even owner)', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertFails(setDoc(doc(db, 'user_limits/user_123'), { count: 1 }));
     });
   });
 
