@@ -65,7 +65,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('denies creation when user has >3 profiles (quota enforcement)', async () => {
       // Setup: user with 4 profiles
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_123'), {
+        await setDoc(doc(context.firestore(), 'users/user_123/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
       });
@@ -199,7 +199,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
     it('denies creation when user has >3 profiles (quota enforcement)', async () => {
       // Setup: user with 4 profiles
       await testEnv.withSecurityRulesDisabled(async (context) => {
-        await setDoc(doc(context.firestore(), 'users/user_123'), {
+        await setDoc(doc(context.firestore(), 'users/user_123/userState/state'), {
           profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
         });
       });
