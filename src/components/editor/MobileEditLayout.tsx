@@ -488,9 +488,15 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                      )}
                    </div>
                    
-                   <div className="flex items-center gap-2 pl-2 shrink-0">
-                     <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
-                   </div>
+                   {/* A real button for keyboard users; its click bubbles to the toggle handler above. */}
+                   <button
+                     type="button"
+                     aria-expanded={isMobileMenuOpen}
+                     aria-label={t('editor.layout.chooseSection')}
+                     className="flex items-center gap-2 pl-2 shrink-0"
+                   >
+                     <LucideIcons.ChevronDown aria-hidden="true" className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
+                   </button>
                  </div>
                  <AnimatePresence>
                    {isMobileMenuOpen && (
@@ -513,7 +519,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                            <div key={blockId} className="group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all cursor-pointer hover:bg-black/5 text-[#5f5f5d] hover:text-[#1c1c1c]" onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}>
                              <div className="flex-1 flex items-center gap-3 min-w-0">
                                <BlockIcon className="w-4 h-4 shrink-0 text-accent" />
-                               <span className="text-sm tracking-widest font-medium truncate">{block.title}</span>
+                               {/* A real button for keyboard users; its click bubbles to the row handler above. */}
+                              <button type="button" className="text-sm tracking-widest font-medium truncate text-left">{block.title}</button>
                              </div>
                              <div className="flex items-center gap-1 shrink-0">
                                <button

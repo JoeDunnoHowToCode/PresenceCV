@@ -83,7 +83,8 @@
       "addListView": "Add List View",
       "addTagView": "Add Tag View",
       "listView": "List View",
-      "tagView": "Tag View"
+      "tagView": "Tag View",
+      "chooseSection": "Choose a section"
     },
     "sidebar": {
       "share": "Share"
