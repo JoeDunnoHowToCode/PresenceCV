@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ImportResumeModal } from '../src/components/ImportResumeModal';
 import * as AuthContext from '../src/contexts/AuthContext';
 
@@ -32,5 +32,23 @@ describe('ImportResumeModal accessibility', () => {
     rerender(<ImportResumeModal isOpen onClose={onClose} onImport={vi.fn()} />);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores Escape while a resume is uploading, like its backdrop', async () => {
+    const realFetch = global.fetch;
+    global.fetch = vi.fn(() => new Promise<Response>(() => {})); // the upload never finishes
+    try {
+      const onClose = vi.fn();
+      render(<ImportResumeModal isOpen onClose={onClose} onImport={vi.fn()} />);
+      const file = new File(['dummy content'], 'resume.pdf', { type: 'application/pdf' });
+      fireEvent.change(document.querySelector('input[type="file"]')!, { target: { files: [file] } });
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      global.fetch = realFetch;
+    }
   });
 });
