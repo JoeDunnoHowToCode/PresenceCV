@@ -41,4 +41,18 @@ describe('SharedLinksManager', () => {
 
     expect(onStopLive).toHaveBeenCalledTimes(1);
   });
+
+  it("shows each link's date and time without seconds", () => {
+    vi.mocked(sharedLinks.useSharedLinks).mockReturnValue({
+      links: [{ id: 'x', createdAt: Date.UTC(2026, 9, 9, 6, 30, 45), profileName: 'Design CV' }],
+      revokeSnapshot,
+    });
+    render(<NoticeProvider><SharedLinksManager uid="u1" hasLiveLink={false} onStopLive={vi.fn()} /></NoticeProvider>);
+
+    const row = screen.getByText('Design CV').closest('li')!;
+
+    // Minutes are :30 in every whole-hour time zone; the seconds (:45) should not be shown.
+    expect(row.textContent).toContain(':30');
+    expect(row.textContent).not.toContain(':45');
+  });
 });
