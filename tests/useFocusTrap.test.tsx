@@ -29,4 +29,16 @@ describe('useFocusTrap', () => {
 
     expect(screen.getByText('first')).toHaveFocus();
   });
+
+  it('keeps Tab and Shift+Tab inside: last wraps to first, first wraps to last', () => {
+    render(<Popup />);
+    fireEvent.click(screen.getByText('open'));
+
+    screen.getByText('last').focus();
+    fireEvent.keyDown(screen.getByText('last'), { key: 'Tab' });
+    expect(screen.getByText('first')).toHaveFocus();
+
+    fireEvent.keyDown(screen.getByText('first'), { key: 'Tab', shiftKey: true });
+    expect(screen.getByText('last')).toHaveFocus();
+  });
 });
