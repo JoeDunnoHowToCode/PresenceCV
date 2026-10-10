@@ -2,7 +2,7 @@ import { initializeTestEnvironment, assertFails, assertSucceeds, RulesTestEnviro
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
@@ -305,6 +305,69 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
       await assertSucceeds(setDoc(doc(db, 'users/user_pro/userState/state'), {
         profiles: { '1': {}, '2': {}, '3': {}, '4': {} }
       }));
+    });
+  });
+  describe('revoking shared links', () => {
+    const snapshot = { profile: {}, blocks: {}, blockOrder: [], createdAt: 1 };
+    const live = { profile: {}, blocks: {}, blockOrder: [], ownerUid: 'user_123' };
+
+    it('lets the owner delete their live link', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'liveResumes/live_1'), live);
+      });
+
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      await assertSucceeds(deleteDoc(doc(db, 'liveResumes/live_1')));
+    });
+
+    it("denies deleting someone else's live link", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'liveResumes/live_1'), live);
+      });
+
+      const db = testEnv.authenticatedContext('user_456').firestore();
+      await assertFails(deleteDoc(doc(db, 'liveResumes/live_1')));
+    });
+
+    it('allows creating a snapshot together with its ownership record', async () => {
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'sharedResumes/snap_1'), snapshot);
+      batch.set(doc(db, 'users/user_123/sharedLinks/snap_1'), { createdAt: 1, profileName: 'Main' });
+
+      await assertSucceeds(batch.commit());
+    });
+
+    it('denies claiming ownership of a snapshot that already exists', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'sharedResumes/snap_1'), snapshot);
+      });
+
+      const db = testEnv.authenticatedContext('user_456').firestore();
+      await assertFails(setDoc(doc(db, 'users/user_456/sharedLinks/snap_1'), { createdAt: 1, profileName: 'Not mine' }));
+    });
+
+    it('lets the owner delete their snapshot and its ownership record', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'sharedResumes/snap_1'), snapshot);
+        await setDoc(doc(context.firestore(), 'users/user_123/sharedLinks/snap_1'), { createdAt: 1, profileName: 'Main' });
+      });
+
+      const db = testEnv.authenticatedContext('user_123').firestore();
+      const batch = writeBatch(db);
+      batch.delete(doc(db, 'sharedResumes/snap_1'));
+      batch.delete(doc(db, 'users/user_123/sharedLinks/snap_1'));
+      await assertSucceeds(batch.commit());
+    });
+
+    it('denies deleting a snapshot without an ownership record', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'sharedResumes/snap_1'), snapshot);
+        await setDoc(doc(context.firestore(), 'users/user_123/sharedLinks/snap_1'), { createdAt: 1, profileName: 'Main' });
+      });
+
+      const db = testEnv.authenticatedContext('user_456').firestore();
+      await assertFails(deleteDoc(doc(db, 'sharedResumes/snap_1')));
     });
   });
 });
