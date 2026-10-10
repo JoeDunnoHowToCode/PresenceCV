@@ -51,4 +51,10 @@ describe('ImportResumeModal accessibility', () => {
       global.fetch = realFetch;
     }
   });
+
+  it('moves keyboard focus into the dialog when it opens', () => {
+    render(<ImportResumeModal isOpen onClose={vi.fn()} onImport={vi.fn()} />);
+
+    expect(screen.getByRole('dialog')).toContainElement(document.activeElement as HTMLElement);
+  });
 });
