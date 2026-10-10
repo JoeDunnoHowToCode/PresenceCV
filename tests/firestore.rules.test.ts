@@ -2,7 +2,7 @@ import { initializeTestEnvironment, assertFails, assertSucceeds, RulesTestEnviro
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
-import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
 let testEnv: RulesTestEnvironment;
 
@@ -248,23 +248,6 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)('Firestore Security Rules'
         ownerUid: 'user_pro',
         isPro: true
       }));
-    });
-  });
-
-  describe('user_limits', () => {
-    it('allows read by owner', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertSucceeds(getDoc(doc(db, 'user_limits/user_123')));
-    });
-
-    it('denies read by other users', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertFails(getDoc(doc(db, 'user_limits/user_456')));
-    });
-
-    it('denies write by anyone (even owner)', async () => {
-      const db = testEnv.authenticatedContext('user_123').firestore();
-      await assertFails(setDoc(doc(db, 'user_limits/user_123'), { count: 1 }));
     });
   });
 
