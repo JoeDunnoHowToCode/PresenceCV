@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from '../src/pages/HomePage';
 import * as AuthContext from '../src/contexts/AuthContext';
@@ -22,5 +22,15 @@ describe('home page accessibility', () => {
     const unnamed = screen.queryAllByRole('button', { name: '' }).map((button) => button.outerHTML.slice(0, 120));
 
     expect(unnamed).toEqual([]);
+  });
+
+  it('tells screen readers whether the mobile menu is open', () => {
+    render(<MemoryRouter><HomePage /></MemoryRouter>);
+
+    expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+
+    expect(screen.getByRole('button', { name: 'Close menu' })).toHaveAttribute('aria-expanded', 'true');
   });
 });
