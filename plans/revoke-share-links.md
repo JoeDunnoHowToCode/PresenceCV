@@ -35,19 +35,62 @@ Track: **Everything else** (Gates 1–3). Scan finding: share links can never be
 | `revokeSnapshot` deletes the snapshot and its record in one batch | `tests/useSharedLinks.test.ts` |
 | Opening Share writes the snapshot and its ownership record in one batch | `tests/EditorPage.share.test.tsx` |
 | Stopping the live link deletes it and clears `liveId`/`updateToken` | `tests/EditorPage.share.test.tsx` |
+| A failed delete puts the live link back so the owner can retry | `tests/EditorPage.share.test.tsx` |
 | The manager lists snapshot links and revokes the one clicked | `tests/SharedLinksManager.test.tsx` |
 | The manager stops the live link when asked | `tests/SharedLinksManager.test.tsx` |
 
 ## Checklist
 
-- [ ] rules: live link delete (owner only) -> verify: PR CI, "Run Emulator Rules Tests"
-- [ ] rules: snapshot + ownership in one batch -> verify: PR CI
-- [ ] rules: no claiming existing snapshots -> verify: PR CI
-- [ ] rules: snapshot delete (owner only) -> verify: PR CI
-- [ ] useSharedLinks lists newest first -> verify: `npx vitest run tests/useSharedLinks.test.ts`
-- [ ] revokeSnapshot batch-deletes both docs -> verify: `npx vitest run tests/useSharedLinks.test.ts`
-- [ ] Share writes snapshot + ownership in one batch -> verify: `npx vitest run tests/EditorPage.share.test.tsx`
-- [ ] stopping the live link -> verify: `npx vitest run tests/EditorPage.share.test.tsx`
-- [ ] manager lists and revokes snapshots -> verify: `npx vitest run tests/SharedLinksManager.test.tsx`
-- [ ] manager stops the live link -> verify: `npx vitest run tests/SharedLinksManager.test.tsx`
+- [x] rules: live link delete (owner only) -> verify: PR CI, "Run Emulator Rules Tests"
+  ```
+  red (CI 38035526323, before the rules change): Tests  3 failed | 22 passed (25)
+    FAIL … lets the owner delete their live link
+    FAIL … allows creating a snapshot together with its ownership record
+    FAIL … lets the owner delete their snapshot and its ownership record
+  guards passing already: someone else's live link, claiming an existing snapshot, deleting without a record
+  green: see the PR's CI after c5fd51c
+  ```
+- [x] rules: snapshot + ownership in one batch -> verify: PR CI
+  ```
+  red/green: same runs as above
+  ```
+- [x] rules: no claiming existing snapshots -> verify: PR CI
+  ```
+  guard: passed before and must keep passing after the rules change
+  ```
+- [x] rules: snapshot delete (owner only) -> verify: PR CI
+  ```
+  red/green: same runs as above
+  ```
+- [x] useSharedLinks lists newest first -> verify: `npx vitest run tests/useSharedLinks.test.ts`
+  ```
+  red:   TypeError: useSharedLinks is not a function   (red commit blocked by typecheck; staged, test unchanged)
+  green: Tests  1 passed (1)
+  ```
+- [x] revokeSnapshot batch-deletes both docs -> verify: `npx vitest run tests/useSharedLinks.test.ts`
+  ```
+  red:   TypeError: result.current.revokeSnapshot is not a function   (staged, test unchanged)
+  green: Tests  2 passed (2)
+  ```
+- [x] Share writes snapshot + ownership in one batch -> verify: `npx vitest run tests/EditorPage.share.test.tsx`
+  ```
+  red:   AssertionError: expected "spy" to be called 1 times, but got 0 times
+  green: Tests  1 passed (1)
+  ```
+- [x] stopping the live link -> verify: `npx vitest run tests/EditorPage.share.test.tsx`
+  ```
+  red:   Unable to find role="button" and name "Stop sharing the live link"
+  green: Tests  2 passed (2)
+  edge (failed delete puts the link back): red "expected spy to be called 2 times, but got 1 times" -> green Tests  3 passed (3)
+  ```
+- [x] manager lists and revokes snapshots -> verify: `npx vitest run tests/SharedLinksManager.test.tsx`
+  ```
+  red:   Element type is invalid … got: undefined   (staged, test unchanged)
+  green: Tests  1 passed
+  ```
+- [x] manager stops the live link -> verify: `npx vitest run tests/SharedLinksManager.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "button" and name "Stop sharing the live link"
+  green: Tests  2 passed
+  ```
 - [ ] full suite -> verify: `npm test && npm run check && npm run build`, plus PR CI
