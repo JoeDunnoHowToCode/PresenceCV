@@ -23,12 +23,28 @@ Rendering the editor (every section tab) and the home page with Testing Library,
   - `LogoutConfirmModal` and `ImportResumeModal` already had Escape and title ids, so they only add `useFocusTrap`.
   - Editor modals, in both layouts (deliberately duplicated): share, delete-section confirm, delete-profile confirm (its "can't delete the last one" and "delete?" variants share one title id) → `role="dialog"`, `aria-modal="true"`, `aria-labelledby` the `<h3>`; Escape does what Cancel / X does. The share modal's X button gets a name (`common.close`).
   - Photo crop modal (`PhotoUploadCrop`): same; Escape = Cancel.
+  - **Share gives focus back to the Share button (found in the real-browser check)**: `openShareModal` blurred whatever had focus (to flush debounced inputs), including the Share button itself, so on close focus fell to `<body>`. It now blurs only text fields (`input, textarea, [contenteditable="true"]`). A pin test guards the flush: a focused field's latest edit is saved once Share opens. (Safari does not focus a clicked button, so a mouse click there still ends on the page; keyboard use returns to the button.)
 - **Keyboard-usable icon pickers (same list)**: the section icon picker (desktop tab strip, mobile section header) and the contact icon picker (`InfoEditor`) were clickable `<svg>`/`<div>`s.
   - Trigger → one `<button type="button">` (wrapping the icon or the dashed circle, so it stays mounted and focus can return to it) named `editor.a11y.chooseSectionIcon` ("Choose an icon for the {{title}} section") / `chooseContactIcon` ("Choose an icon for {{text}}"; `chooseUntitledContactIcon` when the text is empty), with `aria-haspopup="dialog"` and `aria-expanded`.
   - Popup → `role="dialog"` with the same label, via `useModalDialog`: focus moves in, Tab stays in, Escape closes and returns focus to the trigger. The click-away backdrop is unchanged.
   - Options → `<button type="button">`s named by a translated label, `editor.icons.<LucideName>` (21 names across `AVAILABLE_ICONS` and `AVAILABLE_BLOCK_ICONS`), and `editor.a11y.noIcon` for 🚫 (which replaces the hard-coded `title="No Icon"`). A test pins that every offered icon has a label in both locales.
 - Not touched: the unreachable `isMobile` branch inside `DesktopEditLayout` (the layout only renders when `isMobile` is false) and the unreachable else-branch in `MobileEditLayout` — same dead-code finding as above.
 - Out of scope (follow-ups): arrow-key movement inside the icon grid (Tab works); the photo drop zone is a clickable `<div>` with a hidden file input (no keyboard path to upload); hard-coded English in `PhotoUploadCrop` ("Position in Layout:", "Left", "Right", "Drag to move • Scroll to zoom").
+- Found while verifying, not changed here:
+  - Each desktop tab's "Delete Section" button stays `opacity: 0` while it has keyboard focus (it only appears on hover), and every one is named "Delete Section" (hard-coded English, no section name).
+  - On desktop the sidebar (`z-[60]`) draws over the left edge of the photo crop dialog: the dialog's `z-[100]` sits inside the main column's `z-10` stacking context.
+  - `useDebouncedInput` does not debounce: its unmount-flush effect depends on `[localValue, onSave]`, so its cleanup runs, and saves, on every change.
+
+## Real-browser check (2026-10-10)
+
+The real `EditorPage` in Chromium (Vite harness in a scratch worktree, `useResume` / auth / Firebase stubbed, never committed), driven with real key presses:
+
+- Section icon picker (desktop): Enter on "Choose an icon for the Experience section" opens it with focus on "No icon"; Shift+Tab wraps to "Processor", Tab wraps back; Escape closes and refocuses the trigger; Tab ×8 + Enter picks "Star" (icon changes, focus back on the trigger, focus ring visible).
+- Contact icon picker: real names ("Choose an icon for Metropolis, Earth"); Tab ×2 + Enter picks "Email".
+- Share: opens on "Close"; Shift+Tab wraps to "Generate PDF"; Escape returns focus to the Share button (after the fix above; before it, to `<body>`).
+- Delete-section confirm: opens on Cancel; Tab → Confirm → Cancel; Escape cancels and refocuses the delete button.
+- Photo crop (test PNG injected into the file input): labelled dialog, opens on Cancel; order crop area → Cancel → Save Photo (react-easy-crop's crop area becomes focusable once the image loads); Escape cancels.
+- 375 px, zh-TW: trigger 「選擇「Experience」區塊的圖示」, options 不使用圖示、公事包 … 處理器; Shift+Tab wraps; Escape refocuses the trigger.
 
 ## Tests
 
@@ -139,13 +155,67 @@ Rendering the editor (every section tab) and the home page with Testing Library,
   red:   TypeError: useModalDialog is not a function   (red commit blocked by the pre-commit checks; staged, assertions unchanged, lands with green)
   green: ✓ tests/useModalDialog.test.tsx  (1 test)
   ```
-- [ ] desktop share modal is a labelled modal dialog: takes focus, Escape closes, X button named -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
-- [ ] desktop delete-section confirm is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
-- [ ] desktop delete-profile confirm is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
-- [ ] mobile share / delete-section / delete-profile modals: same -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
-- [ ] photo crop modal is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/PhotoUploadCrop.a11y.test.tsx`
-- [ ] every offered icon has a label in both locales -> verify: `npx vitest run tests/i18n.locales.test.ts`
-- [ ] desktop section icon picker works from the keyboard (named trigger + aria-expanded, focus moves in, named options pick, Escape closes and refocuses the trigger) -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
-- [ ] mobile section icon picker: same -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
-- [ ] contact icon picker: same -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
-- [ ] full suite (with focus traps and icon pickers) -> verify: `npm test && npm run check && npm run build`
+- [x] desktop share modal is a labelled modal dialog: takes focus, Escape closes, X button named -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Share Your Resume"
+  green: ✓ tests/a11y.dialogs.test.tsx  (1 test)
+  ```
+- [x] desktop delete-section confirm is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Delete Section?"
+  green: ✓ tests/a11y.dialogs.test.tsx  (2 tests)
+  ```
+- [x] desktop delete-profile confirm is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Delete Resume?"
+  green: ✓ tests/a11y.dialogs.test.tsx  (3 tests)
+  ```
+- [x] mobile share / delete-section / delete-profile modals: same -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "dialog" and name "Share Your Resume"
+  red:   Unable to find an accessible element with the role "dialog" and name "Delete Section?"
+  red:   Unable to find an accessible element with the role "dialog" and name "Delete Resume?"
+         (one test per modal; the first combined test never reached its delete-section step, see 7852e06)
+  green: ✓ tests/a11y.dialogs.test.tsx  (6 tests)
+  ```
+- [x] photo crop modal is a labelled modal dialog: takes focus, Escape cancels -> verify: `npx vitest run tests/PhotoUploadCrop.a11y.test.tsx`
+  ```
+  red:   Unable to find role="dialog" and name "Crop Profile Photo"   (the crop step's heading was found, so it did open)
+  green: ✓ tests/PhotoUploadCrop.a11y.test.tsx  (1 test)
+  ```
+- [x] every offered icon has a label in both locales -> verify: `npx vitest run tests/i18n.locales.test.ts`
+  ```
+  red:   AssertionError: expected [ 'en: editor.icons.MapPin', …(41) ] to deeply equal []
+  green: ✓ tests/i18n.locales.test.ts  (8 tests)
+  ```
+- [x] desktop section icon picker works from the keyboard (named trigger + aria-expanded, focus moves in, named options pick, Escape closes and refocuses the trigger) -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "button" and name `/^Choose an icon for the/`
+  green: ✓ tests/a11y.iconPickers.test.tsx  (1 test)
+  ```
+- [x] mobile section icon picker: same -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "button" and name `/^Choose an icon for the/`
+  green: ✓ tests/a11y.iconPickers.test.tsx  (2 tests)
+  ```
+- [x] contact icon picker: same -> verify: `npx vitest run tests/a11y.iconPickers.test.tsx`
+  ```
+  red:   Unable to find an accessible element with the role "button" and name `/^Choose an icon for/`
+  green: ✓ tests/a11y.iconPickers.test.tsx  (3 tests)
+  ```
+- [x] pin: a focused field's latest edit is saved once Share opens (guards the next change) -> verify: `npx vitest run tests/a11y.dialogs.test.tsx -t "latest edit"`
+  ```
+  pin (passes on the code before the change): Tests  1 passed | 6 skipped (7)
+  ```
+- [x] closing Share gives focus back to the Share button -> verify: `npx vitest run tests/a11y.dialogs.test.tsx`
+  ```
+  red:   Error: expect(element).toHaveFocus()
+  green: ✓ tests/a11y.dialogs.test.tsx  (8 tests)
+  ```
+- [x] full suite (with focus traps, editor modals, icon pickers and the Share focus fix; at 22ca1be) -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  28 passed | 1 skipped (29)
+        Tests  134 passed | 19 skipped (153)
+  ✖ 88 problems (0 errors, 88 warnings)
+  ✓ built in 5.70s
+  ```
