@@ -44,7 +44,13 @@ Out of scope: `firebase` 12 → 9 and `firebase-tools` downgrades that npm sugge
   ✖ 91 problems (0 errors, 91 warnings)
   ✓ built in 5.37s
   ```
-- [ ] Rules suite still runs and is checked on Vitest 4 -> verify: PR CI, step "Run Emulator Rules Tests"
+- [x] Rules suite still runs and is checked on Vitest 4 -> verify: PR CI, step "Run Emulator Rules Tests"
+  ```
+  CI 38035332686 (c5970a3, Node 22 per the setup-node log):
+  Run Unit Tests:            Tests  106 passed | 19 skipped (125)
+  Run Emulator Rules Tests:  ✓ tests/firestore.rules.test.ts (19 tests) / Tests  19 passed (19)
+                             Script exited successfully (code 0)   <- check-rules-report found nothing skipped
+  ```
 - [x] Advisories after -> verify: `npm audit` and `npm audit --omit=dev`
   ```
   all:  {"low":1,"moderate":5,"high":11,"critical":0,"total":17}   (was 28, 2 critical)
