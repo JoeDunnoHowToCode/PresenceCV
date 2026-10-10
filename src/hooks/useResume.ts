@@ -31,6 +31,8 @@
  * Firestore: users/{uid}/userState/state (read + write)
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNotice } from '../contexts/NoticeContext';
 import { ResumeData } from '../types';
 import { DEFAULT_RESUME } from '../data/defaultResume';
 import { auth, db } from '../lib/firebase';
@@ -57,6 +59,8 @@ export interface AppState {
 }
 
 export function useResume() {
+  const { t } = useTranslation();
+  const { notify } = useNotice();
   const sanitizeHtml = (str: string, maxLength: number = 2000) => {
     if (typeof str !== 'string') return str;
     if (str.startsWith('data:image/')) return str; // Allow full data URLs
@@ -108,6 +112,8 @@ export function useResume() {
   const isInitialMount = useRef(true);
   // Using a ref to track if remote initialization has settled (either loaded or confirmed no auth)
   const isRemoteReady = useRef(false);
+  // The debounced autosave that hasn't run yet, so it can be flushed when the page is hidden.
+  const pendingSaveRef = useRef<{ timeoutId: ReturnType<typeof setTimeout>; save: () => void } | null>(null);
 
   // 1. Sync from Firestore on auth state change
   useEffect(() => {
@@ -169,13 +175,35 @@ export function useResume() {
           });
         } catch (error) {
           console.error("Failed to save state to Firestore:", error);
+          notify(t('editor.notices.saveFailed'), 'error');
         }
       }
     };
 
-    const timeoutId = setTimeout(syncToFirestore, 1500); // 1.5s debounce
-    return () => clearTimeout(timeoutId);
+    const timeoutId = setTimeout(() => {
+      pendingSaveRef.current = null;
+      syncToFirestore();
+    }, 1500); // 1.5s debounce
+    pendingSaveRef.current = { timeoutId, save: syncToFirestore };
+    return () => {
+      clearTimeout(timeoutId);
+      pendingSaveRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- notify/t are only read when a save fails; re-running on a language switch would write an unchanged state
   }, [appState]);
+
+  // 3. Write a pending autosave right away when the page is hidden (tab switch, minimize, close)
+  useEffect(() => {
+    const flushPendingSave = () => {
+      if (document.visibilityState !== 'hidden' || !pendingSaveRef.current) return;
+      const { timeoutId, save } = pendingSaveRef.current;
+      clearTimeout(timeoutId);
+      pendingSaveRef.current = null;
+      save();
+    };
+    document.addEventListener('visibilitychange', flushPendingSave);
+    return () => document.removeEventListener('visibilitychange', flushPendingSave);
+  }, []);
 
   // 結構性變更（profile 刪除、block 重排）使用 transaction 防止多裝置/多 tab 覆蓋
   const syncStructuralChange = useCallback(async (newAppState: AppState) => {
@@ -199,7 +227,7 @@ export function useResume() {
       });
     } catch (error) {
       console.error("Failed to sync structural change to Firestore:", error);
-      alert('Failed to save to cloud (network error or limit reached). Changes reverted to prevent data loss.');
+      notify(t('editor.notices.structuralSyncFailed'), 'error');
       // Rollback to remote state
       const docRef = doc(db, 'users', user.uid, 'userState', 'state');
       getDoc(docRef).then(snap => {
@@ -210,7 +238,7 @@ export function useResume() {
         }
       }).catch(console.error);
     }
-  }, []);
+  }, [notify, t]);
 
   const data = appState.profiles[appState.activeProfileId]?.data || DEFAULT_RESUME;
 

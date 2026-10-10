@@ -14,12 +14,14 @@ import DesktopEditLayout from '../components/editor/DesktopEditLayout';
 import MobileEditLayout from '../components/editor/MobileEditLayout';
 import { EditorLayoutProps } from '../components/editor/EditorLayoutProps';
 import { useTranslation } from 'react-i18next';
+import { useNotice } from '../contexts/NoticeContext';
 
 export default function EditorPage() {
   useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, signOut, isPro, isAdmin } = useAuth();
   const { t } = useTranslation();
+  const { notify } = useNotice();
   
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -52,7 +54,7 @@ export default function EditorPage() {
   useEffect(() => {
     if (location.state?.openImport) {
       if (!isPro && !isAdmin && Object.keys(appState.profiles).length >= 3) {
-        alert(t('editor.alerts.limitReached'));
+        notify(t('editor.alerts.limitReached'));
       } else {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsImportModalOpen(true);
@@ -140,7 +142,7 @@ export default function EditorPage() {
       localStorage.setItem('RESUME_PRINT_DATA', JSON.stringify(profileData));
       const printWindow = window.open('/view?print=true', '_blank');
       if (!printWindow) {
-        alert(t('editor.alerts.allowPopups'));
+        notify(t('editor.alerts.allowPopups'), 'error');
         return;
       }
       const intervalId = setInterval(() => {
@@ -323,7 +325,7 @@ export default function EditorPage() {
         onClose={() => setIsImportModalOpen(false)}
         onImport={(parsedData) => {
           if (!isPro && !isAdmin && Object.keys(appState.profiles).length >= 3) {
-            alert(t('editor.alerts.limitReached'));
+            notify(t('editor.alerts.limitReached'));
             return;
           }
           importResumeProfile(

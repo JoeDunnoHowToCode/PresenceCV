@@ -96,6 +96,10 @@
       "limitReached": "You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to import a new one.",
       "allowPopups": "Please allow popups to generate the PDF.",
       "unsupportedFormat": "Only JPG, PNG, and HEIF formats are supported."
+    },
+    "notices": {
+      "saveFailed": "Couldn't save your changes to the cloud. They're kept on this device, and we'll try again on your next edit.",
+      "structuralSyncFailed": "Couldn't save this change to the cloud (network error or resume limit reached), so it was undone to prevent data loss."
     }
   },
   "common": {
@@ -110,6 +114,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "okay": "Okay",
+    "dismiss": "Dismiss",
     "deleteSectionTitle": "Delete Section?",
     "deleteSectionDesc": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
     "unableToDeleteProfileTitle": "Unable to delete the profile",

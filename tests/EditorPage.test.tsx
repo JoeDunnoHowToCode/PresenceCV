@@ -5,6 +5,9 @@ import EditorPage from '../src/pages/EditorPage';
 import { MemoryRouter } from 'react-router-dom';
 import * as AuthContext from '../src/contexts/AuthContext';
 import * as useResume from '../src/hooks/useResume';
+import { NoticeProvider } from '../src/contexts/NoticeContext';
+
+const LIMIT_MESSAGE = 'You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to import a new one.';
 
 
 // Mock dependencies
@@ -65,46 +68,54 @@ describe('Editor UI limits', () => {
     setupMock(false, false, 3);
 
     render(
-      <MemoryRouter>
-        <EditorPage />
-      </MemoryRouter>
+      <NoticeProvider>
+        <MemoryRouter>
+          <EditorPage />
+        </MemoryRouter>
+      </NoticeProvider>
     );
 
     const uploadButton = screen.getByText(/Upload Resume/i);
     fireEvent.click(uploadButton);
 
-    expect(mockAlert).toHaveBeenCalledWith('You have reached the maximum number of 3 resumes for non-pro users. Please upgrade to Pro or delete an existing resume to import a new one.');
+    expect(screen.getByRole('status')).toHaveTextContent(LIMIT_MESSAGE);
+    expect(mockAlert).not.toHaveBeenCalled();
   });
 
   it('allows opening import modal if isPro and count >= 3', () => {
     setupMock(true, false, 3);
 
     render(
-      <MemoryRouter>
-        <EditorPage />
-      </MemoryRouter>
+      <NoticeProvider>
+        <MemoryRouter>
+          <EditorPage />
+        </MemoryRouter>
+      </NoticeProvider>
     );
 
     const uploadButton = screen.getByText(/Upload Resume/i);
     fireEvent.click(uploadButton);
 
     expect(mockAlert).not.toHaveBeenCalled();
-    // In EditorPage, the modal open state is internal. We can just verify no alert.
+    expect(screen.queryByText(LIMIT_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('allows opening import modal if isAdmin and count >= 3', () => {
     setupMock(false, true, 3);
 
     render(
-      <MemoryRouter>
-        <EditorPage />
-      </MemoryRouter>
+      <NoticeProvider>
+        <MemoryRouter>
+          <EditorPage />
+        </MemoryRouter>
+      </NoticeProvider>
     );
 
     const uploadButton = screen.getByText(/Upload Resume/i);
     fireEvent.click(uploadButton);
 
     expect(mockAlert).not.toHaveBeenCalled();
+    expect(screen.queryByText(LIMIT_MESSAGE)).not.toBeInTheDocument();
   });
 });
 
