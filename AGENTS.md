@@ -10,9 +10,9 @@ This file exists only so Codex discovers the same rules Claude does. It is delib
 
 Even if you read nothing else, these are non-negotiable:
 
-1. **Never `git push`, `git merge`, or `git rebase`.** Deploy is a human pushing to `main`; Vercel auto-builds and `firestore.rules` ships via GitHub Action. Commit only when asked.
+1. **`git push` and merging (`git merge`, `gh pr merge`) only on the user's explicit instruction in the current conversation — never on your own initiative. Never `git rebase`.** Anything that lands on `main` deploys: Vercel auto-builds and `firestore.rules` ships via GitHub Action. Commit your work as you finish each step; no need to ask.
 2. **Stop after 3 consecutive failures** of the same test/typecheck/build command. Report a summary instead of guessing again.
-3. **Never delete, skip, or weaken a test to make the suite pass.** Fix the code, and add a regression test for every bug you fix.
+3. **Never delete, skip, or weaken a test to make the suite pass.** Fix the code, and add a regression test for every bug you fix. If a test seems wrong, stop and ask before changing it.
 4. **Read `.agents/LESSONS.md` first**, and append new non-obvious gotchas there when you find one. (Local-only/gitignored — it may be absent in a fresh clone.)
 
 ## Verification gate

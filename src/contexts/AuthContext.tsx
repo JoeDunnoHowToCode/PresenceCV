@@ -25,6 +25,7 @@
  */
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNotice } from './NoticeContext';
 import { auth, db } from '../lib/firebase';
 import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, browserPopupRedirectResolver } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -43,6 +44,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
+  const { notify } = useNotice();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -115,14 +117,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // User intentionally closed the popup, fail silently
         return;
       } else if (error.code === 'auth/popup-blocked') {
-        alert(t('auth.alerts.popupBlocked'));
+        notify(t('auth.alerts.popupBlocked'), 'error');
       } else if (error.code === 'auth/missing-initial-state' || (error.message && error.message.includes('missing initial state'))) {
-        alert(t('auth.alerts.storageBlocked'));
+        notify(t('auth.alerts.storageBlocked'), 'error');
       } else if (error.code === 'auth/too-many-requests') {
-        alert(t('auth.alerts.tooManyRequests'));
+        notify(t('auth.alerts.tooManyRequests'), 'error');
       } else {
         console.error('Sign-in error:', error);
-        alert(t('auth.alerts.failed'));
+        notify(t('auth.alerts.failed'), 'error');
       }
       throw error;
     }

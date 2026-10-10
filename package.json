@@ -14,7 +14,7 @@
     "start": "node --experimental-strip-types server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:rules": "firebase emulators:exec --project demo-test \"vitest run tests/firestore.rules.test.ts\"",
+    "test:rules": "firebase emulators:exec --project demo-test \"vitest run tests/firestore.rules.test.ts --reporter=default --reporter=json --outputFile.json=test-results/rules.json\" && node scripts/check-rules-report.mjs test-results/rules.json",
     "prepare": "husky"
   },
   "dependencies": {
@@ -76,6 +76,11 @@
     "vitest": "^1.6.0",
     "whatwg-fetch": "^3.6.2",
     "yaml": "^2.9.0"
+  },
+  "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^7.1.6"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx}": [

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNotice } from '../../contexts/NoticeContext';
 import Cropper from 'react-easy-crop';
 import * as LucideIcons from 'lucide-react';
 import getCroppedImg from '../../lib/cropImage';
@@ -12,6 +13,7 @@ interface PhotoUploadCropProps {
 
 const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: PhotoUploadCropProps) => {
   const { t } = useTranslation();
+  const { notify } = useNotice();
   const [isPhotoDragging, setIsPhotoDragging] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -28,7 +30,7 @@ const PhotoUploadCrop = React.memo(({ photo, photoPosition, updateProfile }: Pho
 
   const handleImageUpload = (file: File) => {
     if (!['image/jpeg', 'image/png', 'image/heic', 'image/heif'].includes(file.type)) {
-      alert(t('editor.alerts.unsupportedFormat'));
+      notify(t('editor.alerts.unsupportedFormat'), 'error');
       return;
     }
     const reader = new FileReader();
