@@ -15,7 +15,8 @@ vi.mock('firebase/auth', () => ({
     return () => {};
   }),
   signInWithPopup: vi.fn(),
-  GoogleAuthProvider: vi.fn().mockImplementation(() => ({ setCustomParameters: vi.fn() })),
+  // A function, not an arrow: AuthContext calls it with `new` (Vitest 3+ enforces this).
+  GoogleAuthProvider: vi.fn().mockImplementation(function () { return { setCustomParameters: vi.fn() }; }),
   signOut: vi.fn(),
   browserPopupRedirectResolver: {},
 }));
