@@ -88,4 +88,42 @@ describe('editor modals', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(deleteProfile).not.toHaveBeenCalled();
   });
+
+  it('on mobile, Share and both delete confirms are labelled modal dialogs that take focus and close on Escape', () => {
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({
+      appState: {
+        activeProfileId: 'main',
+        profiles: {
+          main: { id: 'main', name: 'Main', data: DEFAULT_RESUME },
+          design: { id: 'design', name: 'Design CV', data: DEFAULT_RESUME },
+        },
+      },
+    }) as never);
+    const desktopWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 375 });
+    try {
+      render(<MemoryRouter><EditorPage /></MemoryRouter>);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Share Resume' }));
+      const share = expectFocusedModalDialog('Share Your Resume');
+      expect(within(share).getByRole('button', { name: 'Close' })).toBeInTheDocument();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Choose a section' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Experience' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete Section' }));
+      expectFocusedModalDialog('Delete Section?');
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Main' })[0]); // open a profile switcher
+      fireEvent.click(screen.getAllByRole('button', { name: 'Delete Profile' })[0]);
+      expectFocusedModalDialog('Delete Resume?');
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: desktopWidth });
+    }
+  });
 });
