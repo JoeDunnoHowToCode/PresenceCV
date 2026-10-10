@@ -7,6 +7,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
   useEffect(() => {
     const container = ref.current;
     if (!active || !container) return;
+    const opener = document.activeElement as HTMLElement | null;
     const focusables = (): HTMLElement[] => Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE));
     (focusables()[0] ?? container).focus();
 
@@ -29,6 +30,9 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
       }
     };
     document.addEventListener('keydown', wrapTab);
-    return () => document.removeEventListener('keydown', wrapTab);
+    return () => {
+      document.removeEventListener('keydown', wrapTab);
+      opener?.focus?.();
+    };
   }, [ref, active]);
 }
