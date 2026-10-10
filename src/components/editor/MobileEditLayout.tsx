@@ -16,6 +16,7 @@ import InfoEditor from './InfoEditor';
 import ListBlockEditor from './ListBlockEditor';
 import TagsBlockEditor from './TagsBlockEditor';
 import { EditorLayoutProps } from './EditorLayoutProps';
+import { useModalDialog } from '../../hooks/useModalDialog';
 
 export default function MobileEditLayout(props: EditorLayoutProps) {
   const {
@@ -36,6 +37,12 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
   const { notify } = useNotice();
   const [iconMenuRect, setIconMenuRect] = useState<DOMRect | null>(null);
 
+  const closeShareModal = () => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); };
+  const { ref: shareDialogRef, titleId: shareTitleId } = useModalDialog(isShareModalOpen, closeShareModal);
+  const { ref: deleteSectionDialogRef, titleId: deleteSectionTitleId } = useModalDialog(!!blockToDelete, () => setBlockToDelete(null));
+  const { ref: deleteProfileDialogRef, titleId: deleteProfileTitleId } = useModalDialog(!!profileToDelete, () => setProfileToDelete(null));
+  const { ref: iconPickerRef } = useModalDialog(openIconMenuId !== null, () => setOpenIconMenuId(null));
+
   const activeBlock = data.blocks[activeTab];
 
   return (
@@ -49,16 +56,17 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
 
         {isShareModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-            <div className="bg-white p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl relative">
+            <div ref={shareDialogRef} role="dialog" aria-modal="true" aria-labelledby={shareTitleId} className="bg-white p-8 rounded-2xl max-w-lg w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl relative">
               <button
-                onClick={() => { setIsShareModalOpen(false); setSnapshotUrl(null); setCopiedSection(null); }}
+                onClick={closeShareModal}
+                aria-label={t('common.close')}
                 className="absolute top-4 right-4 text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors p-2"
               >
                 <LucideIcons.X className="w-5 h-5" />
               </button>
 
               <LucideIcons.Share2 className="w-10 h-10 text-accent mb-4" />
-              <h3 className="text-2xl text-[#1c1c1c] mb-2">{t('common.shareResume')}</h3>
+              <h3 id={shareTitleId} className="text-2xl text-[#1c1c1c] mb-2">{t('common.shareResume')}</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 {t('common.shareResumeDesc')}
               </p>
@@ -179,11 +187,12 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
         {blockToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteSectionDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteSectionTitleId}
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
             >
               <LucideIcons.AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-              <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
+              <h3 id={deleteSectionTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteSectionTitle')}</h3>
               <p className="text-sm text-[#5f5f5d] mb-8">
                 {t('common.deleteSectionDesc', { title: data.blocks[blockToDelete]?.title })}
               </p>
@@ -212,6 +221,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
         {profileToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
             <motion.div 
+              ref={deleteProfileDialogRef} role="dialog" aria-modal="true" aria-labelledby={deleteProfileTitleId}
               initial={{ opacity: 0, scale: 0.9, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className="bg-white p-8 rounded-2xl max-w-md w-full flex flex-col items-center text-center border border-[#eceae4] shadow-xl"
@@ -219,7 +229,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
               <LucideIcons.FileWarning className="w-12 h-12 text-red-500 mb-4" />
               {Object.keys(appState.profiles).length <= 1 ? (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.unableToDeleteProfileTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.unableToDeleteProfileDesc')}
                   </p>
@@ -234,7 +244,7 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
+                  <h3 id={deleteProfileTitleId} className="text-xl font-medium text-[#1c1c1c] mb-2">{t('common.deleteResumeTitle')}</h3>
                   <p className="text-sm text-[#5f5f5d] mb-8">
                     {t('common.deleteResumeDesc', { name: appState.profiles[profileToDelete]?.name })}
                   </p>
@@ -428,21 +438,28 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                        const FinalIcon = !block?.icon ? null : (block?.icon ? (LucideIcons as any)[block.icon] || LucideIcons.Briefcase : ICONS[activeTab] || LucideIcons.Briefcase);
                        return (
                           <div className="relative shrink-0 flex items-center justify-center">
-                            {FinalIcon ? (
-                              <FinalIcon 
-                                onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
-                                className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" 
-                              />
-                            ) : (
-                              <div 
-                                onClick={(e: any) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
-                                className="w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer"
-                              />
-                            )}
+                            <button
+                              type="button"
+                              aria-label={t('editor.a11y.chooseSectionIcon', { title: block?.title })}
+                              aria-haspopup="dialog"
+                              aria-expanded={openIconMenuId === activeTab}
+                              onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(openIconMenuId === activeTab ? null : activeTab); setIconMenuRect(e.currentTarget.getBoundingClientRect()); }}
+                              className="flex items-center justify-center"
+                            >
+                              {FinalIcon ? (
+                                <FinalIcon className="w-4 h-4 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                              ) : (
+                                <span className="block w-4 h-4 rounded-full border border-dashed border-white/30 hover:border-white transition-colors cursor-pointer" />
+                              )}
+                            </button>
                            {openIconMenuId === activeTab && typeof document !== 'undefined' && createPortal(
                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 99999 }}>
                                <div className="fixed inset-0 z-[99998]" onClick={(e) => { e.stopPropagation(); setOpenIconMenuId(null); }} />
                                <div 
+                                 ref={iconPickerRef}
+                                 role="dialog"
+                                 aria-modal="true"
+                                 aria-label={t('editor.a11y.chooseSectionIcon', { title: block?.title })}
                                  className="fixed bg-white border border-[#eceae4] shadow-lg rounded-xl p-3 grid grid-cols-5 gap-3 z-[99999] w-max" 
                                  style={{ 
                                    top: iconMenuRect ? iconMenuRect.bottom + 8 : '50%', 
@@ -451,21 +468,27 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                                  }}
                                  onClick={e => e.stopPropagation()}
                                >
-                                 <div 
+                                 <button
+                                   type="button"
                                    className="w-4 h-4 cursor-pointer flex items-center justify-center hover:text-accent transition-colors text-base"
                                    onClick={() => { updateBlockIcon(activeTab, ''); setOpenIconMenuId(null); }}
-                                   title="No Icon"
+                                   aria-label={t('editor.a11y.noIcon')}
+                                   title={t('editor.a11y.noIcon')}
                                  >
                                    🚫
-                                 </div>
+                                 </button>
                                  {AVAILABLE_BLOCK_ICONS.map((iconName: string) => {
                                    const OptionIcon = (LucideIcons as any)[iconName];
                                    return OptionIcon ? (
-                                     <OptionIcon 
-                                       key={iconName} 
-                                       className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors" 
+                                     <button
+                                       type="button"
+                                       key={iconName}
+                                       aria-label={t(`editor.icons.${iconName}`)}
+                                       className="w-4 h-4 cursor-pointer text-[#5f5f5d] hover:text-accent transition-colors"
                                        onClick={() => { updateBlockIcon(activeTab, iconName); setOpenIconMenuId(null); }}
-                                     />
+                                     >
+                                       <OptionIcon className="w-4 h-4" />
+                                     </button>
                                    ) : null;
                                  })}
                                </div>
@@ -488,9 +511,15 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                      )}
                    </div>
                    
-                   <div className="flex items-center gap-2 pl-2 shrink-0">
-                     <LucideIcons.ChevronDown className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
-                   </div>
+                   {/* A real button for keyboard users; its click bubbles to the toggle handler above. */}
+                   <button
+                     type="button"
+                     aria-expanded={isMobileMenuOpen}
+                     aria-label={t('editor.layout.chooseSection')}
+                     className="flex items-center gap-2 pl-2 shrink-0"
+                   >
+                     <LucideIcons.ChevronDown aria-hidden="true" className={`w-4 h-4 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
+                   </button>
                  </div>
                  <AnimatePresence>
                    {isMobileMenuOpen && (
@@ -513,7 +542,8 @@ export default function MobileEditLayout(props: EditorLayoutProps) {
                            <div key={blockId} className="group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all cursor-pointer hover:bg-black/5 text-[#5f5f5d] hover:text-[#1c1c1c]" onClick={() => { handleTabClick(blockId); setIsMobileMenuOpen(false); }}>
                              <div className="flex-1 flex items-center gap-3 min-w-0">
                                <BlockIcon className="w-4 h-4 shrink-0 text-accent" />
-                               <span className="text-sm tracking-widest font-medium truncate">{block.title}</span>
+                               {/* A real button for keyboard users; its click bubbles to the row handler above. */}
+                              <button type="button" className="text-sm tracking-widest font-medium truncate text-left">{block.title}</button>
                              </div>
                              <div className="flex items-center gap-1 shrink-0">
                                <button

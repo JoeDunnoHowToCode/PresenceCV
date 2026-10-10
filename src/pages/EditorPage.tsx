@@ -188,8 +188,9 @@ export default function EditorPage() {
   }, [data, user?.uid, isPro]);
 
   const openShareModal = useCallback(async () => {
-    // Force flush any active debounced inputs
-    if (document.activeElement instanceof HTMLElement) {
+    // Force flush any active debounced inputs. Only text fields: blurring the Share button
+    // itself would leave the dialog nothing to give focus back to when it closes.
+    if (document.activeElement instanceof HTMLElement && document.activeElement.matches('input, textarea, [contenteditable="true"]')) {
       document.activeElement.blur();
     }
 

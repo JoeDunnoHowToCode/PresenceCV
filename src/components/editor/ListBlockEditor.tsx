@@ -183,6 +183,7 @@ const ListItemEditor = React.memo(({ provided, snapshot, blockId, item, index, t
       ) : (
         <div 
           {...provided.dragHandleProps}
+          aria-label={item.title ? t('editor.a11y.reorderItem', { title: item.title }) : t('editor.a11y.reorderUntitledItem')}
           className="absolute left-4 top-4 text-[#eceae4] hover:text-accent cursor-grab active:cursor-grabbing transition-colors"
         >
           <LucideIcons.GripVertical className="w-5 h-5" />

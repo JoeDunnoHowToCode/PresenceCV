@@ -83,7 +83,8 @@
       "addListView": "Add List View",
       "addTagView": "Add Tag View",
       "listView": "List View",
-      "tagView": "Tag View"
+      "tagView": "Tag View",
+      "chooseSection": "Choose a section"
     },
     "sidebar": {
       "share": "Share"
@@ -100,6 +101,38 @@
     "notices": {
       "saveFailed": "Couldn't save your changes to the cloud. They're kept on this device, and we'll try again on your next edit.",
       "structuralSyncFailed": "Couldn't save this change to the cloud (network error or resume limit reached), so it was undone to prevent data loss."
+    },
+    "a11y": {
+      "reorderSection": "Drag to reorder the {{title}} section",
+      "reorderItem": "Drag to reorder {{title}}",
+      "reorderUntitledItem": "Drag to reorder this item",
+      "chooseSectionIcon": "Choose an icon for the {{title}} section",
+      "chooseContactIcon": "Choose an icon for {{text}}",
+      "chooseUntitledContactIcon": "Choose an icon for this contact",
+      "noIcon": "No icon"
+    },
+    "icons": {
+      "MapPin": "Map pin",
+      "Mail": "Email",
+      "Phone": "Phone",
+      "Link": "Link",
+      "Github": "GitHub",
+      "Linkedin": "LinkedIn",
+      "Twitter": "Twitter",
+      "Globe": "Globe",
+      "Briefcase": "Briefcase",
+      "GraduationCap": "Graduation cap",
+      "Code": "Code",
+      "User": "Person",
+      "Award": "Award",
+      "Layout": "Layout",
+      "Star": "Star",
+      "Folder": "Folder",
+      "File": "File",
+      "Book": "Book",
+      "Heart": "Heart",
+      "Coffee": "Coffee",
+      "Cpu": "Processor"
     }
   },
   "common": {
@@ -115,6 +148,7 @@
     "confirm": "Confirm",
     "okay": "Okay",
     "dismiss": "Dismiss",
+    "close": "Close",
     "deleteSectionTitle": "Delete Section?",
     "deleteSectionDesc": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
     "unableToDeleteProfileTitle": "Unable to delete the profile",
@@ -179,7 +213,9 @@
       "features": "Features",
       "pricing": "Pricing",
       "login": "Log In",
-      "resumeEditor": "Resume Editor"
+      "resumeEditor": "Resume Editor",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "hero": {
       "badge": "100% Free & Open Creator",

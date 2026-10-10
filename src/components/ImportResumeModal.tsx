@@ -25,12 +25,13 @@
  * Depends on: AuthContext, firebase.ts, @google/genai
  * Firestore reads/writes: user_limits/{uid}
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 
 interface ImportResumeModalProps {
@@ -41,11 +42,23 @@ interface ImportResumeModalProps {
 
 export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, onClose, onImport }) => {
   const { t } = useTranslation();
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, isOpen);
   const [isUploading, setIsUploading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!isOpen || isUploading) return; // same rule as the backdrop
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen, isUploading, onClose]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -170,10 +183,14 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-xl z-[101] overflow-hidden border border-[#eceae4]"
           >
             <div className="p-6 border-b border-[#eceae4] flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-[#1c1c1c] flex items-center gap-2">
+              <h2 id={titleId} className="text-xl font-semibold text-[#1c1c1c] flex items-center gap-2">
                 <FileText className="w-5 h-5 text-accent" />
                 {t('importModal.title')}
               </h2>

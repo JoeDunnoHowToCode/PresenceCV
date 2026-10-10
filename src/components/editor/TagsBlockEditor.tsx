@@ -210,6 +210,7 @@ const TagItemEditor = React.memo(({ provided, snapshot, blockId, item, index, to
       ) : (
         <div 
           {...provided.dragHandleProps}
+          aria-label={initialTitle.trim() ? t('editor.a11y.reorderItem', { title: initialTitle.trim() }) : t('editor.a11y.reorderUntitledItem')}
           className="cursor-grab active:cursor-grabbing text-[#eceae4] hover:text-accent transition-colors mt-1 md:mt-0"
         >
           <LucideIcons.GripVertical className="w-5 h-5" />

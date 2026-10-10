@@ -83,7 +83,8 @@
       "addListView": "新增列表",
       "addTagView": "新增標籤",
       "listView": "列表",
-      "tagView": "標籤"
+      "tagView": "標籤",
+      "chooseSection": "選擇區塊"
     },
     "sidebar": {
       "share": "分享"
@@ -100,6 +101,38 @@
     "notices": {
       "saveFailed": "無法將變更儲存到雲端。變更已保留在這台裝置上，下次編輯時會再試一次。",
       "structuralSyncFailed": "無法將這項變更儲存到雲端（網路錯誤或已達履歷上限），已復原以避免資料遺失。"
+    },
+    "a11y": {
+      "reorderSection": "拖曳以調整「{{title}}」區塊的順序",
+      "reorderItem": "拖曳以調整「{{title}}」的順序",
+      "reorderUntitledItem": "拖曳以調整這個項目的順序",
+      "chooseSectionIcon": "選擇「{{title}}」區塊的圖示",
+      "chooseContactIcon": "選擇「{{text}}」的圖示",
+      "chooseUntitledContactIcon": "選擇這個聯絡方式的圖示",
+      "noIcon": "不使用圖示"
+    },
+    "icons": {
+      "MapPin": "地圖標記",
+      "Mail": "電子郵件",
+      "Phone": "電話",
+      "Link": "連結",
+      "Github": "GitHub",
+      "Linkedin": "LinkedIn",
+      "Twitter": "Twitter",
+      "Globe": "地球",
+      "Briefcase": "公事包",
+      "GraduationCap": "學士帽",
+      "Code": "程式碼",
+      "User": "人像",
+      "Award": "獎章",
+      "Layout": "版面",
+      "Star": "星星",
+      "Folder": "資料夾",
+      "File": "檔案",
+      "Book": "書本",
+      "Heart": "愛心",
+      "Coffee": "咖啡",
+      "Cpu": "處理器"
     }
   },
   "common": {
@@ -115,6 +148,7 @@
     "confirm": "確認",
     "okay": "確定",
     "dismiss": "關閉",
+    "close": "關閉",
     "deleteSectionTitle": "刪除區塊？",
     "deleteSectionDesc": "確定要刪除「{{title}}」嗎？此動作無法復原。",
     "unableToDeleteProfileTitle": "無法刪除履歷",
@@ -179,7 +213,9 @@
       "features": "特色",
       "pricing": "定價",
       "login": "登入",
-      "resumeEditor": "履歷編輯器"
+      "resumeEditor": "履歷編輯器",
+      "openMenu": "開啟選單",
+      "closeMenu": "關閉選單"
     },
     "hero": {
       "badge": "100% 免費開放履歷建立工具",
