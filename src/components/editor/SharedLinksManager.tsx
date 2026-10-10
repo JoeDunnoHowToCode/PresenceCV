@@ -42,7 +42,7 @@ export default function SharedLinksManager({ uid, hasLiveLink, onStopLive }: Sha
       ) : (
         <ul className="flex flex-col gap-2 max-h-40 overflow-y-auto">
           {links.map((link) => {
-            const date = new Date(link.createdAt).toLocaleString(i18n.language);
+            const date = new Date(link.createdAt).toLocaleString(i18n.language, { dateStyle: 'medium', timeStyle: 'short' });
             return (
               <li key={link.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="min-w-0 flex flex-col">
