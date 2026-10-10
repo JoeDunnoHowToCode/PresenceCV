@@ -14,12 +14,12 @@ vi.mock('../src/lib/firebase', () => ({ auth: {}, db: {} }));
 // useResume returns ~40 members; these tests need its data, every other member can be a no-op function.
 const mockResume = (overrides: Record<string, unknown> = {}) => new Proxy(
   {
-    ...overrides,
     data: DEFAULT_RESUME,
     appState: { activeProfileId: 'main', profiles: { main: { id: 'main', name: 'Main', data: DEFAULT_RESUME } } },
     loading: false,
     isSyncing: false,
     getCurrentData: () => DEFAULT_RESUME,
+    ...overrides,
   } as Record<string | symbol, unknown>,
   { get: (target, key) => (key in target ? target[key] : vi.fn()) },
 );
@@ -64,5 +64,28 @@ describe('editor modals', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(removeBlock).not.toHaveBeenCalled();
+  });
+
+  it('asks before deleting a resume in a labelled modal dialog that takes focus; Escape cancels', () => {
+    const deleteProfile = vi.fn();
+    vi.mocked(useResume.useResume).mockReturnValue(mockResume({
+      deleteProfile,
+      appState: {
+        activeProfileId: 'main',
+        profiles: {
+          main: { id: 'main', name: 'Main', data: DEFAULT_RESUME },
+          design: { id: 'design', name: 'Design CV', data: DEFAULT_RESUME },
+        },
+      },
+    }) as never);
+    render(<MemoryRouter><EditorPage /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Main' })); // open the profile switcher
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete Profile' })[0]);
+
+    expectFocusedModalDialog('Delete Resume?');
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(deleteProfile).not.toHaveBeenCalled();
   });
 });
