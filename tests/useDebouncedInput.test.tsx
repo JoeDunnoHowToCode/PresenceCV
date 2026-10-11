@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useDebouncedInput } from '../src/components/editor/InfoEditor';
 
 // Wired the way the editors wire it: an uncontrolled input and a new inline onSave arrow on every render.
@@ -43,5 +43,58 @@ describe('useDebouncedInput', () => {
     rerender(<NameField value="Sam" onSave={vi.fn()} />);
 
     expect(field).toHaveValue('Alex R.');
+  });
+
+  it('saves once, 1000 ms after the last of two quick changes', () => {
+    const onSave = vi.fn();
+    render(<NameField value="Alex" onSave={onSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+
+    fireEvent.change(field, { target: { value: 'Alex R' } });
+    act(() => { vi.advanceTimersByTime(600); });
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+    act(() => { vi.advanceTimersByTime(999); });
+
+    expect(onSave).not.toHaveBeenCalled();
+
+    act(() => { vi.advanceTimersByTime(1); });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('Alex R.');
+  });
+
+  it('saves a pending edit exactly once when the field loses focus', () => {
+    const onSave = vi.fn();
+    render(<NameField value="Alex" onSave={onSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+
+    act(() => { field.blur(); });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('Alex R.');
+
+    act(() => { vi.advanceTimersByTime(1000); });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves a pending edit exactly once when the field unmounts', () => {
+    const onSave = vi.fn();
+    const { unmount } = render(<NameField value="Alex" onSave={onSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+
+    unmount();
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('Alex R.');
+
+    act(() => { vi.advanceTimersByTime(1000); });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
   });
 });
