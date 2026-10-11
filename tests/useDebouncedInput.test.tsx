@@ -97,4 +97,20 @@ describe('useDebouncedInput', () => {
 
     expect(onSave).toHaveBeenCalledTimes(1);
   });
+
+  it('sends a pending save to the onSave from the newest render', () => {
+    const firstOnSave = vi.fn();
+    const newestOnSave = vi.fn();
+    const { rerender } = render(<NameField value="Alex" onSave={firstOnSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+
+    rerender(<NameField value="Alex" onSave={newestOnSave} />);
+    act(() => { vi.advanceTimersByTime(1000); });
+
+    expect(firstOnSave).not.toHaveBeenCalled();
+    expect(newestOnSave).toHaveBeenCalledTimes(1);
+    expect(newestOnSave).toHaveBeenCalledWith('Alex R.');
+  });
 });
