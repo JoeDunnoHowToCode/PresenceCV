@@ -27,7 +27,7 @@ Track: **Bug fix** (Gates 2–3; this plan was asked for — the fix fits in one
 
 ## Interaction with open PRs
 
-- **#11 `feat/a11y-basics`** — its pin test "has saved the latest edit of a focused text field once Share opens" (`tests/a11y.dialogs.test.tsx`) passes today thanks to the early save. After this fix the save has to come from the `blur()` in `openShareModal` (jsdom 24's `blur()` fires `focusout`, which React's `onBlur` listens to). #11 also edits `InfoEditor.tsx` — an import after line 6 and `ContactItemEditor` from line 205 — but not the hook. Check: build the merged tree without touching either branch (`git merge-tree --write-tree` + `git commit-tree` + `git worktree add --detach`, LESSONS 2026-10-10) and run the full suite there.
+- **#11 `feat/a11y-basics`** — its pin test "has saved the latest edit of a focused text field once Share opens" (`tests/a11y.dialogs.test.tsx`) passes today thanks to the early save. After this fix the save has to come from the field's blur flush (jsdom 24's `blur()` fires `focusout`, which React's `onBlur` listens to). On the merged tree there are two blurs: the `blur()` in `openShareModal`, and #11's focus trap moving focus into the dialog — removing the first alone still passes; removing the hook's blur flush fails (see checklist). #11 also edits `InfoEditor.tsx` — an import after line 6 and `ContactItemEditor` from line 205 — but not the hook. Check: build the merged tree without touching either branch (`git merge-tree --write-tree` + `git commit-tree` + `git worktree add --detach`, LESSONS 2026-10-10) and run the full suite there.
 - **#12 `fix/dependency-majors`** moves to Vitest 4. The new test only uses `vi.useFakeTimers`, `vi.advanceTimersByTime` and `act`; run it on main + #12 + this branch.
 
 ## Tests
@@ -44,13 +44,70 @@ Track: **Bug fix** (Gates 2–3; this plan was asked for — the fix fits in one
 
 ## Checklist
 
-- [ ] Pin: outside values sync only while the field is unfocused (passes before the fix) -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
-- [ ] Red: one save 1000 ms after the last change; blur saves once; unmount saves once (3 assertion failures) -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
-- [ ] Green: flush only on unmount, through refs -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
-- [ ] Red: a pending save goes to the newest `onSave` -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
-- [ ] Green: the timer calls `onSaveRef.current` -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
-- [ ] Full suite passes -> verify: `npm run test`
-- [ ] Typecheck + lint pass with no new warnings (baseline: 0 errors, 91 warnings) -> verify: `npm run check`
-- [ ] Build passes -> verify: `npm run build`
-- [ ] Full suite, including PR #11's pin test, passes on main + #11 + this branch -> verify: `npm run test` in a detached worktree of the merged tree
-- [ ] The new test passes under Vitest 4 on main + #12 + this branch -> verify: `npx vitest run tests/useDebouncedInput.test.tsx` in a detached worktree of the merged tree
+- [x] Pin: outside values sync only while the field is unfocused (passes before the fix) -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
+  ```
+  unfixed code:            Tests  2 passed (2)
+  mutation, focus guard dropped:  × keeps what the user typed …  Expected "Alex R."  Received "Sam"
+  mutation, sync disabled:        × shows a new outside value …  Expected "Sam"      Received "Alex"
+  ```
+- [x] Red: one save 1000 ms after the last change; blur saves once; unmount saves once (3 assertion failures) -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
+  ```
+  × saves once, 1000 ms after the last of two quick changes
+    AssertionError: expected "spy" to not be called at all, but actually been called 2 times   (calls: "Alex R", "Alex R.")
+  × saves a pending edit exactly once when the field loses focus
+    AssertionError: expected "spy" to be called 1 times, but got 2 times
+  × saves a pending edit exactly once when the field unmounts
+    AssertionError: expected "spy" to be called 1 times, but got 2 times
+  Tests  3 failed | 2 passed (5)
+  ```
+- [x] Green: flush only on unmount, through refs -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
+  ```
+  Tests  5 passed (5)
+  git diff HEAD --stat:  src/components/editor/InfoEditor.tsx | 17 +++++++++++++----
+  ```
+- [x] Red: a pending save goes to the newest `onSave` -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
+  ```
+  × sends a pending save to the onSave from the newest render
+    AssertionError: expected "spy" to not be called at all, but actually been called 1 times   (first onSave got "Alex R.")
+  Tests  1 failed | 5 passed (6)
+  ```
+- [x] Green: the timer calls `onSaveRef.current` -> verify: `npx vitest run tests/useDebouncedInput.test.tsx`
+  ```
+  Tests  6 passed (6)
+  git diff HEAD --stat:  src/components/editor/InfoEditor.tsx | 5 +++--
+  ```
+- [x] Full suite passes -> verify: `npm run test`
+  ```
+  Test Files  20 passed | 1 skipped (21)
+       Tests  111 passed | 19 skipped (130)
+  (baseline 105 passed | 19 skipped; the 19 are tests/firestore.rules.test.ts, which runs only under npm run test:rules)
+  ```
+- [x] Typecheck + lint pass with no new warnings (baseline: 0 errors, 91 warnings) -> verify: `npm run check`
+  ```
+  ✖ 90 problems (0 errors, 90 warnings)   — the inputRef-in-cleanup warning (InfoEditor.tsx:42) is gone
+  ```
+- [x] Build passes -> verify: `npm run build`
+  ```
+  ✓ built in 2.60s
+  ```
+- [x] Full suite, including PR #11's pin test, passes on main + #11 + this branch -> verify: `npm run test` in a detached worktree of the merged tree
+  ```
+  merge-tree: no conflicts (temp commit d68b463, not a branch)
+  Test Files  29 passed | 1 skipped (30)
+       Tests  140 passed | 19 skipped (159)
+  ✓ tests/a11y.dialogs.test.tsx > editor modals > has saved the latest edit of a focused text field once Share opens
+  mutation, both blur() calls in EditorPage removed:  ✓ still passes (the dialog's focus trap blurs the field)
+  mutation, the hook's blur flush removed:            × expected last "spy" call to have been called with [ 'name', 'Alex R.' ]
+  ```
+- [x] The new test passes under Vitest 4 on main + #12 + this branch -> verify: `npx vitest run tests/useDebouncedInput.test.tsx` in a detached worktree of the merged tree
+  ```
+  vitest/4.1.11 darwin-arm64 node-v22.22.3 — merge-tree: no conflicts (temp commit 55c1b51, not a branch)
+  Test Files  1 passed (1)
+       Tests  6 passed (6)
+  ```
+- [x] Real browser: the real `InfoEditor` in `StrictMode`, Chromium (browser pane) -> verify: throwaway Vite harness (LESSONS 2026-10-10; deleted after) logging keystroke / blur / save times to `window.__log`
+  ```
+  3 keystrokes 4–5 ms apart → 1 save "name=Alex Rivera JrXYZ", 1001 ms after the last keystroke
+  2 keystrokes, then click elsewhere → blur and 1 save "title=Product DesignerAB" in the same ms; no timer save in the next 2 s
+  mount (StrictMode) → no save
+  ```
