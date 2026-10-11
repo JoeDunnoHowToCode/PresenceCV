@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/refs, react-hooks/immutability -- Intentional: callback-ref assignments and ref access in event handlers for IME composition focus management */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as LucideIcons from 'lucide-react';
 import isEqual from 'fast-deep-equal';
@@ -23,6 +23,14 @@ export function useDebouncedInput(
   const [localValue, setLocalValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Newest onSave for the timer and the unmount flush; last typed value for the unmount flush
+  // (inputRef is already null when an unmount cleanup runs)
+  const onSaveRef = useRef(onSave);
+  const pendingValueRef = useRef(initialValue);
+
+  useLayoutEffect(() => {
+    onSaveRef.current = onSave;
+  });
 
   // Sync external changes ONLY if the input is not actively focused
   useEffect(() => {
@@ -34,23 +42,25 @@ export function useDebouncedInput(
     }
   }, [initialValue]);
 
-  // Cleanup timeout on unmount
+  // Flush a pending save on unmount only: callers pass a new inline onSave on every render
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
-        onSave(inputRef.current?.value || localValue);
+        timeoutRef.current = null;
+        onSaveRef.current(pendingValueRef.current);
       }
     };
-  }, [localValue, onSave]);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
+    pendingValueRef.current = newValue;
     
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      onSave(newValue);
+      onSaveRef.current(newValue);
       timeoutRef.current = null;
     }, delay);
   };
