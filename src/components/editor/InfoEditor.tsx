@@ -23,7 +23,8 @@ export function useDebouncedInput(
   const [localValue, setLocalValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  // Newest onSave and last typed value for the unmount flush (inputRef is already null by then)
+  // Newest onSave for the timer and the unmount flush; last typed value for the unmount flush
+  // (inputRef is already null when an unmount cleanup runs)
   const onSaveRef = useRef(onSave);
   const pendingValueRef = useRef(initialValue);
 
@@ -59,7 +60,7 @@ export function useDebouncedInput(
     
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      onSave(newValue);
+      onSaveRef.current(newValue);
       timeoutRef.current = null;
     }, delay);
   };
