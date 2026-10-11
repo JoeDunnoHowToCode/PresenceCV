@@ -113,4 +113,49 @@ describe('useDebouncedInput', () => {
     expect(newestOnSave).toHaveBeenCalledTimes(1);
     expect(newestOnSave).toHaveBeenCalledWith('Alex R.');
   });
+
+  // main.tsx renders in StrictMode, which mounts, unmounts and remounts every component once.
+  it('waits for the pause under StrictMode too', () => {
+    const onSave = vi.fn();
+    render(<React.StrictMode><NameField value="Alex" onSave={onSave} /></React.StrictMode>);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+    act(() => { vi.advanceTimersByTime(999); });
+
+    expect(onSave).not.toHaveBeenCalled();
+
+    act(() => { vi.advanceTimersByTime(1); });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('Alex R.');
+  });
+
+  it('saves once in total when the field is blurred and then unmounts', () => {
+    const onSave = vi.fn();
+    const { unmount } = render(<NameField value="Alex" onSave={onSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+    fireEvent.change(field, { target: { value: 'Alex R.' } });
+
+    act(() => { field.blur(); });
+    unmount();
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('Alex R.');
+  });
+
+  it('saves an emptied field as an empty string', () => {
+    const onSave = vi.fn();
+    const { unmount } = render(<NameField value="Alex" onSave={onSave} />);
+    const field = screen.getByRole('textbox', { name: 'Name' });
+    field.focus();
+    fireEvent.change(field, { target: { value: '' } });
+
+    unmount();
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('');
+  });
 });
