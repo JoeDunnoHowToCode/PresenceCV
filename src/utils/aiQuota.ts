@@ -33,5 +33,13 @@ export function createAiQuota(store: QuotaStore, now: () => number = Date.now) {
       }
       return { allowed: true, remaining: AI_IMPORT_LIMIT - count, limit: AI_IMPORT_LIMIT, resetAt: now() + ttl };
     },
+
+    async status(uid: string): Promise<QuotaState> {
+      const key = keyFor(uid);
+      const count = Number(await store.get(key) ?? 0);
+      if (count === 0) return { remaining: AI_IMPORT_LIMIT, limit: AI_IMPORT_LIMIT, resetAt: null };
+      const ttl = await store.pttl(key);
+      return { remaining: AI_IMPORT_LIMIT - count, limit: AI_IMPORT_LIMIT, resetAt: now() + ttl };
+    },
   };
 }
