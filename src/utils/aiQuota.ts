@@ -1,4 +1,6 @@
 // Per-account AI-import quota: 5 imports in a 24-hour window that starts at the first import.
+import { Redis } from '@upstash/redis';
+
 export const AI_IMPORT_LIMIT = 5;
 export const AI_IMPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -20,9 +22,19 @@ export interface QuotaState {
 
 const keyFor = (uid: string) => `presencecv:ai-import:${uid}`;
 
-export function createAiQuota(store: QuotaStore, now: () => number = Date.now) {
+// Without Redis: allow everything in development (easy local work), refuse in production (fail closed).
+const noStoreState = (): QuotaState => {
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+  return { remaining: isProduction ? 0 : AI_IMPORT_LIMIT, limit: AI_IMPORT_LIMIT, resetAt: null };
+};
+
+export function createAiQuota(store: QuotaStore | null, now: () => number = Date.now) {
   return {
     async consume(uid: string): Promise<QuotaState & { allowed: boolean }> {
+      if (!store) {
+        const state = noStoreState();
+        return { allowed: state.remaining > 0, ...state };
+      }
       const key = keyFor(uid);
       const count = await store.incr(key);
       let ttl = await store.pttl(key);
@@ -41,6 +53,7 @@ export function createAiQuota(store: QuotaStore, now: () => number = Date.now) {
     },
 
     async status(uid: string): Promise<QuotaState> {
+      if (!store) return noStoreState();
       const key = keyFor(uid);
       const count = Number(await store.get(key) ?? 0);
       if (count === 0) return { remaining: AI_IMPORT_LIMIT, limit: AI_IMPORT_LIMIT, resetAt: null };
@@ -49,3 +62,9 @@ export function createAiQuota(store: QuotaStore, now: () => number = Date.now) {
     },
   };
 }
+
+export const aiQuota = createAiQuota(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
+    : null,
+);
