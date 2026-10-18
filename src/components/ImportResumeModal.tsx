@@ -85,11 +85,19 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
     return () => { cancelled = true; };
   }, [isOpen, user]);
 
-  // Tick once a second while a window is running.
+  // While a window is running, tick each time the displayed second changes (first tick lined up with it, then every 1s).
   useEffect(() => {
     if (!quota?.resetAt) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
+    const tick = () => setNow(Date.now());
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const timeout = setTimeout(() => {
+      tick();
+      interval = setInterval(tick, 1000);
+    }, (quota.resetAt - Date.now()) % 1000 || 1000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [quota?.resetAt]);
 
   useEffect(() => {
