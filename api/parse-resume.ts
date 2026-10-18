@@ -35,7 +35,7 @@ export const config = {
   },
 };
 
-import { checkRateLimit } from "../src/utils/rateLimiter.js";
+import { aiQuota } from "../src/utils/aiQuota.js";
 import { getFirebaseAdmin } from '../src/lib/firebase-admin.js';
 
 export default async function handler(req: any, res: any) {
@@ -54,22 +54,6 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Correctly extract the first IP from x-forwarded-for if it's a list
-    let ipStr = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
-    if (Array.isArray(ipStr)) {
-      ipStr = ipStr[0];
-    } else if (typeof ipStr === 'string' && ipStr.includes(',')) {
-      ipStr = ipStr.split(',')[0].trim();
-    }
-
-    const rateLimitResult = await checkRateLimit(ipStr);
-    if (!rateLimitResult.success) {
-      return res.status(429).json({ 
-        error: "Too many requests from this IP. Please try again later.",
-        retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
-      });
-    }
-
     // Authenticate user via Firebase ID Token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -94,11 +78,18 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: "Server Configuration Error" });
     }
 
+    let uid: string;
     try {
-      await adminAuth.verifyIdToken(idToken);
+      ({ uid } = await adminAuth.verifyIdToken(idToken));
     } catch (err) {
       console.error("Firebase ID Token verification failed:", err);
       return res.status(401).json({ error: "Unauthorized. Invalid ID token." });
+    }
+
+    // Per-account quota (src/utils/aiQuota.ts), counted only after the user is known.
+    const quota = await aiQuota.consume(uid);
+    if (!quota.allowed) {
+      return res.status(429).json({ error: "AI_IMPORT_LIMIT" });
     }
 
     const { fileType, base64Data } = req.body;
