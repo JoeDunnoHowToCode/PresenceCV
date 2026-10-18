@@ -65,4 +65,19 @@ describe('ImportResumeModal - AI-import quota', () => {
     await act(async () => { vi.advanceTimersByTime(400); }); // 7.3 s left → 6.9 s: the display must already say 07
     expect(screen.getByText('3 AI imports left · back to 5 in 02:05:07')).toBeInTheDocument();
   });
+
+  it('shows no quota line before the first import (no window yet) or for an admin', async () => {
+    mockApi({ remaining: 5, limit: 5, resetAt: null });
+    const { unmount } = render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/ai-quota', expect.anything()));
+    await act(async () => {});
+    expect(screen.queryByText(/AI imports left|No AI imports left/)).not.toBeInTheDocument();
+    unmount();
+
+    mockApi({ unlimited: true });
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+    await vi.waitFor(() => expect(global.fetch).toHaveBeenCalledWith('/api/ai-quota', expect.anything()));
+    await act(async () => {});
+    expect(screen.queryByText(/AI imports left|No AI imports left/)).not.toBeInTheDocument();
+  });
 });
