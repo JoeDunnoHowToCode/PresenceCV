@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ImportResumeModal } from '../src/components/ImportResumeModal';
 import { useAuth } from '../src/contexts/AuthContext';
@@ -94,5 +94,32 @@ describe('ImportResumeModal - AI-import quota', () => {
 
     expect(screen.queryByText(/No AI imports left/)).not.toBeInTheDocument();
     expect(fileInput).not.toBeDisabled();
+  });
+
+  it('turns a 429 from the import into the used-up countdown instead of showing the raw error', async () => {
+    const resetAt = NOW + 90_000;
+    global.fetch = vi.fn(async (url: string) => (url === '/api/ai-quota'
+      ? { ok: true, status: 200, json: async () => ({ remaining: 1, limit: 5, resetAt: NOW + 60_000 }) }
+      : { ok: false, status: 429, json: async () => ({ error: 'AI_IMPORT_LIMIT', remaining: 0, limit: 5, resetAt }) })) as never;
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+    await screen.findByText(/1 AI imports left/);
+
+    const file = new File(['%PDF'], 'resume.pdf', { type: 'application/pdf' });
+    fireEvent.change(document.querySelector('input[type="file"]')!, { target: { files: [file] } });
+
+    expect(await screen.findByText('No AI imports left · back to 5 in 00:01:30')).toBeInTheDocument();
+    expect(screen.queryByText(/AI_IMPORT_LIMIT/)).not.toBeInTheDocument();
+  });
+
+  it('says the AI service is unavailable when the import is refused without a window end (no quota store in production)', async () => {
+    global.fetch = vi.fn(async (url: string) => (url === '/api/ai-quota'
+      ? { ok: true, status: 200, json: async () => ({ remaining: 0, limit: 5, resetAt: null }) }
+      : { ok: false, status: 429, json: async () => ({ error: 'AI_IMPORT_LIMIT', remaining: 0, limit: 5, resetAt: null }) })) as never;
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    const file = new File(['%PDF'], 'resume.pdf', { type: 'application/pdf' });
+    fireEvent.change(document.querySelector('input[type="file"]')!, { target: { files: [file] } });
+
+    expect(await screen.findByText(en.importModal.errors.serverUnavailable)).toBeInTheDocument();
   });
 });
