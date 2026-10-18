@@ -2,11 +2,13 @@
  * api/ai-quota.ts — Vercel Serverless Function: the signed-in user's AI-import quota.
  *
  * Request: GET with Authorization: Bearer <Firebase ID token>
+ * 200: { remaining, limit, resetAt } — resetAt (ms epoch) is null until the first import starts a window.
  * Responses: 401 without a valid token, 405 for other methods, 500 without Admin SDK credentials.
  *
  * Consumed by: ImportResumeModal.tsx (when it opens). server.ts mounts the same handler for local dev.
  */
 import { getFirebaseAdmin } from '../src/lib/firebase-admin.js';
+import { aiQuota } from '../src/utils/aiQuota.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,12 +38,13 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: "Server Configuration Error" });
   }
 
+  let uid: string;
   try {
-    await adminAuth.verifyIdToken(idToken);
+    ({ uid } = await adminAuth.verifyIdToken(idToken));
   } catch (err) {
     console.error("Firebase ID Token verification failed:", err);
     return res.status(401).json({ error: "Unauthorized. Invalid ID token." });
   }
 
-  return res.status(501).end();
+  return res.status(200).json(await aiQuota.status(uid));
 }
