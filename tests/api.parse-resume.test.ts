@@ -109,4 +109,15 @@ describe('API Route: /api/parse-resume', () => {
       profile: expect.any(Object)
     }));
   });
+
+  it('counts the import against the signed-in account, and not at all for a bad token', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    mockVerifyIdToken.mockRejectedValueOnce(new Error('Invalid token'));
+    await handler(req, res);
+    expect(aiQuota.consume).not.toHaveBeenCalled();
+
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
+    await handler(req, res);
+    expect(aiQuota.consume).toHaveBeenCalledWith('user_1');
+  });
 });
