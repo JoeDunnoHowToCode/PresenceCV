@@ -6,11 +6,10 @@
  * the warm glassmorphic editor.
  *
  * Sections:
- * 1. Navigation Bar: Logo, Features/Pricing links, Login/Logout buttons (responsive)
+ * 1. Navigation Bar: Logo, Features link, Login/Logout buttons (responsive)
  * 2. Hero: Headline, subtitle, CTA button ("Start Building Now")
- * 3. Features Grid: 4 feature cards (AI, Live Share, PDF, Multi-Profile)
- * 4. Pricing: Free tier (current) and Pro tier (coming soon)
- * 5. Footer: Brand, links to Features/Privacy/Terms
+ * 3. Features Grid: 4 feature cards (Account, Live Share, PDF, AI Import)
+ * 4. Footer: Brand, links to Features/Privacy/Terms
  *
  * Auth Integration:
  * - "Start Building Now" and "Log In" trigger signInWithGoogle → navigate("/editor")
@@ -77,7 +76,6 @@ export default function HomePage() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors text-sm font-medium">{t('home.nav.features')}</a>
-            <a href="#pricing" className="text-[#5f5f5d] hover:text-[#1c1c1c] transition-colors text-sm font-medium">{t('home.nav.pricing')}</a>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
@@ -129,7 +127,6 @@ export default function HomePage() {
               <div className="flex flex-col p-6 gap-4">
                 <LanguageSwitcher fullWidth={false} />
                 <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-[#5f5f5d] font-medium">{t('home.nav.features')}</a>
-                <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-[#5f5f5d] font-medium">{t('home.nav.pricing')}</a>
                 <hr className="border-[#eceae4]" />
                 <button 
                   onClick={() => { setIsMobileMenuOpen(false); handleLogin(); }}
@@ -234,68 +231,15 @@ export default function HomePage() {
 
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
               <div className="p-4 bg-white rounded-2xl border border-[#eceae4] shadow-sm mb-8">
-                <LucideIcons.Bot className="w-7 h-7 text-[#1c1c1c]" />
+                <LucideIcons.FileUp className="w-7 h-7 text-[#1c1c1c]" />
               </div>
-              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">{t('home.features.aiJobHuntingTitle')}</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]"><span className="text-blue-500 font-semibold text-[11px] tracking-wider uppercase mr-2 border border-blue-200 bg-blue-50 px-1.5 py-0.5 rounded-sm">{t('home.pricing.comingSoon')}</span>{t('home.features.aiJobHuntingDesc')}</p>
+              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">{t('home.features.aiImportTitle')}</h3>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">{t('home.features.aiImportDesc')}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section - Pure White Background */}
-      <section id="pricing" className="py-32 md:py-48 px-6 bg-white text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-[48px] font-semibold leading-[1.0] tracking-[-1.2px] mb-4">{t('home.pricing.title')}</h2>
-          <p className="text-[18px] text-[#5f5f5d] mb-16">{t('home.pricing.subtitle')}</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto">
-            <div className="bg-[#f7f4ed] border border-[#eceae4] p-8 rounded-2xl flex flex-col">
-              <h3 className="text-[24px] font-semibold mb-2">{t('home.pricing.free.name')}</h3>
-              <p className="text-[#5f5f5d] mb-6">{t('home.pricing.free.desc')}</p>
-              <div className="text-[36px] font-semibold tracking-tight mb-8">{t('home.pricing.free.price')}<span className="text-[18px] font-normal text-[#5f5f5d]">{t('home.pricing.free.period')}</span></div>
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> {t('home.pricing.free.features.profiles')}</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> {t('home.pricing.free.features.pdf')}</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c]" /> {t('home.pricing.free.features.share')}</li>
-                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 text-[#1c1c1c] shrink-0" /> <span>{t('home.pricing.free.features.ai')} <span className="text-xs font-semibold text-blue-500 block sm:inline">({t('home.pricing.comingSoon')})</span></span></li>
-              </ul>
-              <button 
-                onClick={handleGetStarted}
-                className="w-full text-center text-[#1c1c1c] bg-transparent border border-[#1c1c1c]/40 rounded-md px-6 py-3 text-base font-medium hover:opacity-80"
-              >
-                Current Plan
-              </button>
-            </div>
-            
-            <div className="bg-[#1c1c1c] text-[#fcfbf8] p-8 rounded-2xl flex flex-col relative shadow-2xl">
-              <div className="absolute top-0 right-8 -translate-y-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                Coming Soon
-              </div>
-              <h3 className="text-[24px] font-semibold mb-2 text-[#fcfbf8]">{t('home.pricing.pro.name')}</h3>
-              <p className="opacity-80 mb-6 text-[16px]">{t('home.pricing.pro.desc')}</p>
-              <div className="text-[36px] font-semibold tracking-tight mb-8 text-[#fcfbf8]">
-                <span className="line-through text-gray-400 text-[24px] font-normal mr-3">$10 USD</span>
-                {t('home.pricing.pro.price')}
-                <span className="text-[18px] font-normal opacity-80 ml-1">{t('home.pricing.pro.period')}</span>
-                <div className="inline-block align-middle ml-4 -mt-1">
-                  <span className="text-[13px] font-bold text-yellow-300 bg-yellow-500/20 px-2.5 py-1 rounded-md border border-yellow-500/30 whitespace-nowrap">{t('home.pricing.pro.discount')}</span>
-                </div>
-              </div>
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> {t('home.pricing.pro.features.profiles')}</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> {t('home.pricing.pro.features.pdf')}</li>
-                <li className="flex items-center gap-3"><LucideIcons.Check className="w-5 h-5" /> {t('home.pricing.pro.features.share')}</li>
-                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>{t('home.pricing.pro.features.ai')} <span className="text-xs font-semibold text-blue-400 block sm:inline">({t('home.pricing.comingSoon')})</span></span></li>
-                <li className="flex items-center gap-3 text-left"><LucideIcons.Check className="w-5 h-5 shrink-0" /> <span>{t('home.pricing.pro.features.advanced')} <span className="text-xs font-semibold text-blue-400 block sm:inline">({t('home.pricing.comingSoon')})</span></span></li>
-              </ul>
-              <button className="w-full text-center bg-white text-[#1c1c1c] rounded-md px-6 py-3 text-base font-medium opacity-50 cursor-not-allowed">
-                Get Started
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-12 border-t border-[#eceae4] px-6 text-sm">

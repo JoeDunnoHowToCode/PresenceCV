@@ -7,6 +7,7 @@
  *
  * API Routes:
  * - POST /api/parse-resume: Server-side Gemini AI resume parsing.
+ * - GET /api/ai-quota: the signed-in user's AI-import quota (same handler as api/ai-quota.ts).
  *   Accepts { fileType, base64Data } and returns structured resume JSON.
  *   Returns 412 if GEMINI_API_KEY is missing/placeholder.
  *
@@ -31,6 +32,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import parseResumeHandler from './api/parse-resume.ts';
+import aiQuotaHandler from './api/ai-quota.ts';
 
 async function startServer() {
   const app = express();
@@ -43,6 +45,9 @@ async function startServer() {
   // This guarantees local testing is identical to production.
   app.post("/api/parse-resume", async (req, res) => {
     await parseResumeHandler(req, res);
+  });
+  app.get("/api/ai-quota", async (req, res) => {
+    await aiQuotaHandler(req, res);
   });
 
   // Vite middleware for development

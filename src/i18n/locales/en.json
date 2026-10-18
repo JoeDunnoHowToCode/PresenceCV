@@ -146,13 +146,16 @@
   },
   "importModal": {
     "title": "Import Resume with AI",
-    "subtitle": "Upload an existing PDF or DOCX file to automatically populate your profile using AI.",
+    "subtitle": "Upload an existing PDF or image to automatically populate your profile using AI.",
     "dropzoneText": "Drag and drop your file here, or click to browse",
-    "supportedFormats": "Supports PDF, DOCX (Max 5MB)",
+    "supportedFormats": "Supports PDF, JPG, PNG (Max 3MB)",
+    "quota": {
+      "remaining": "{{remaining}} AI imports left · back to {{limit}} in {{time}}",
+      "exhausted": "No AI imports left · back to {{limit}} in {{time}}"
+    },
     "parsing": "Analyzing and parsing resume...",
     "parseSuccess": "Resume parsed successfully!",
     "parseError": "Failed to parse resume. Please check the file and try again.",
-    "dailyLimitExceeded": "Daily AI parse limit reached (5/5). Please try again tomorrow.",
     "buttonImport": "Parse & Import",
     "buttonCancel": "Cancel",
     "loading": {
@@ -177,7 +180,6 @@
   "home": {
     "nav": {
       "features": "Features",
-      "pricing": "Pricing",
       "login": "Log In",
       "resumeEditor": "Resume Editor"
     },
@@ -195,58 +197,11 @@
       "manageDesc": "Log in from anywhere to instantly generate, manage, and present your resume across any device. Your professional presence, always accessible.",
       "liveTitle": "Live Share Link",
       "liveDesc": "Found a typo after sending the link? No problem. Edits update in real-time, ensuring recruiters always see your perfect, up-to-date professional profile.",
-      "pdfTitle": "ATS-Optimized PDF",
-      "pdfDesc": "Skip the confusing, overly-decorated layouts. We provide a single, clean format built to be easily read by recruiters and perfectly parsed by ATS scanners.",
-      "aiJobHuntingTitle": "AI Job-Hunting Sidekick",
-      "aiJobHuntingDesc": "AI that tailors your resume, matches JDs, writes cover letters, and fully automates applying to LinkedIn and other top job platforms.",
+      "pdfTitle": "Clean, Simple PDF",
+      "pdfDesc": "Skip the overly-decorated layouts. One clean format with selectable, copyable text that recruiters can read at a glance.",
+      "aiImportTitle": "AI Resume Import",
+      "aiImportDesc": "Upload an existing PDF or image and AI turns it into an editable resume. 5 imports per account every 24 hours.",
       "whyTitle": "Why PresenceCV?"
-    },
-    "pricing": {
-      "heading": "Simple, transparent pricing",
-      "subheading": "Get started for free today. Upgrade only if you need advanced capabilities.",
-      "freeName": "Free Tier",
-      "freePrice": "$0",
-      "freePeriod": "forever",
-      "freeDesc": "Ideal for job seekers building their core resume.",
-      "freeFeature1": "Up to 3 distinct resume profiles",
-      "freeFeature2": "5 AI resume parses per day",
-      "freeFeature3": "Instant PDF exports & Live links",
-      "proName": "Pro Tier",
-      "proPrice": "$9",
-      "proPeriod": "/ month",
-      "proDesc": "For active job seekers who need AI optimization.",
-      "proFeature1": "Unlimited resume profiles",
-      "proFeature2": "Unlimited AI parses & ATS Keyword Matching",
-      "proFeature3": "104 Job Auto-Applier Integration",
-      "comingSoon": "Coming Soon",
-      "title": "Early Access: Free for all",
-      "subtitle": "Start building your resume immediately.",
-      "free": {
-        "name": "Free",
-        "desc": "Everything you need to land an interview.",
-        "price": "$0 USD",
-        "period": "/mo",
-        "features": {
-          "profiles": "3 resume profiles",
-          "pdf": "Unlimited PDF export",
-          "share": "Unlimited live & snapshot link sharing",
-          "ai": "10 AI fully auto job appling / day"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "desc": "For power users and active job seekers.",
-        "price": "$5 USD",
-        "period": "/mo",
-        "features": {
-          "profiles": "Unlimited profiles",
-          "pdf": "Unlimited PDF export without watermark",
-          "share": "Unlimited live & snapshot link sharing",
-          "ai": "50 AI schedule & customized fully auto job appling / day",
-          "advanced": "Latest AI-powered job hunting functions"
-        },
-        "discount": "First month 50% off"
-      }
     },
     "footer": {
       "tagline": "Crafted with care by independent developer Joe.",

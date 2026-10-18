@@ -5,15 +5,13 @@
  * (PDF, JPG, or PNG) and have it automatically parsed by Google Gemini AI
  * into structured data that populates a new resume profile.
  *
- * Dual-Path Parsing Strategy:
- * 1. Server-side (preferred): POST /api/parse-resume → uses server's GEMINI_API_KEY
- *    - Returns 412 if no valid key is configured on the server
- * 2. Client-side fallback: Direct Gemini API call via frontend proxy
- *    - Used in AI Studio Free Tier where the key is injected at build time
+ * Parsing: POST /api/parse-resume (server's GEMINI_API_KEY; 412 when none is configured,
+ * no client-side fallback).
  *
- * Rate Limiting:
- * - 5 imports per day per user, tracked in Firestore user_limits/{uid}
- * - Owner email (mujoecs@gmail.com) is exempted from limits
+ * AI-import quota (src/utils/aiQuota.ts):
+ * - 5 imports per account in a 24-hour window that starts at the first import; admins exempt
+ * - On open the modal reads GET /api/ai-quota; once a window is running it shows the imports
+ *   left and a countdown, and disables upload when none are left (also after a 429)
  *
  * File Constraints: Max 3MB, PDF/JPG/PNG only
  *
@@ -22,8 +20,7 @@
  * - onClose: () => void — called when modal should close
  * - onImport: (data) => void — called with parsed resume data on success
  *
- * Depends on: AuthContext, firebase.ts, @google/genai
- * Firestore reads/writes: user_limits/{uid}
+ * Depends on: AuthContext, firebase.ts
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +29,21 @@ import { Upload, X, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
 
+
+// What GET /api/ai-quota says (admins get { unlimited: true }, which is not stored).
+interface AiQuota {
+  remaining: number;
+  limit: number;
+  resetAt: number | null;
+}
+
+// 2h 5m 7s → "02:05:07"
+const formatCountdown = (ms: number) => {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return [Math.floor(total / 3600), Math.floor(total / 60) % 60, total % 60]
+    .map((n) => String(n).padStart(2, '0'))
+    .join(':');
+};
 
 interface ImportResumeModalProps {
   isOpen: boolean;
@@ -46,6 +58,46 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const [quota, setQuota] = useState<AiQuota | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Ask for the quota each time the modal opens. If that fails, show nothing: the server still enforces it.
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) return;
+        const response = await fetch('/api/ai-quota', { headers: { Authorization: `Bearer ${idToken}` } });
+        const data = response.ok ? await response.json() : null;
+        if (!cancelled && typeof data?.remaining === 'number') {
+          setNow(Date.now());
+          setQuota(data);
+        }
+      } catch (err) {
+        console.warn('Could not read the AI-import quota:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen, user]);
+
+  // While a window is running, tick each time the displayed second changes (first tick lined up with it, then every 1s).
+  useEffect(() => {
+    if (!quota?.resetAt) return;
+    const resetAt = quota.resetAt;
+    // When the window ends the quota is full again: drop it (the line disappears, upload is enabled).
+    const tick = () => (Date.now() >= resetAt ? setQuota(null) : setNow(Date.now()));
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const timeout = setTimeout(() => {
+      tick();
+      interval = setInterval(tick, 1000);
+    }, (resetAt - Date.now()) % 1000 || 1000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [quota?.resetAt]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -56,6 +108,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
     }
     return () => clearInterval(interval);
   }, [isUploading]);
+
+  const usedUp = quota?.resetAt != null && quota.remaining === 0;
+  const uploadDisabled = isUploading || usedUp;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,6 +176,13 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          if (response.status === 429 && errorData.error === 'AI_IMPORT_LIMIT') {
+            // No window end means the server has no quota store (fails closed in production).
+            if (typeof errorData.resetAt !== 'number') throw new Error(t('importModal.errors.serverUnavailable'));
+            setNow(Date.now());
+            setQuota(errorData);
+            return;
+          }
           throw new Error(errorData.error || `${t('common.error')}: ${response.status}`);
         }
 
@@ -191,6 +253,14 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                 {t('importModal.subtitle')}
               </p>
 
+              {quota?.resetAt && (
+                <p className="mb-6 text-sm text-center text-[#1c1c1c]">
+                  {usedUp
+                    ? t('importModal.quota.exhausted', { limit: quota.limit, time: formatCountdown(quota.resetAt - now) })
+                    : t('importModal.quota.remaining', { remaining: quota.remaining, limit: quota.limit, time: formatCountdown(quota.resetAt - now) })}
+                </p>
+              )}
+
               {error && (
                 <div className="mb-6 p-4 bg-red-500/10 rounded-xl flex border border-red-500/20 text-red-400 gap-3 items-start">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -200,9 +270,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  isUploading ? 'border-[#eceae4] bg-black/5' : 'border-[#eceae4] bg-white hover:bg-black/5 hover:border-[#1c1c1c]/20 cursor-pointer '
+                  uploadDisabled ? 'border-[#eceae4] bg-black/5' : 'border-[#eceae4] bg-white hover:bg-black/5 hover:border-[#1c1c1c]/20 cursor-pointer '
                 }`}
-                onClick={() => !isUploading && fileInputRef.current?.click()}
+                onClick={() => !uploadDisabled && fileInputRef.current?.click()}
               >
                 {isUploading ? (
                   <div className="flex flex-col items-center gap-3">
@@ -229,6 +299,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                   ref={fileInputRef} 
                   className="hidden" 
                   accept=".pdf,image/png,image/jpeg" 
+                  disabled={usedUp}
                   onChange={handleFileChange}
                 />
               </div>

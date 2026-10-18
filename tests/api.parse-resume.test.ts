@@ -2,11 +2,11 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import handler from '../api/parse-resume';
 
 // Mock dependencies
-vi.mock('../src/utils/rateLimiter', () => ({
-  globalRateLimiter: {
-    isRateLimited: vi.fn().mockReturnValue(false)
-  },
-  checkRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: Date.now() + 3600000 })
+vi.mock('../src/utils/aiQuota', () => ({
+  aiQuota: {
+    consume: vi.fn().mockResolvedValue({ allowed: true, remaining: 4, limit: 5, resetAt: Date.now() + 86400000 }),
+    status: vi.fn(),
+  }
 }));
 
 // Mock @google/genai
@@ -34,7 +34,7 @@ vi.mock('../src/lib/firebase-admin', () => ({
     adminAuth: { verifyIdToken: mockVerifyIdToken },
     adminDb: {
       collection: vi.fn().mockReturnValue({
-        doc: vi.fn().mockReturnValue({ id: 'mock-doc' })
+        doc: vi.fn().mockReturnValue({ id: 'mock-doc', get: vi.fn().mockResolvedValue({ exists: false }) })
       })
     }
   }))
@@ -103,16 +103,42 @@ describe('API Route: /api/parse-resume', () => {
     }));
   });
 
-  it('returns 429 if IP rate limit exceeded', async () => {
+  it('counts the import against the signed-in account, and not at all for a bad token', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    mockVerifyIdToken.mockRejectedValueOnce(new Error('Invalid token'));
+    await handler(req, res);
+    expect(aiQuota.consume).not.toHaveBeenCalled();
+
     mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
-    // Override the rate limiter mock for this test
-    const { checkRateLimit } = await import('../src/utils/rateLimiter');
-    (checkRateLimit as any).mockResolvedValueOnce({ success: false, limit: 5, remaining: 0, reset: Date.now() + 3600000 });
+    await handler(req, res);
+    expect(aiQuota.consume).toHaveBeenCalledWith('user_1');
+  });
+
+  it('returns 429 with remaining 0 and the window end when the account has used its 5 imports', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    const resetAt = Date.UTC(2026, 9, 19, 2, 0);
+    vi.mocked(aiQuota.consume).mockResolvedValueOnce({ allowed: false, remaining: 0, limit: 5, resetAt });
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
 
     await handler(req, res);
+
     expect(res.status).toHaveBeenCalledWith(429);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      error: expect.stringContaining('Too many requests')
-    }));
+    expect(res.json).toHaveBeenCalledWith({ error: 'AI_IMPORT_LIMIT', remaining: 0, limit: 5, resetAt });
+  });
+
+  it('does not count imports by an admin (admins/{uid} exists)', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    const { getFirebaseAdmin } = await import('../src/lib/firebase-admin');
+    const doc = vi.fn((uid: string) => ({ get: vi.fn().mockResolvedValue({ exists: uid === 'admin_1' }) }));
+    const collection = vi.fn(() => ({ doc }));
+    vi.mocked(getFirebaseAdmin).mockReturnValueOnce({ adminAuth: { verifyIdToken: mockVerifyIdToken }, adminDb: { collection } } as never);
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'admin_1' });
+
+    await handler(req, res);
+
+    expect(collection).toHaveBeenCalledWith('admins');
+    expect(doc).toHaveBeenCalledWith('admin_1');
+    expect(aiQuota.consume).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 });

@@ -1,22 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { globalRateLimiter, RateLimiter } from '../src/utils/rateLimiter';
-
-describe('RateLimiter (Upstash)', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    delete process.env.UPSTASH_REDIS_REST_URL;
-    delete process.env.UPSTASH_REDIS_REST_TOKEN;
-  });
-
-  it('returns allowed when Upstash is not configured', async () => {
-    const { checkRateLimit: check } = await import('../src/utils/rateLimiter');
-    const result = await check('127.0.0.1');
-    
-    expect(result.success).toBe(true);
-    expect(result.limit).toBe(5);
-    expect(result.remaining).toBe(5);
-  });
-});
 
 describe('RateLimiter backward compatibility', () => {
   it('exports globalRateLimiter with isRateLimited method', () => {

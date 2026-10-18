@@ -11,6 +11,9 @@
  * - Returns 412 if GEMINI_API_KEY env var is missing/placeholder, telling the
  *   frontend to fall back to client-side Gemini proxy mode
  * - Returns 405 for non-POST methods
+ * - Returns 429 { error: "AI_IMPORT_LIMIT", remaining, limit, resetAt } once the
+ *   signed-in account has used its 5 imports in the current 24-hour window
+ *   (src/utils/aiQuota.ts); accounts listed in admins/{uid} are not counted
  * - Body size limit: 4MB (Vercel's hard limit is 4.5MB)
  *
  * AI Prompt:
@@ -35,7 +38,7 @@ export const config = {
   },
 };
 
-import { checkRateLimit } from "../src/utils/rateLimiter.js";
+import { aiQuota } from "../src/utils/aiQuota.js";
 import { getFirebaseAdmin } from '../src/lib/firebase-admin.js';
 
 export default async function handler(req: any, res: any) {
@@ -54,22 +57,6 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Correctly extract the first IP from x-forwarded-for if it's a list
-    let ipStr = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
-    if (Array.isArray(ipStr)) {
-      ipStr = ipStr[0];
-    } else if (typeof ipStr === 'string' && ipStr.includes(',')) {
-      ipStr = ipStr.split(',')[0].trim();
-    }
-
-    const rateLimitResult = await checkRateLimit(ipStr);
-    if (!rateLimitResult.success) {
-      return res.status(429).json({ 
-        error: "Too many requests from this IP. Please try again later.",
-        retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
-      });
-    }
-
     // Authenticate user via Firebase ID Token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -94,11 +81,23 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: "Server Configuration Error" });
     }
 
+    let uid: string;
     try {
-      await adminAuth.verifyIdToken(idToken);
+      ({ uid } = await adminAuth.verifyIdToken(idToken));
     } catch (err) {
       console.error("Firebase ID Token verification failed:", err);
       return res.status(401).json({ error: "Unauthorized. Invalid ID token." });
+    }
+
+    // Per-account quota (src/utils/aiQuota.ts), counted only after the user is known.
+    // Admins (admins/{uid} exists) are not counted; if that read fails, the import counts.
+    const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap) => snap.exists, () => false);
+    if (!isAdmin) {
+      const quota = await aiQuota.consume(uid);
+      if (!quota.allowed) {
+        // remaining / limit / resetAt let the import modal show a countdown.
+        return res.status(429).json({ error: "AI_IMPORT_LIMIT", remaining: quota.remaining, limit: quota.limit, resetAt: quota.resetAt });
+      }
     }
 
     const { fileType, base64Data } = req.body;

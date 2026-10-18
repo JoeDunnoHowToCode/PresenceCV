@@ -146,13 +146,16 @@
   },
   "importModal": {
     "title": "使用 AI 匯入履歷",
-    "subtitle": "上傳現有的 PDF 或 DOCX 檔案，透過 AI 自動解析並填入您的履歷資料。",
+    "subtitle": "上傳現有的 PDF 或圖片檔，透過 AI 自動解析並填入您的履歷資料。",
     "dropzoneText": "拖曳檔案至此，或點擊選擇檔案",
-    "supportedFormats": "支援 PDF、DOCX 格式 (最大 5MB)",
+    "supportedFormats": "支援 PDF、JPG、PNG (最大 3MB)",
+    "quota": {
+      "remaining": "AI 匯入剩 {{remaining}} 次，{{time}} 後補滿 {{limit}} 次",
+      "exhausted": "AI 匯入次數已用完，{{time}} 後補滿 {{limit}} 次"
+    },
     "parsing": "正在解析與分析履歷中...",
     "parseSuccess": "履歷解析成功！",
     "parseError": "履歷解析失敗，請檢查檔案後重試。",
-    "dailyLimitExceeded": "今日 AI 解析次數已達上限 (5/5)，請明天再試。",
     "buttonImport": "解析並匯入",
     "buttonCancel": "取消",
     "loading": {
@@ -177,7 +180,6 @@
   "home": {
     "nav": {
       "features": "特色",
-      "pricing": "定價",
       "login": "登入",
       "resumeEditor": "履歷編輯器"
     },
@@ -195,58 +197,11 @@
       "manageDesc": "隨時隨地登入，在任何裝置上即時生成、管理並展示您的履歷。讓您的專業形象時刻在線。",
       "liveTitle": "即時分享連結",
       "liveDesc": "發送連結後才發現錯字？沒問題。編輯內容會即時更新，確保招募人員看到的永遠是您最新、最完美的專業履歷。",
-      "pdfTitle": "ATS 最佳化 PDF",
-      "pdfDesc": "捨棄令人眼花撩亂的複雜排版。我們提供單一、乾淨的格式，不僅讓招募人員一目了然，更確保 ATS 系統能完美解析。",
-      "aiJobHuntingTitle": "AI 求職得力助手",
-      "aiJobHuntingDesc": "AI 將為您量身打造履歷、比對職缺需求、撰寫求職信，並全自動化幫您投遞至 LinkedIn 等各大求職平台。",
+      "pdfTitle": "乾淨俐落的 PDF",
+      "pdfDesc": "捨棄令人眼花撩亂的複雜排版。單一、乾淨的版型，文字可選取、可複製，招募人員一目了然。",
+      "aiImportTitle": "AI 匯入履歷",
+      "aiImportDesc": "上傳現有的 PDF 或圖片，AI 自動整理成可編輯的履歷。每個帳號 24 小時內可匯入 5 次。",
       "whyTitle": "為什麼選擇 PresenceCV？"
-    },
-    "pricing": {
-      "heading": "簡單透明的方案選擇",
-      "subheading": "今天即可免費開始使用，僅在您需要高級功能時進行升級。",
-      "freeName": "免費方案",
-      "freePrice": "$0",
-      "freePeriod": "永久免費",
-      "freeDesc": "適合正在打造核心履歷的求職者。",
-      "freeFeature1": "最多建立 3 份獨立履歷版本",
-      "freeFeature2": "每日 5 次 AI 履歷解析額度",
-      "freeFeature3": "即時 PDF 匯出與線上連結",
-      "proName": "Pro 專業方案",
-      "proPrice": "$9",
-      "proPeriod": "/ 月",
-      "proDesc": "適合需要 AI 最佳化與自動投遞的活躍求職者。",
-      "proFeature1": "無限制履歷版本數量",
-      "proFeature2": "無限次 AI 解析與 ATS 關鍵字對比",
-      "proFeature3": "104 人力銀行履歷自動投遞機器人",
-      "comingSoon": "即將推出",
-      "title": "免費搶先體驗！",
-      "subtitle": "立即開始建立您的履歷。",
-      "free": {
-        "name": "免費",
-        "desc": "獲得面試機會所需的一切。",
-        "price": "$0 USD",
-        "period": "/月",
-        "features": {
-          "profiles": "3 份履歷版本",
-          "pdf": "無限次 PDF 匯出",
-          "share": "無限次即時與快照連結分享",
-          "ai": "每日 10 次 AI 自動投遞"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "desc": "適合進階使用者與積極求職者。",
-        "price": "$5 USD",
-        "period": "/月",
-        "features": {
-          "profiles": "無限次履歷版本",
-          "pdf": "無限次無浮水印 PDF 匯出",
-          "share": "無限次即時與快照連結分享",
-          "ai": "每日 50 次 AI 排程與客製化自動投遞",
-          "advanced": "最新 AI 驅動求職功能"
-        },
-        "discount": "首月 5 折優惠"
-      }
     },
     "footer": {
       "tagline": "由獨立開發者 Joe 打造",

@@ -1,39 +1,3 @@
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
-
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
-
-const upstashLimiter = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(5, '1 h'),
-      analytics: true,
-      prefix: 'presencecv:ratelimit',
-    })
-  : null;
-
-export async function checkRateLimit(identifier: string): Promise<{
-  success: boolean;
-  limit: number;
-  remaining: number;
-  reset: number;
-}> {
-  if (!upstashLimiter) {
-    // 開發環境允許（無 Upstash 時方便本地開發）；生產環境 fail closed
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
-    if (isProduction) {
-      return { success: false, limit: 0, remaining: 0, reset: Date.now() + 3600000 };
-    }
-    return { success: true, limit: 5, remaining: 5, reset: Date.now() + 3600000 };
-  }
-  return upstashLimiter.limit(identifier);
-}
-
 // Backward compatibility for existing code (server.ts, tests)
 interface RateLimitData {
   count: number;
