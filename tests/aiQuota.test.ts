@@ -46,6 +46,19 @@ describe('AI-import quota', () => {
     expect(result).toEqual({ allowed: true, remaining: 4, limit: 5, resetAt: clock.now + AI_IMPORT_WINDOW_MS });
   });
 
+  it('rejects the 6th import in a window without counting it', async () => {
+    const clock = { now: Date.UTC(2026, 9, 18, 2, 0) };
+    const quota = createAiQuota(fakeStore(clock), () => clock.now);
+    const firstImportAt = clock.now;
+    for (let i = 0; i < 5; i++) await quota.consume('u1');
+
+    clock.now += 60 * 1000;
+    const sixth = await quota.consume('u1');
+
+    expect(sixth).toEqual({ allowed: false, remaining: 0, limit: 5, resetAt: firstImportAt + AI_IMPORT_WINDOW_MS });
+    expect(await quota.status('u1')).toEqual({ remaining: 0, limit: 5, resetAt: firstImportAt + AI_IMPORT_WINDOW_MS });
+  });
+
   it('reports 5 and no countdown before the first import, the countdown during the window, and 5 again after it', async () => {
     const clock = { now: Date.UTC(2026, 9, 18, 2, 0) };
     const quota = createAiQuota(fakeStore(clock), () => clock.now);
