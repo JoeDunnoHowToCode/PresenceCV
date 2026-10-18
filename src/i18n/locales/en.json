@@ -156,7 +156,6 @@
     "parsing": "Analyzing and parsing resume...",
     "parseSuccess": "Resume parsed successfully!",
     "parseError": "Failed to parse resume. Please check the file and try again.",
-    "dailyLimitExceeded": "Daily AI parse limit reached (5/5). Please try again tomorrow.",
     "buttonImport": "Parse & Import",
     "buttonCancel": "Cancel",
     "loading": {

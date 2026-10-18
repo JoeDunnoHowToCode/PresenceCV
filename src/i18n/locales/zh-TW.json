@@ -156,7 +156,6 @@
     "parsing": "正在解析與分析履歷中...",
     "parseSuccess": "履歷解析成功！",
     "parseError": "履歷解析失敗，請檢查檔案後重試。",
-    "dailyLimitExceeded": "今日 AI 解析次數已達上限 (5/5)，請明天再試。",
     "buttonImport": "解析並匯入",
     "buttonCancel": "取消",
     "loading": {

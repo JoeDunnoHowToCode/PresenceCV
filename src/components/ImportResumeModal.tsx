@@ -5,15 +5,13 @@
  * (PDF, JPG, or PNG) and have it automatically parsed by Google Gemini AI
  * into structured data that populates a new resume profile.
  *
- * Dual-Path Parsing Strategy:
- * 1. Server-side (preferred): POST /api/parse-resume → uses server's GEMINI_API_KEY
- *    - Returns 412 if no valid key is configured on the server
- * 2. Client-side fallback: Direct Gemini API call via frontend proxy
- *    - Used in AI Studio Free Tier where the key is injected at build time
+ * Parsing: POST /api/parse-resume (server's GEMINI_API_KEY; 412 when none is configured,
+ * no client-side fallback).
  *
- * Rate Limiting:
- * - 5 imports per day per user, tracked in Firestore user_limits/{uid}
- * - Owner email (mujoecs@gmail.com) is exempted from limits
+ * AI-import quota (src/utils/aiQuota.ts):
+ * - 5 imports per account in a 24-hour window that starts at the first import; admins exempt
+ * - On open the modal reads GET /api/ai-quota; once a window is running it shows the imports
+ *   left and a countdown, and disables upload when none are left (also after a 429)
  *
  * File Constraints: Max 3MB, PDF/JPG/PNG only
  *
@@ -22,8 +20,7 @@
  * - onClose: () => void — called when modal should close
  * - onImport: (data) => void — called with parsed resume data on success
  *
- * Depends on: AuthContext, firebase.ts, @google/genai
- * Firestore reads/writes: user_limits/{uid}
+ * Depends on: AuthContext, firebase.ts
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
