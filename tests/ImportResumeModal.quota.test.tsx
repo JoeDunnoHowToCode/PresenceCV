@@ -54,4 +54,15 @@ describe('ImportResumeModal - AI-import quota', () => {
     await act(async () => { vi.advanceTimersByTime(1000); });
     expect(screen.getByText('3 AI imports left · back to 5 in 02:05:06')).toBeInTheDocument();
   });
+
+  it('changes the countdown when the displayed second changes, not up to a second late', async () => {
+    mockApi({ remaining: 3, limit: 5, resetAt: NOW + 2 * 3600_000 + 5 * 60_000 + 7_300 });
+
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    expect(await screen.findByText('3 AI imports left · back to 5 in 02:05:08')).toBeInTheDocument();
+    await act(async () => {});
+    await act(async () => { vi.advanceTimersByTime(400); }); // 7.3 s left → 6.9 s: the display must already say 07
+    expect(screen.getByText('3 AI imports left · back to 5 in 02:05:07')).toBeInTheDocument();
+  });
 });
