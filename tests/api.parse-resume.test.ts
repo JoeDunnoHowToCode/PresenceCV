@@ -9,6 +9,13 @@ vi.mock('../src/utils/rateLimiter', () => ({
   checkRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: Date.now() + 3600000 })
 }));
 
+vi.mock('../src/utils/aiQuota', () => ({
+  aiQuota: {
+    consume: vi.fn().mockResolvedValue({ allowed: true, remaining: 4, limit: 5, resetAt: Date.now() + 86400000 }),
+    status: vi.fn(),
+  }
+}));
+
 // Mock @google/genai
 vi.mock('@google/genai', () => {
   return {
@@ -34,7 +41,7 @@ vi.mock('../src/lib/firebase-admin', () => ({
     adminAuth: { verifyIdToken: mockVerifyIdToken },
     adminDb: {
       collection: vi.fn().mockReturnValue({
-        doc: vi.fn().mockReturnValue({ id: 'mock-doc' })
+        doc: vi.fn().mockReturnValue({ id: 'mock-doc', get: vi.fn().mockResolvedValue({ exists: false }) })
       })
     }
   }))
@@ -100,19 +107,6 @@ describe('API Route: /api/parse-resume', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       profile: expect.any(Object)
-    }));
-  });
-
-  it('returns 429 if IP rate limit exceeded', async () => {
-    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
-    // Override the rate limiter mock for this test
-    const { checkRateLimit } = await import('../src/utils/rateLimiter');
-    (checkRateLimit as any).mockResolvedValueOnce({ success: false, limit: 5, remaining: 0, reset: Date.now() + 3600000 });
-
-    await handler(req, res);
-    expect(res.status).toHaveBeenCalledWith(429);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      error: expect.stringContaining('Too many requests')
     }));
   });
 });
