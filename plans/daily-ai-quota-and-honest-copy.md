@@ -128,23 +128,136 @@ Open PRs #11 (HomePage nav, ImportResumeModal dialog, locales), #12 (`tests/api.
 
 ## Checklist
 
-- [ ] quota: first import starts a 24 h window -> verify: `npx vitest run tests/aiQuota.test.ts`
-- [ ] quota: 6th import rejected, not counted -> verify: `npx vitest run tests/aiQuota.test.ts`
-- [ ] quota: back to 5 after the window -> verify: `npx vitest run tests/aiQuota.test.ts`
-- [ ] quota: no Upstash — dev allowed, production rejected -> verify: `npx vitest run tests/aiQuota.test.ts`
-- [ ] test update (own commit): parse-resume tests mock the quota module and `admins/{uid}`; the per-IP 429 test is replaced -> verify: `npx vitest run tests/api.parse-resume.test.ts`
-- [ ] parse-resume counts per account after login -> verify: `npx vitest run tests/api.parse-resume.test.ts`
-- [ ] parse-resume skips the count for admins -> verify: `npx vitest run tests/api.parse-resume.test.ts`
-- [ ] parse-resume 429 carries `remaining` / `resetAt` -> verify: `npx vitest run tests/api.parse-resume.test.ts`
-- [ ] remove `checkRateLimit` and its test (own commit) -> verify: `npx vitest run tests/rateLimiter.test.ts`
-- [ ] ai-quota endpoint (401, 405, admin, user) + `server.ts` route -> verify: `npx vitest run tests/api.ai-quota.test.ts`
-- [ ] modal shows nothing before first import / for admins -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx`
-- [ ] modal shows remaining + countdown -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx`
-- [ ] modal used up → disabled; at 0 → enabled -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx`
-- [ ] modal 429 → countdown, not raw English -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx`
-- [ ] modal format text = PDF/JPG/PNG, 3MB -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx`
-- [ ] homepage has no pricing section or link -> verify: `npx vitest run tests/HomePage.content.test.tsx`
-- [ ] homepage: no ATS / auto-apply claims, AI import card shown -> verify: `npx vitest run tests/HomePage.content.test.tsx`
-- [ ] docs: CLAUDE.md, README, stale comments -> verify: `git grep -n -i -E "per-IP|5 requests/hour|DOCX|5MB" -- CLAUDE.md README.md src`
-- [ ] full suite -> verify: `npm test && npm run check && npm run build`
-- [ ] real browser: modal countdown + homepage (harness from `.agents/LESSONS.md`) -> verify: screenshots / observed text recorded here
+- [x] quota: first import starts a 24 h window -> verify: `npx vitest run tests/aiQuota.test.ts`
+  ```
+  red:   TypeError: createAiQuota is not a function   (red commit blocked by the pre-commit typecheck; staged, test unchanged, lands with green 338bd06)
+  green: ✓ tests/aiQuota.test.ts  (1 test)
+  ```
+- [x] quota: status — 5 / no countdown before the first import, countdown during the window, **back to 5 after it** (the "back to 5" line is covered here) -> verify: `npx vitest run tests/aiQuota.test.ts`
+  ```
+  red:   TypeError: quota.status is not a function   (blocked by typecheck; staged, unchanged, lands with green df48be9)
+  green: ✓ tests/aiQuota.test.ts  (2 tests)
+  ```
+- [x] quota: 6th import rejected, not counted -> verify: `npx vitest run tests/aiQuota.test.ts`
+  ```
+  red:   AssertionError: expected { allowed: true, remaining: -1, …(2) } to deeply equal { allowed: false, remaining: +0, …(2) }
+  green: ✓ tests/aiQuota.test.ts  (3 tests)
+  ```
+- [x] quota: no Upstash — dev allowed, production rejected -> verify: `npx vitest run tests/aiQuota.test.ts`
+  ```
+  red:   TypeError: Cannot read properties of null (reading 'incr')
+  green: ✓ tests/aiQuota.test.ts  (4 tests)
+  ```
+- [x] test update (own commit c9f5173): parse-resume tests mock the quota module and `admins/{uid}`; the per-IP 429 test is removed -> verify: `npx vitest run tests/api.parse-resume.test.ts --exclude '**/.claude/**'`
+  ```
+  ✓ tests/api.parse-resume.test.ts  (5 tests)   (on the unchanged handler)
+  ```
+- [x] parse-resume counts per account after login -> verify: `npx vitest run tests/api.parse-resume.test.ts --exclude '**/.claude/**'`
+  ```
+  red:   AssertionError: expected "spy" to be called with arguments: [ 'user_1' ]
+  green: ✓ tests/api.parse-resume.test.ts  (6 tests)
+  ```
+- [x] parse-resume 429 carries `remaining` / `limit` / `resetAt` -> verify: same
+  ```
+  red:   AssertionError: expected "spy" to be called with arguments: [ { error: 'AI_IMPORT_LIMIT', …(3) } ]
+  green: Tests  7 passed (7)
+  ```
+- [x] parse-resume skips the count for admins -> verify: same
+  ```
+  red:   AssertionError: expected "spy" to be called with arguments: [ 'admins' ]
+  green: Tests  8 passed (8)
+  ```
+- [x] remove `checkRateLimit`, its test and the stale rateLimiter mock (own commit 874676f) -> verify: `npx vitest run tests/rateLimiter.test.ts tests/api.parse-resume.test.ts --exclude '**/.claude/**'`
+  ```
+  Tests  11 passed (11)
+  ```
+- [x] ai-quota endpoint: 405 / 401 -> verify: `npx vitest run tests/api.ai-quota.test.ts --exclude '**/.claude/**'`
+  ```
+  red:   TypeError: default is not a function   (blocked by typecheck; staged, unchanged, lands with green 5605564)
+  green: ✓ tests/api.ai-quota.test.ts  (1 test)
+  ```
+- [x] ai-quota endpoint: user status -> verify: same
+  ```
+  red:   AssertionError: expected "spy" to be called with arguments: [ 'user_1' ]
+  green: ✓ tests/api.ai-quota.test.ts  (2 tests)
+  ```
+- [x] ai-quota endpoint: admin unlimited -> verify: same
+  ```
+  red:   AssertionError: expected "spy" to be called with arguments: [ 'admins' ]
+  green: ✓ tests/api.ai-quota.test.ts  (3 tests)
+  ```
+- [x] `server.ts` route (no server test exists) -> verify: real dev server, `fetch('/api/ai-quota')`
+  ```
+  GET  → 401 application/json {"error":"Unauthorized. Missing bearer token."}
+  POST → 404 (Express mounts GET only; on Vercel the handler answers 405)
+  ```
+- [x] modal shows remaining + countdown -> verify: `npx vitest run tests/ImportResumeModal.quota.test.tsx --exclude '**/.claude/**'`
+  ```
+  red:   Unable to find an element with the text: 3 AI imports left · back to 5 in 02:05:07
+  green: committed in 92a527c **while this test still failed** (my commit was not gated on the result).
+         Diagnosis (owner chose "investigate"): the test advanced the clock before React ran the effect that
+         starts the timer (timer created at +1020 ms). Owner agreed to change the test (667d23a: flush effects first);
+         with it, 92a527c's code passes: ✓ (1 test)
+  ```
+- [x] modal countdown changes exactly when the displayed second changes (owner's pick A) -> verify: same
+  ```
+  red:   Unable to find an element with the text: 3 AI imports left · back to 5 in 02:05:07   (still 08 after 0.4 s)
+  green: ✓ tests/ImportResumeModal.quota.test.tsx  (2 tests) + ImportResumeModal.test.tsx (5)
+  ```
+- [x] modal shows nothing before first import / for admins -> verify: same
+  ```
+  pin (behaviour already given by the countdown slice; passed on first run): Tests  3 passed (3)
+  mutation check (show the line for any known quota, not committed): expected document not to contain element, found <p
+  ```
+- [x] modal used up → disabled; at 0 → enabled -> verify: same
+  ```
+  red:   Unable to find an element with the text: No AI imports left · back to 5 in 00:00:03
+  green: Tests  9 passed (9)   (with ImportResumeModal.test.tsx)
+  ```
+- [x] modal 429 → countdown, not raw English; 429 without `resetAt` → "AI service unavailable" (two cases of one branch, one slice) -> verify: same
+  ```
+  red:   Tests  2 failed | 4 passed (6)
+  green: Tests  11 passed (11)
+  ```
+- [x] modal format text = PDF/JPG/PNG, 3MB -> verify: same
+  ```
+  red:   Unable to find an element with the text: Supports PDF, JPG, PNG (Max 3MB)
+  green: Tests  12 passed (12)
+  ```
+- [x] homepage has no pricing section or link -> verify: `npx vitest run tests/HomePage.content.test.tsx --exclude '**/.claude/**'`
+  ```
+  red:   AssertionError: expected <section id="pricing" …(1)>…(1)</section> to be null
+  green: Tests  8 passed (8)   (with i18n.locales.test.ts)
+  ```
+- [x] homepage: no ATS / auto-apply claims, AI import card shown -> verify: same
+  ```
+  red:   AssertionError: expected 'PresenceCVFeaturesEnglishLog InYour R…' not to match /\bATS\b/
+  green: Tests  9 passed (9)
+  ```
+- [x] docs: CLAUDE.md, README, .env.example, stale comments -> verify: `git grep -n -i -E "per-IP|5 requests/hour|DOCX|5MB|user_limits" -- CLAUDE.md README.md .env.example src api`
+  ```
+  only hits outside the locales: "4.5MB" (Vercel's body limit) in CLAUDE.md and api/parse-resume.ts — correct as is
+  ```
+- [x] full suite (clean scratch worktree at 04d977b; 823db9b after it only drops two type annotations: tsc ok, its 11 API tests pass) -> verify: `npm test && npm run check && npm run build`
+  ```
+   Test Files  23 passed | 1 skipped (24)
+        Tests  122 passed | 19 skipped (141)
+  ✖ 97 problems (0 errors, 97 warnings)   (main: 91; this branch adds no-explicit-any warnings in handler/test signatures, matching the existing style; 2 removed in 823db9b)
+  ✓ built in 4.67s
+  ```
+- [x] real browser (Vite harness, stubbed auth/Firebase/fetch, never committed) -> verify: observed text
+  ```
+  zh-TW, 3 left:  "AI 匯入剩 3 次，02:05:05 後補滿 5 次" → 2 s later "…02:05:03…"
+  zh-TW copy:     "支援 PDF、JPG、PNG (最大 3MB)", "上傳現有的 PDF 或圖片檔，…"
+  used up (5 s):  "AI 匯入次數已用完，00:00:04 後補滿 5 次", file input disabled → after 5 s: no line, enabled
+  admin / no window: no line
+  429 on upload:  "No AI imports left · back to 5 in 00:01:29", input disabled, no "AI_IMPORT_LIMIT" text
+  homepage (en):  no #pricing, 0 pricing links, no ATS / auto-apply / coming soon;
+                  cards: Manage in One Account · Live Share Link · Clean, Simple PDF · AI Resume Import
+  ```
+
+## Deviations from the design (recorded after the fact)
+
+- `importModal.errors.rateLimit` and its `includes('429')` branch **stay**: `tests/i18n.locales.test.ts` requires the key, and changing that test was not in the approved list. Our API no longer produces that path.
+- `@upstash/ratelimit` is now unused, but removing it rewrites `package-lock.json`, which open PR #12 also rewrites — left for after #12.
+- 429 without `resetAt` (production without Upstash) shows the existing `importModal.errors.serverUnavailable` text instead of a new key.
