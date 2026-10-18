@@ -17,7 +17,7 @@ PresenceCV is a modern, AI-powered online resume builder built with React, TypeS
 | **Multi-Profile** | Create and manage multiple resume versions for different opportunities |
 | **Multi-Language (i18n)** | Seamless internationalization with English and Traditional Chinese UI switching |
 | **XSS & URL Sanitization** | DOMPurify-powered sanitization preventing `javascript:` XSS script execution |
-| **Rate Limiting & Security** | Upstash Redis API rate limiter and Firebase App Check bot protection |
+| **AI Import Quota & Security** | 5 AI imports per account per 24 hours (Upstash Redis), with a countdown in the import dialog; Firebase App Check bot protection |
 | **Theme Accent Colors** | 6 preset accent colors + custom hex color picker |
 | **Photo Upload** | Upload and crop a profile photo with an in-browser cropper |
 | **Drag & Drop** | Reorder sections and items with smooth drag-and-drop |
@@ -72,7 +72,7 @@ GEMINI_API_KEY=your_gemini_api_key
 FIREBASE_SERVICE_ACCOUNT_KEY= # Stringified JSON of your Firebase Admin Service Account Key
 
 # ------------------------------------------------------------------------------
-# 4. Serverless API Rate Limiting (Optional but Recommended)
+# 4. AI-Import Quota (Required in production: without it every AI import is refused)
 # ------------------------------------------------------------------------------
 UPSTASH_REDIS_REST_URL=your_upstash_redis_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
@@ -193,7 +193,7 @@ PresenceCV/
 - **Authentication**: Google OAuth only — no password storage
 - **Data Isolation**: Firestore security rules enforce strict per-user access (UID matching)
 - **App Check Bot Protection**: Optional Firebase App Check (reCAPTCHA v3) integration preventing unauthorized script access
-- **API Rate Limiting**: Upstash Redis serverless rate limiter restricting `/api/parse-resume` abuse
+- **AI-Import Quota**: 5 imports per account in a 24-hour window that starts at the first import (Upstash Redis); admins (`admins/{uid}`) are exempt
 - **XSS Defense**: DOMPurify sanitization filtering out malicious `javascript:` schemes in URLs
 - **Session Cleanup**: Sign-out clears all localStorage data to prevent cross-session leaks
 - **Shared Links**: Read-only access; cannot be updated or deleted after creation
@@ -209,7 +209,7 @@ PresenceCV/
    - All `VITE_FIREBASE_*` variables
    - `GEMINI_API_KEY` (for server-side AI parsing)
    - `FIREBASE_SERVICE_ACCOUNT_KEY` (for server-side token verification)
-   - `UPSTASH_REDIS_REST_URL` & `UPSTASH_REDIS_REST_TOKEN` (optional rate limiter)
+   - `UPSTASH_REDIS_REST_URL` & `UPSTASH_REDIS_REST_TOKEN` (AI-import quota; without them production refuses AI imports)
    - `VITE_RECAPTCHA_SITE_KEY` (optional App Check)
 3. Deploy — Vercel auto-detects Vite and uses `api/` for serverless functions
 4. The `vercel.json` SPA rewrite handles client-side routing

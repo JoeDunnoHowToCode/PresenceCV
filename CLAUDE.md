@@ -111,5 +111,5 @@ Every user-facing string goes through i18next — no hardcoded copy in component
 ## Known traps
 
 - The rules suite (`tests/firestore.rules.test.ts`) runs only under `npm run test:rules` (Firestore emulator, needs Java); plain `npm test` skips it. `test:rules` fails if any rules test is skipped (`scripts/check-rules-report.mjs`) — never hard-skip it again.
-- The per-user daily AI-import quota (`user_limits`) was removed; only a per-IP Upstash limit of **5 requests/hour** on `/api/parse-resume` remains. Stale comments in `src/components/ImportResumeModal.tsx` still describe the old quota.
+- AI imports are limited **per account**: 5 in a 24-hour window that starts at the first import (`src/utils/aiQuota.ts`, Upstash Redis key `presencecv:ai-import:<uid>`); `admins/{uid}` is exempt. `/api/parse-resume` counts after token verification and returns 429 `AI_IMPORT_LIMIT` with `resetAt`; `GET /api/ai-quota` feeds the import modal's countdown. Without Upstash env vars the quota allows everything in development and **refuses every import in production**.
 - `DesktopEditLayout.tsx` and `MobileEditLayout.tsx` are deliberately duplicated for now — don't "fix" it by merging them unprompted.
