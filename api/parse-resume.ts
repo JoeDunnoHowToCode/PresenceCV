@@ -13,7 +13,7 @@
  * - Returns 405 for non-POST methods
  * - Returns 429 { error: "AI_IMPORT_LIMIT", remaining, limit, resetAt } once the
  *   signed-in account has used its 5 imports in the current 24-hour window
- *   (src/utils/aiQuota.ts)
+ *   (src/utils/aiQuota.ts); accounts listed in admins/{uid} are not counted
  * - Body size limit: 4MB (Vercel's hard limit is 4.5MB)
  *
  * AI Prompt:
@@ -90,10 +90,14 @@ export default async function handler(req: any, res: any) {
     }
 
     // Per-account quota (src/utils/aiQuota.ts), counted only after the user is known.
-    const quota = await aiQuota.consume(uid);
-    if (!quota.allowed) {
-      // remaining / limit / resetAt let the import modal show a countdown.
-      return res.status(429).json({ error: "AI_IMPORT_LIMIT", remaining: quota.remaining, limit: quota.limit, resetAt: quota.resetAt });
+    // Admins (admins/{uid} exists) are not counted; if that read fails, the import counts.
+    const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap: any) => snap.exists, () => false);
+    if (!isAdmin) {
+      const quota = await aiQuota.consume(uid);
+      if (!quota.allowed) {
+        // remaining / limit / resetAt let the import modal show a countdown.
+        return res.status(429).json({ error: "AI_IMPORT_LIMIT", remaining: quota.remaining, limit: quota.limit, resetAt: quota.resetAt });
+      }
     }
 
     const { fileType, base64Data } = req.body;
