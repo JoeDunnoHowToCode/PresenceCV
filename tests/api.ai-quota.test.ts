@@ -50,4 +50,16 @@ describe('API Route: /api/ai-quota', () => {
     expect(res.status).toHaveBeenLastCalledWith(200);
     expect(res.json).toHaveBeenLastCalledWith({ remaining: 3, limit: 5, resetAt });
   });
+
+  it('tells an admin (admins/{uid} exists) the quota does not apply', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'admin_1' });
+
+    await handler(req, res);
+
+    expect(mockCollection).toHaveBeenCalledWith('admins');
+    expect(mockAdminDoc).toHaveBeenCalledWith('admin_1');
+    expect(aiQuota.status).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenLastCalledWith({ unlimited: true });
+  });
 });
