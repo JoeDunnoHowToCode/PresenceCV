@@ -23,4 +23,15 @@ describe('HomePage content only promises what exists', () => {
     expect(container.querySelector('a[href="#pricing"]')).toBeNull();
     expect(screen.queryByText('Pricing')).not.toBeInTheDocument();
   });
+
+  it('makes no ATS or auto-apply claim and presents the AI import that exists', () => {
+    const { container } = renderHome();
+    const text = container.textContent ?? '';
+
+    expect(text).not.toMatch(/\bATS\b/);
+    expect(text).not.toMatch(/auto-?appl|automates applying|coming soon/i);
+    expect(screen.getByRole('heading', { name: 'Clean, Simple PDF' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'AI Resume Import' })).toBeInTheDocument();
+    expect(screen.getByText(/5 imports per account every 24 hours/)).toBeInTheDocument();
+  });
 });
