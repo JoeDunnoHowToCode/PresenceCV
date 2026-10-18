@@ -72,4 +72,18 @@ describe('AI-import quota', () => {
     clock.now = firstImportAt + AI_IMPORT_WINDOW_MS;
     expect(await quota.status('u1')).toEqual({ remaining: 5, limit: 5, resetAt: null });
   });
+
+  it('without Upstash: allows imports in development, rejects them in production', async () => {
+    const quota = createAiQuota(null);
+    expect(await quota.consume('u1')).toEqual({ allowed: true, remaining: 5, limit: 5, resetAt: null });
+    expect(await quota.status('u1')).toEqual({ remaining: 5, limit: 5, resetAt: null });
+
+    process.env.VERCEL_ENV = 'production';
+    try {
+      expect(await quota.consume('u1')).toEqual({ allowed: false, remaining: 0, limit: 5, resetAt: null });
+      expect(await quota.status('u1')).toEqual({ remaining: 0, limit: 5, resetAt: null });
+    } finally {
+      delete process.env.VERCEL_ENV;
+    }
+  });
 });
