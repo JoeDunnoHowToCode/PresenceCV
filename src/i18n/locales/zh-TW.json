@@ -181,7 +181,6 @@
   "home": {
     "nav": {
       "features": "特色",
-      "pricing": "定價",
       "login": "登入",
       "resumeEditor": "履歷編輯器"
     },
@@ -206,51 +205,7 @@
       "whyTitle": "為什麼選擇 PresenceCV？"
     },
     "pricing": {
-      "heading": "簡單透明的方案選擇",
-      "subheading": "今天即可免費開始使用，僅在您需要高級功能時進行升級。",
-      "freeName": "免費方案",
-      "freePrice": "$0",
-      "freePeriod": "永久免費",
-      "freeDesc": "適合正在打造核心履歷的求職者。",
-      "freeFeature1": "最多建立 3 份獨立履歷版本",
-      "freeFeature2": "每日 5 次 AI 履歷解析額度",
-      "freeFeature3": "即時 PDF 匯出與線上連結",
-      "proName": "Pro 專業方案",
-      "proPrice": "$9",
-      "proPeriod": "/ 月",
-      "proDesc": "適合需要 AI 最佳化與自動投遞的活躍求職者。",
-      "proFeature1": "無限制履歷版本數量",
-      "proFeature2": "無限次 AI 解析與 ATS 關鍵字對比",
-      "proFeature3": "104 人力銀行履歷自動投遞機器人",
-      "comingSoon": "即將推出",
-      "title": "免費搶先體驗！",
-      "subtitle": "立即開始建立您的履歷。",
-      "free": {
-        "name": "免費",
-        "desc": "獲得面試機會所需的一切。",
-        "price": "$0 USD",
-        "period": "/月",
-        "features": {
-          "profiles": "3 份履歷版本",
-          "pdf": "無限次 PDF 匯出",
-          "share": "無限次即時與快照連結分享",
-          "ai": "每日 10 次 AI 自動投遞"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "desc": "適合進階使用者與積極求職者。",
-        "price": "$5 USD",
-        "period": "/月",
-        "features": {
-          "profiles": "無限次履歷版本",
-          "pdf": "無限次無浮水印 PDF 匯出",
-          "share": "無限次即時與快照連結分享",
-          "ai": "每日 50 次 AI 排程與客製化自動投遞",
-          "advanced": "最新 AI 驅動求職功能"
-        },
-        "discount": "首月 5 折優惠"
-      }
+      "comingSoon": "即將推出"
     },
     "footer": {
       "tagline": "由獨立開發者 Joe 打造",

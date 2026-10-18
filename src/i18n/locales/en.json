@@ -181,7 +181,6 @@
   "home": {
     "nav": {
       "features": "Features",
-      "pricing": "Pricing",
       "login": "Log In",
       "resumeEditor": "Resume Editor"
     },
@@ -206,51 +205,7 @@
       "whyTitle": "Why PresenceCV?"
     },
     "pricing": {
-      "heading": "Simple, transparent pricing",
-      "subheading": "Get started for free today. Upgrade only if you need advanced capabilities.",
-      "freeName": "Free Tier",
-      "freePrice": "$0",
-      "freePeriod": "forever",
-      "freeDesc": "Ideal for job seekers building their core resume.",
-      "freeFeature1": "Up to 3 distinct resume profiles",
-      "freeFeature2": "5 AI resume parses per day",
-      "freeFeature3": "Instant PDF exports & Live links",
-      "proName": "Pro Tier",
-      "proPrice": "$9",
-      "proPeriod": "/ month",
-      "proDesc": "For active job seekers who need AI optimization.",
-      "proFeature1": "Unlimited resume profiles",
-      "proFeature2": "Unlimited AI parses & ATS Keyword Matching",
-      "proFeature3": "104 Job Auto-Applier Integration",
-      "comingSoon": "Coming Soon",
-      "title": "Early Access: Free for all",
-      "subtitle": "Start building your resume immediately.",
-      "free": {
-        "name": "Free",
-        "desc": "Everything you need to land an interview.",
-        "price": "$0 USD",
-        "period": "/mo",
-        "features": {
-          "profiles": "3 resume profiles",
-          "pdf": "Unlimited PDF export",
-          "share": "Unlimited live & snapshot link sharing",
-          "ai": "10 AI fully auto job appling / day"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "desc": "For power users and active job seekers.",
-        "price": "$5 USD",
-        "period": "/mo",
-        "features": {
-          "profiles": "Unlimited profiles",
-          "pdf": "Unlimited PDF export without watermark",
-          "share": "Unlimited live & snapshot link sharing",
-          "ai": "50 AI schedule & customized fully auto job appling / day",
-          "advanced": "Latest AI-powered job hunting functions"
-        },
-        "discount": "First month 50% off"
-      }
+      "comingSoon": "Coming Soon"
     },
     "footer": {
       "tagline": "Crafted with care by independent developer Joe.",
