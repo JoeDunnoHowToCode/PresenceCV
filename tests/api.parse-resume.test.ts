@@ -132,4 +132,20 @@ describe('API Route: /api/parse-resume', () => {
     expect(res.status).toHaveBeenCalledWith(429);
     expect(res.json).toHaveBeenCalledWith({ error: 'AI_IMPORT_LIMIT', remaining: 0, limit: 5, resetAt });
   });
+
+  it('does not count imports by an admin (admins/{uid} exists)', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    const { getFirebaseAdmin } = await import('../src/lib/firebase-admin');
+    const doc = vi.fn((uid: string) => ({ get: vi.fn().mockResolvedValue({ exists: uid === 'admin_1' }) }));
+    const collection = vi.fn(() => ({ doc }));
+    vi.mocked(getFirebaseAdmin).mockReturnValueOnce({ adminAuth: { verifyIdToken: mockVerifyIdToken }, adminDb: { collection } } as never);
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'admin_1' });
+
+    await handler(req, res);
+
+    expect(collection).toHaveBeenCalledWith('admins');
+    expect(doc).toHaveBeenCalledWith('admin_1');
+    expect(aiQuota.consume).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
 });
