@@ -120,4 +120,16 @@ describe('API Route: /api/parse-resume', () => {
     await handler(req, res);
     expect(aiQuota.consume).toHaveBeenCalledWith('user_1');
   });
+
+  it('returns 429 with remaining 0 and the window end when the account has used its 5 imports', async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    const resetAt = Date.UTC(2026, 9, 19, 2, 0);
+    vi.mocked(aiQuota.consume).mockResolvedValueOnce({ allowed: false, remaining: 0, limit: 5, resetAt });
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
+
+    await handler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(429);
+    expect(res.json).toHaveBeenCalledWith({ error: 'AI_IMPORT_LIMIT', remaining: 0, limit: 5, resetAt });
+  });
 });
