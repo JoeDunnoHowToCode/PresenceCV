@@ -122,4 +122,14 @@ describe('ImportResumeModal - AI-import quota', () => {
 
     expect(await screen.findByText(en.importModal.errors.serverUnavailable)).toBeInTheDocument();
   });
+
+  it('describes the files it really accepts: PDF, JPG or PNG up to 3MB, no DOCX', async () => {
+    mockApi({ remaining: 5, limit: 5, resetAt: null });
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    expect(screen.getByText('Supports PDF, JPG, PNG (Max 3MB)')).toBeInTheDocument();
+    expect(screen.queryByText(/DOCX|5MB/)).not.toBeInTheDocument();
+    expect(document.querySelector('input[type="file"]')).toHaveAttribute('accept', '.pdf,image/png,image/jpeg');
+    await act(async () => {});
+  });
 });
