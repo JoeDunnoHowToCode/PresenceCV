@@ -88,12 +88,14 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
   // While a window is running, tick each time the displayed second changes (first tick lined up with it, then every 1s).
   useEffect(() => {
     if (!quota?.resetAt) return;
-    const tick = () => setNow(Date.now());
+    const resetAt = quota.resetAt;
+    // When the window ends the quota is full again: drop it (the line disappears, upload is enabled).
+    const tick = () => (Date.now() >= resetAt ? setQuota(null) : setNow(Date.now()));
     let interval: ReturnType<typeof setInterval> | undefined;
     const timeout = setTimeout(() => {
       tick();
       interval = setInterval(tick, 1000);
-    }, (quota.resetAt - Date.now()) % 1000 || 1000);
+    }, (resetAt - Date.now()) % 1000 || 1000);
     return () => {
       clearTimeout(timeout);
       clearInterval(interval);
@@ -109,6 +111,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
     }
     return () => clearInterval(interval);
   }, [isUploading]);
+
+  const usedUp = quota?.resetAt != null && quota.remaining === 0;
+  const uploadDisabled = isUploading || usedUp;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -246,7 +251,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               {quota?.resetAt && (
                 <p className="mb-6 text-sm text-center text-[#1c1c1c]">
-                  {t('importModal.quota.remaining', { remaining: quota.remaining, limit: quota.limit, time: formatCountdown(quota.resetAt - now) })}
+                  {usedUp
+                    ? t('importModal.quota.exhausted', { limit: quota.limit, time: formatCountdown(quota.resetAt - now) })
+                    : t('importModal.quota.remaining', { remaining: quota.remaining, limit: quota.limit, time: formatCountdown(quota.resetAt - now) })}
                 </p>
               )}
 
@@ -259,9 +266,9 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
 
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  isUploading ? 'border-[#eceae4] bg-black/5' : 'border-[#eceae4] bg-white hover:bg-black/5 hover:border-[#1c1c1c]/20 cursor-pointer '
+                  uploadDisabled ? 'border-[#eceae4] bg-black/5' : 'border-[#eceae4] bg-white hover:bg-black/5 hover:border-[#1c1c1c]/20 cursor-pointer '
                 }`}
-                onClick={() => !isUploading && fileInputRef.current?.click()}
+                onClick={() => !uploadDisabled && fileInputRef.current?.click()}
               >
                 {isUploading ? (
                   <div className="flex flex-col items-center gap-3">
@@ -288,6 +295,7 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
                   ref={fileInputRef} 
                   className="hidden" 
                   accept=".pdf,image/png,image/jpeg" 
+                  disabled={usedUp}
                   onChange={handleFileChange}
                 />
               </div>

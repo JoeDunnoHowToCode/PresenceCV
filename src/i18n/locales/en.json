@@ -150,7 +150,8 @@
     "dropzoneText": "Drag and drop your file here, or click to browse",
     "supportedFormats": "Supports PDF, DOCX (Max 5MB)",
     "quota": {
-      "remaining": "{{remaining}} AI imports left · back to {{limit}} in {{time}}"
+      "remaining": "{{remaining}} AI imports left · back to {{limit}} in {{time}}",
+      "exhausted": "No AI imports left · back to {{limit}} in {{time}}"
     },
     "parsing": "Analyzing and parsing resume...",
     "parseSuccess": "Resume parsed successfully!",

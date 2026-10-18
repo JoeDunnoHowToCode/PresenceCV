@@ -150,7 +150,8 @@
     "dropzoneText": "拖曳檔案至此，或點擊選擇檔案",
     "supportedFormats": "支援 PDF、DOCX 格式 (最大 5MB)",
     "quota": {
-      "remaining": "AI 匯入剩 {{remaining}} 次，{{time}} 後補滿 {{limit}} 次"
+      "remaining": "AI 匯入剩 {{remaining}} 次，{{time}} 後補滿 {{limit}} 次",
+      "exhausted": "AI 匯入次數已用完，{{time}} 後補滿 {{limit}} 次"
     },
     "parsing": "正在解析與分析履歷中...",
     "parseSuccess": "履歷解析成功！",
