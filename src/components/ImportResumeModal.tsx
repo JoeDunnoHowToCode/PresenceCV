@@ -179,6 +179,13 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          if (response.status === 429 && errorData.error === 'AI_IMPORT_LIMIT') {
+            // No window end means the server has no quota store (fails closed in production).
+            if (typeof errorData.resetAt !== 'number') throw new Error(t('importModal.errors.serverUnavailable'));
+            setNow(Date.now());
+            setQuota(errorData);
+            return;
+          }
           throw new Error(errorData.error || `${t('common.error')}: ${response.status}`);
         }
 
