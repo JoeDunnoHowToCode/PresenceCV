@@ -91,7 +91,7 @@ export default async function handler(req: any, res: any) {
 
     // Per-account quota (src/utils/aiQuota.ts), counted only after the user is known.
     // Admins (admins/{uid} exists) are not counted; if that read fails, the import counts.
-    const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap: any) => snap.exists, () => false);
+    const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap) => snap.exists, () => false);
     if (!isAdmin) {
       const quota = await aiQuota.consume(uid);
       if (!quota.allowed) {

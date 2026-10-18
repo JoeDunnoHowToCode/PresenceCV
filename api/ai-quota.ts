@@ -48,7 +48,7 @@ export default async function handler(req: any, res: any) {
   }
 
   // Same admin rule as parse-resume: admins/{uid} exists → not counted; a failed read means "not admin".
-  const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap: any) => snap.exists, () => false);
+  const isAdmin = await adminDb.collection('admins').doc(uid).get().then((snap) => snap.exists, () => false);
   if (isAdmin) {
     return res.status(200).json({ unlimited: true });
   }
