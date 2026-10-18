@@ -37,4 +37,17 @@ describe('API Route: /api/ai-quota', () => {
     await handler(req, res);
     expect(res.status).toHaveBeenLastCalledWith(401);
   });
+
+  it("returns the signed-in user's remaining imports and when the window ends", async () => {
+    const { aiQuota } = await import('../src/utils/aiQuota');
+    const resetAt = Date.UTC(2026, 9, 19, 2, 0);
+    vi.mocked(aiQuota.status).mockResolvedValueOnce({ remaining: 3, limit: 5, resetAt });
+    mockVerifyIdToken.mockResolvedValueOnce({ uid: 'user_1' });
+
+    await handler(req, res);
+
+    expect(aiQuota.status).toHaveBeenCalledWith('user_1');
+    expect(res.status).toHaveBeenLastCalledWith(200);
+    expect(res.json).toHaveBeenLastCalledWith({ remaining: 3, limit: 5, resetAt });
+  });
 });
