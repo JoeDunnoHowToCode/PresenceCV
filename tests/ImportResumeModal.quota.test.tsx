@@ -50,6 +50,7 @@ describe('ImportResumeModal - AI-import quota', () => {
     render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
 
     expect(await screen.findByText('3 AI imports left · back to 5 in 02:05:07')).toBeInTheDocument();
+    await act(async () => {}); // let React run the effects (which start the countdown timer) before moving the clock
     await act(async () => { vi.advanceTimersByTime(1000); });
     expect(screen.getByText('3 AI imports left · back to 5 in 02:05:06')).toBeInTheDocument();
   });
