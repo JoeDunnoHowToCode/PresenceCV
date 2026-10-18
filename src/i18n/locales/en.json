@@ -198,14 +198,11 @@
       "manageDesc": "Log in from anywhere to instantly generate, manage, and present your resume across any device. Your professional presence, always accessible.",
       "liveTitle": "Live Share Link",
       "liveDesc": "Found a typo after sending the link? No problem. Edits update in real-time, ensuring recruiters always see your perfect, up-to-date professional profile.",
-      "pdfTitle": "ATS-Optimized PDF",
-      "pdfDesc": "Skip the confusing, overly-decorated layouts. We provide a single, clean format built to be easily read by recruiters and perfectly parsed by ATS scanners.",
-      "aiJobHuntingTitle": "AI Job-Hunting Sidekick",
-      "aiJobHuntingDesc": "AI that tailors your resume, matches JDs, writes cover letters, and fully automates applying to LinkedIn and other top job platforms.",
+      "pdfTitle": "Clean, Simple PDF",
+      "pdfDesc": "Skip the overly-decorated layouts. One clean format with selectable, copyable text that recruiters can read at a glance.",
+      "aiImportTitle": "AI Resume Import",
+      "aiImportDesc": "Upload an existing PDF or image and AI turns it into an editable resume. 5 imports per account every 24 hours.",
       "whyTitle": "Why PresenceCV?"
-    },
-    "pricing": {
-      "comingSoon": "Coming Soon"
     },
     "footer": {
       "tagline": "Crafted with care by independent developer Joe.",

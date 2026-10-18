@@ -8,7 +8,7 @@
  * Sections:
  * 1. Navigation Bar: Logo, Features link, Login/Logout buttons (responsive)
  * 2. Hero: Headline, subtitle, CTA button ("Start Building Now")
- * 3. Features Grid: 4 feature cards (AI, Live Share, PDF, Multi-Profile)
+ * 3. Features Grid: 4 feature cards (Account, Live Share, PDF, AI Import)
  * 4. Footer: Brand, links to Features/Privacy/Terms
  *
  * Auth Integration:
@@ -231,10 +231,10 @@ export default function HomePage() {
 
             <div className="bg-white/60 backdrop-blur-sm border border-[#eceae4] p-10 rounded-3xl flex flex-col items-start transition-all hover:shadow-xl hover:-translate-y-2">
               <div className="p-4 bg-white rounded-2xl border border-[#eceae4] shadow-sm mb-8">
-                <LucideIcons.Bot className="w-7 h-7 text-[#1c1c1c]" />
+                <LucideIcons.FileUp className="w-7 h-7 text-[#1c1c1c]" />
               </div>
-              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">{t('home.features.aiJobHuntingTitle')}</h3>
-              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]"><span className="text-blue-500 font-semibold text-[11px] tracking-wider uppercase mr-2 border border-blue-200 bg-blue-50 px-1.5 py-0.5 rounded-sm">{t('home.pricing.comingSoon')}</span>{t('home.features.aiJobHuntingDesc')}</p>
+              <h3 className="text-[22px] font-semibold leading-[1.2] mb-4 text-[#1c1c1c]">{t('home.features.aiImportTitle')}</h3>
+              <p className="text-[17px] text-[#5f5f5d] leading-[1.6]">{t('home.features.aiImportDesc')}</p>
             </div>
           </div>
         </div>

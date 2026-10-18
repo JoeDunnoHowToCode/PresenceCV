@@ -198,14 +198,11 @@
       "manageDesc": "隨時隨地登入，在任何裝置上即時生成、管理並展示您的履歷。讓您的專業形象時刻在線。",
       "liveTitle": "即時分享連結",
       "liveDesc": "發送連結後才發現錯字？沒問題。編輯內容會即時更新，確保招募人員看到的永遠是您最新、最完美的專業履歷。",
-      "pdfTitle": "ATS 最佳化 PDF",
-      "pdfDesc": "捨棄令人眼花撩亂的複雜排版。我們提供單一、乾淨的格式，不僅讓招募人員一目了然，更確保 ATS 系統能完美解析。",
-      "aiJobHuntingTitle": "AI 求職得力助手",
-      "aiJobHuntingDesc": "AI 將為您量身打造履歷、比對職缺需求、撰寫求職信，並全自動化幫您投遞至 LinkedIn 等各大求職平台。",
+      "pdfTitle": "乾淨俐落的 PDF",
+      "pdfDesc": "捨棄令人眼花撩亂的複雜排版。單一、乾淨的版型，文字可選取、可複製，招募人員一目了然。",
+      "aiImportTitle": "AI 匯入履歷",
+      "aiImportDesc": "上傳現有的 PDF 或圖片，AI 自動整理成可編輯的履歷。每個帳號 24 小時內可匯入 5 次。",
       "whyTitle": "為什麼選擇 PresenceCV？"
-    },
-    "pricing": {
-      "comingSoon": "即將推出"
     },
     "footer": {
       "tagline": "由獨立開發者 Joe 打造",
