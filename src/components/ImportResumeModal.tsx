@@ -33,6 +33,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
 
 
+// What GET /api/ai-quota says (admins get { unlimited: true }, which is not stored).
+interface AiQuota {
+  remaining: number;
+  limit: number;
+  resetAt: number | null;
+}
+
+// 2h 5m 7s → "02:05:07"
+const formatCountdown = (ms: number) => {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return [Math.floor(total / 3600), Math.floor(total / 60) % 60, total % 60]
+    .map((n) => String(n).padStart(2, '0'))
+    .join(':');
+};
+
 interface ImportResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -46,6 +61,36 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const [quota, setQuota] = useState<AiQuota | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Ask for the quota each time the modal opens. If that fails, show nothing: the server still enforces it.
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) return;
+        const response = await fetch('/api/ai-quota', { headers: { Authorization: `Bearer ${idToken}` } });
+        const data = response.ok ? await response.json() : null;
+        if (!cancelled && typeof data?.remaining === 'number') {
+          setNow(Date.now());
+          setQuota(data);
+        }
+      } catch (err) {
+        console.warn('Could not read the AI-import quota:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen, user]);
+
+  // Tick once a second while a window is running.
+  useEffect(() => {
+    if (!quota?.resetAt) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [quota?.resetAt]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -190,6 +235,12 @@ export const ImportResumeModal: React.FC<ImportResumeModalProps> = ({ isOpen, on
               <p className="text-[#5f5f5d] mb-6 text-sm text-center">
                 {t('importModal.subtitle')}
               </p>
+
+              {quota?.resetAt && (
+                <p className="mb-6 text-sm text-center text-[#1c1c1c]">
+                  {t('importModal.quota.remaining', { remaining: quota.remaining, limit: quota.limit, time: formatCountdown(quota.resetAt - now) })}
+                </p>
+              )}
 
               {error && (
                 <div className="mb-6 p-4 bg-red-500/10 rounded-xl flex border border-red-500/20 text-red-400 gap-3 items-start">

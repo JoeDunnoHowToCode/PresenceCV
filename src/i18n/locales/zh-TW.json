@@ -149,6 +149,9 @@
     "subtitle": "上傳現有的 PDF 或 DOCX 檔案，透過 AI 自動解析並填入您的履歷資料。",
     "dropzoneText": "拖曳檔案至此，或點擊選擇檔案",
     "supportedFormats": "支援 PDF、DOCX 格式 (最大 5MB)",
+    "quota": {
+      "remaining": "AI 匯入剩 {{remaining}} 次，{{time}} 後補滿 {{limit}} 次"
+    },
     "parsing": "正在解析與分析履歷中...",
     "parseSuccess": "履歷解析成功！",
     "parseError": "履歷解析失敗，請檢查檔案後重試。",

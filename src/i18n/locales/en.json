@@ -149,6 +149,9 @@
     "subtitle": "Upload an existing PDF or DOCX file to automatically populate your profile using AI.",
     "dropzoneText": "Drag and drop your file here, or click to browse",
     "supportedFormats": "Supports PDF, DOCX (Max 5MB)",
+    "quota": {
+      "remaining": "{{remaining}} AI imports left · back to {{limit}} in {{time}}"
+    },
     "parsing": "Analyzing and parsing resume...",
     "parseSuccess": "Resume parsed successfully!",
     "parseError": "Failed to parse resume. Please check the file and try again.",
