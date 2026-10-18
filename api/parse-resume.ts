@@ -11,6 +11,9 @@
  * - Returns 412 if GEMINI_API_KEY env var is missing/placeholder, telling the
  *   frontend to fall back to client-side Gemini proxy mode
  * - Returns 405 for non-POST methods
+ * - Returns 429 { error: "AI_IMPORT_LIMIT", remaining, limit, resetAt } once the
+ *   signed-in account has used its 5 imports in the current 24-hour window
+ *   (src/utils/aiQuota.ts)
  * - Body size limit: 4MB (Vercel's hard limit is 4.5MB)
  *
  * AI Prompt:
@@ -89,7 +92,8 @@ export default async function handler(req: any, res: any) {
     // Per-account quota (src/utils/aiQuota.ts), counted only after the user is known.
     const quota = await aiQuota.consume(uid);
     if (!quota.allowed) {
-      return res.status(429).json({ error: "AI_IMPORT_LIMIT" });
+      // remaining / limit / resetAt let the import modal show a countdown.
+      return res.status(429).json({ error: "AI_IMPORT_LIMIT", remaining: quota.remaining, limit: quota.limit, resetAt: quota.resetAt });
     }
 
     const { fileType, base64Data } = req.body;
