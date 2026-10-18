@@ -80,4 +80,19 @@ describe('ImportResumeModal - AI-import quota', () => {
     await act(async () => {});
     expect(screen.queryByText(/AI imports left|No AI imports left/)).not.toBeInTheDocument();
   });
+
+  it('when the imports are used up, disables upload until the countdown ends, then goes back to normal', async () => {
+    mockApi({ remaining: 0, limit: 5, resetAt: NOW + 3_000 });
+    render(<ImportResumeModal isOpen={true} onClose={() => {}} onImport={() => {}} />);
+
+    expect(await screen.findByText('No AI imports left · back to 5 in 00:00:03')).toBeInTheDocument();
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(fileInput).toBeDisabled();
+
+    await act(async () => {});
+    await act(async () => { vi.advanceTimersByTime(3_000); });
+
+    expect(screen.queryByText(/No AI imports left/)).not.toBeInTheDocument();
+    expect(fileInput).not.toBeDisabled();
+  });
 });
