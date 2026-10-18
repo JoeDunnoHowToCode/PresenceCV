@@ -31,7 +31,13 @@ export function createAiQuota(store: QuotaStore, now: () => number = Date.now) {
         await store.pexpire(key, AI_IMPORT_WINDOW_MS);
         ttl = AI_IMPORT_WINDOW_MS;
       }
-      return { allowed: true, remaining: AI_IMPORT_LIMIT - count, limit: AI_IMPORT_LIMIT, resetAt: now() + ttl };
+      const resetAt = now() + ttl;
+      if (count > AI_IMPORT_LIMIT) {
+        // Over the limit: take the increment back so a rejected request doesn't count.
+        await store.decr(key);
+        return { allowed: false, remaining: 0, limit: AI_IMPORT_LIMIT, resetAt };
+      }
+      return { allowed: true, remaining: AI_IMPORT_LIMIT - count, limit: AI_IMPORT_LIMIT, resetAt };
     },
 
     async status(uid: string): Promise<QuotaState> {
