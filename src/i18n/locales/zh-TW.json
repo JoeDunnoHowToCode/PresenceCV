@@ -146,9 +146,9 @@
   },
   "importModal": {
     "title": "使用 AI 匯入履歷",
-    "subtitle": "上傳現有的 PDF 或 DOCX 檔案，透過 AI 自動解析並填入您的履歷資料。",
+    "subtitle": "上傳現有的 PDF 或圖片檔，透過 AI 自動解析並填入您的履歷資料。",
     "dropzoneText": "拖曳檔案至此，或點擊選擇檔案",
-    "supportedFormats": "支援 PDF、DOCX 格式 (最大 5MB)",
+    "supportedFormats": "支援 PDF、JPG、PNG (最大 3MB)",
     "quota": {
       "remaining": "AI 匯入剩 {{remaining}} 次，{{time}} 後補滿 {{limit}} 次",
       "exhausted": "AI 匯入次數已用完，{{time}} 後補滿 {{limit}} 次"

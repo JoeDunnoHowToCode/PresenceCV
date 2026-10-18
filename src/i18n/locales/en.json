@@ -146,9 +146,9 @@
   },
   "importModal": {
     "title": "Import Resume with AI",
-    "subtitle": "Upload an existing PDF or DOCX file to automatically populate your profile using AI.",
+    "subtitle": "Upload an existing PDF or image to automatically populate your profile using AI.",
     "dropzoneText": "Drag and drop your file here, or click to browse",
-    "supportedFormats": "Supports PDF, DOCX (Max 5MB)",
+    "supportedFormats": "Supports PDF, JPG, PNG (Max 3MB)",
     "quota": {
       "remaining": "{{remaining}} AI imports left · back to {{limit}} in {{time}}",
       "exhausted": "No AI imports left · back to {{limit}} in {{time}}"
