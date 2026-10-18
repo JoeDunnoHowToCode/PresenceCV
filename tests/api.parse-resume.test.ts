@@ -2,13 +2,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import handler from '../api/parse-resume';
 
 // Mock dependencies
-vi.mock('../src/utils/rateLimiter', () => ({
-  globalRateLimiter: {
-    isRateLimited: vi.fn().mockReturnValue(false)
-  },
-  checkRateLimit: vi.fn().mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: Date.now() + 3600000 })
-}));
-
 vi.mock('../src/utils/aiQuota', () => ({
   aiQuota: {
     consume: vi.fn().mockResolvedValue({ allowed: true, remaining: 4, limit: 5, resetAt: Date.now() + 86400000 }),
